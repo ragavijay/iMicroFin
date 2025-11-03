@@ -1,0 +1,35 @@
+﻿@model IEnumerable<iMicroFin.Models.GroupCenterViewModel>
+
+@{
+    ViewBag.Title = "View Centers";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Centers</h2>
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.CenterCode)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.CenterName)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.CenterCode)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.CenterName)
+        </td>
+        <td>
+            @Html.ActionLink("Edit", "GroupCenterForm", new { id=item.CenterCode })
+        </td>
+    </tr>
+}
+
+</table>

@@ -1,0 +1,47 @@
+﻿@model iMicroFin.Models.GroupCenterViewModel
+
+@{
+    ViewBag.Title = "Add/Edit Center";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="page-wrapper bg-gra-03 p-t-45 p-b-50">
+    <div class="wrapper wrapper--w790">
+        <div class="card card-5">
+            <div class="card-heading">
+                <h2 class="title">Add/Edit Center</h2>
+            </div>
+            <div class="card-body">
+                @using (Html.BeginForm("GroupCenter", "Center", FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+                    <!--Center Code -->
+                    <div class="form-row">
+                        <div class="name">Center Code</div>
+                        <div class="value">
+                            <div class="input-group">
+                                @Html.TextBoxFor(m => m.CenterCode, new { id="centerCode", @class="input--style-5", @placeholder = "auto-generated", @readonly = "true" })
+                                @Html.HiddenFor(m=>m.CenterId)
+                            </div>
+                        </div>
+                    </div>
+                    <!--Center Name -->
+                    <div class="form-row">
+                        <div class="name">Center Name</div>
+                        <div class="value">
+                            <div class="input-group">
+                                @Html.TextBoxFor(m => m.CenterName, new { id = "centerName", @class = "input--style-5", @placeholder = "enter center name", @autocomplete = "off", @required = "true", @maxlength="40", @tabindex ="1"})
+                                <p style='color:red;'> @ViewBag.ErrCenterName </p>
+                            </div>
+                        </div>
+                    </div>
+                    <!--Submit -->
+                    <div>
+                        <p style='color:red;'> @ViewBag.ErrTryAgain </p>
+                        <button class="btn btn--radius-2 btn--red" type="submit", tabindex="2">Save</button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

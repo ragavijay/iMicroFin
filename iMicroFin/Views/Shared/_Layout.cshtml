@@ -1,0 +1,253 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+
+    <link rel="stylesheet" href="~/css/home.css" />
+    <link rel="stylesheet" href="~/css/form.css" />
+    <link href="~/css/material-design-iconic-font.min.css" rel="stylesheet" media="all">
+    <link href="~/css/font-awesome.min.css" rel="stylesheet" media="all">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i,800,800i" rel="stylesheet">
+    <link href="~/css/select2.min.css" rel="stylesheet" media="all">
+    <link href="~/css/daterangepicker.css" rel="stylesheet" media="all">
+    <link href="~/css/main.css" rel="stylesheet" media="all">
+    <link href="~/css/menu.css" rel="stylesheet" media="all">
+</head>
+<body>
+    @{
+        var userId = Context.Session.GetString("userId");
+        var userType = Context.Session.GetString("userType");
+        var branch = Context.Session.GetString("branch");
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            Context.Response.Redirect("/App/Login");
+            return;
+        }
+
+        var userInitials = !string.IsNullOrEmpty(userId) && userId.Length >= 2 ? userId.Substring(0, 2).ToUpper() : "U";
+    }
+
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-toggle" onclick="toggleMobileMenu()">
+        <i class="fa fa-bars"></i>
+    </button>
+
+    <!-- Sidebar Overlay for Mobile -->
+    <div class="sidebar-overlay" onclick="toggleMobileMenu()"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <!-- Sidebar Header -->
+        <div class="sidebar-header">
+            <h3>MFI System</h3>
+            <button class="toggle-btn" onclick="toggleSidebar()">
+                <i class="fa fa-angle-left"></i>
+            </button>
+        </div>
+
+        <!-- User Info -->
+        <div class="user-info">
+            <div class="user-avatar">@userInitials</div>
+            <div class="user-details">
+                <div class="user-name">@userId</div>
+                <div class="user-branch">@branch</div>
+            </div>
+        </div>
+
+        <!-- Navigation Menu -->
+        <nav>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a class="nav-link" asp-controller="App" asp-action="Home" data-title="Home">
+                        <span class="nav-icon"><i class="fa fa-home"></i></span>
+                        <span class="nav-text">Home</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" onclick="toggleSubmenu(this)" data-title="Center">
+                        <span class="nav-icon"><i class="fa fa-building"></i></span>
+                        <span class="nav-text">Center</span>
+                        <span class="nav-arrow">▼</span>
+                    </a>
+                    <ul class="submenu">
+                        <li><a class="submenu-link" asp-controller="Center" asp-action="GroupCenterForm">Add Center</a></li>
+                        <li><a class="submenu-link" asp-controller="Center" asp-action="ViewGroupCenters">View Centers</a></li>
+                    </ul>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" onclick="toggleSubmenu(this)" data-title="Group">
+                        <span class="nav-icon"><i class="fa fa-users"></i></span>
+                        <span class="nav-text">Group</span>
+                        <span class="nav-arrow">▼</span>
+                    </a>
+                    <ul class="submenu">
+                        <li><a class="submenu-link" asp-controller="Group" asp-action="MemberGroupForm">Add Group</a></li>
+                        <li><a class="submenu-link" asp-controller="Group" asp-action="ViewMemberGroups">View Groups</a></li>
+                    </ul>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" onclick="toggleSubmenu(this)" data-title="Member">
+                        <span class="nav-icon"><i class="fa fa-user"></i></span>
+                        <span class="nav-text">Member</span>
+                        <span class="nav-arrow">▼</span>
+                    </a>
+                    <ul class="submenu">
+                        <li><a class="submenu-link" asp-controller="Member" asp-action="MemberForm">Add Member</a></li>
+                        <li><a class="submenu-link" asp-controller="Member" asp-action="ViewMembers">View Members</a></li>
+                        <li><a class="submenu-link" asp-controller="Member" asp-action="SearchMember">Search Member</a></li>
+                    </ul>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" onclick="toggleSubmenu(this)" data-title="Loan">
+                        <span class="nav-icon"><i class="fa fa-money"></i></span>
+                        <span class="nav-text">Loan</span>
+                        <span class="nav-arrow">▼</span>
+                    </a>
+                    <ul class="submenu">
+                        <li><a class="submenu-link" asp-controller="Loan" asp-action="LoanForm">New Loan</a></li>
+                        <li><a class="submenu-link" asp-controller="Loan" asp-action="GroupLoanForm">Group Loan</a></li>
+                        <li><a class="submenu-link" asp-controller="Loan" asp-action="ViewLoans">View Loans</a></li>
+                        <li><a class="submenu-link" asp-controller="Loan" asp-action="CumulativeReport">Cumulative Report</a></li>
+                    </ul>
+                </li>
+
+                @if (!string.IsNullOrEmpty(userType) && (userType == "M" || userType == "D" || userType == "C"))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link" onclick="toggleSubmenu(this)" data-title="Receipts">
+                            <span class="nav-icon"><i class="fa fa-file-text"></i></span>
+                            <span class="nav-text">Receipts</span>
+                            <span class="nav-arrow">▼</span>
+                        </a>
+                        <ul class="submenu">
+                            <li><a class="submenu-link" asp-controller="Receipt" asp-action="PFReceiptForm">Fee Receipt (Member)</a></li>
+                            <li><a class="submenu-link" asp-controller="Receipt" asp-action="GroupPFReceiptForm">Fee Receipt (Group)</a></li>
+                            <li><a class="submenu-link" asp-controller="Receipt" asp-action="InstalmentReceiptForm">Due Receipt (Member)</a></li>
+                            <li><a class="submenu-link" asp-controller="Receipt" asp-action="GroupInstalmentReceiptForm">Due Receipt (Group)</a></li>
+                            <li><a class="submenu-link" asp-controller="Receipt" asp-action="ViewEwiDueList">Due Statement</a></li>
+                            <li><a class="submenu-link" asp-controller="Receipt" asp-action="CashReceiptStatementForm">Cash Receipt-Statement</a></li>
+                        </ul>
+                    </li>
+                }
+
+                @if (!string.IsNullOrEmpty(userType) && userType == "X")
+                {
+                    <li class="nav-item">
+                        <a class="nav-link" onclick="toggleSubmenu(this)" data-title="Branch">
+                            <span class="nav-icon"><i class="fa fa-code-fork"></i></span>
+                            <span class="nav-text">Branch</span>
+                            <span class="nav-arrow">▼</span>
+                        </a>
+                        <ul class="submenu">
+                            <li><a class="submenu-link" href="javascript:void(0)" onclick="aeBranchForm();">Add</a></li>
+                            <li><a class="submenu-link" href="javascript:void(0)" onclick="viewBranches();">View</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" onclick="toggleSubmenu(this)" data-title="User">
+                            <span class="nav-icon"><i class="fa fa-user-plus"></i></span>
+                            <span class="nav-text">User</span>
+                            <span class="nav-arrow">▼</span>
+                        </a>
+                        <ul class="submenu">
+                            <li><a class="submenu-link" href="javascript:void(0)" onclick="aeUserForm();">Add</a></li>
+                            <li><a class="submenu-link" href="javascript:void(0)" onclick="viewUsers();">View</a></li>
+                        </ul>
+                    </li>
+                }
+            </ul>
+        </nav>
+
+        <!-- Logout Section -->
+        <div class="logout-section">
+            <a class="logout-btn" asp-controller="App" asp-action="Logout">
+                <i class="fa fa-sign-out"></i>
+                <span>Logout</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="top-bar">
+            <h1 class="page-title">@ViewBag.Title</h1>
+        </div>
+
+        <div id="content">
+            @RenderBody()
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+    <script src="~/js/home.js"></script>
+    <script src="~/js/select2.min.js"></script>
+    <script src="~/js/moment.min.js"></script>
+    <script src="~/js/daterangepicker.js"></script>
+    <script src="~/js/global.js"></script>
+
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('collapsed');
+            localStorage.setItem('sidebarCollapsed',
+                document.getElementById('sidebar').classList.contains('collapsed'));
+        }
+
+        function toggleSubmenu(element) {
+            const parent = element.closest('.nav-item');
+            const isOpen = parent.classList.contains('open');
+
+            // Close all other submenus
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('open');
+            });
+
+            // Toggle current submenu
+            if (!isOpen) {
+                parent.classList.add('open');
+            }
+        }
+
+        function toggleMobileMenu() {
+            document.getElementById('sidebar').classList.toggle('mobile-open');
+            document.querySelector('.sidebar-overlay').classList.toggle('active');
+        }
+
+        // Restore sidebar state
+        window.addEventListener('DOMContentLoaded', () => {
+            if (localStorage.getItem('sidebarCollapsed') === 'true') {
+                document.getElementById('sidebar').classList.add('collapsed');
+            }
+        });
+
+        // Close mobile menu when clicking a link
+        document.querySelectorAll('.submenu-link, .nav-link[href]').forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    toggleMobileMenu();
+                }
+            });
+        });
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-23581568-13"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-23581568-13');
+    </script>
+</body>
+</html>

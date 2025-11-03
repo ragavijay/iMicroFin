@@ -1,0 +1,82 @@
+﻿@model iMicroFin.Models.LoginViewModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - ATHIRSHTAM MICRO FINANCE</title>
+    <link rel="stylesheet" href="~/css/login.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>ATHIRSHTAM MICRO FINANCE PRIVATE LTD</h1>
+            <p>Sign in to your account to continue</p>
+        </div>
+
+        @using (Html.BeginForm("Home", "App", FormMethod.Post, new { @class = "login-form" }))
+        {
+            @Html.AntiForgeryToken()
+
+            <!-- Username Field -->
+            <div class="form-group">
+                <label for="UserId">Username</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                    </span>
+                    @Html.TextBox("UserId", "", new { @class = "form-control", placeholder = "Enter your username", required = "required" })
+                </div>
+            </div>
+
+            <!-- Password Field -->
+            <div class="form-group">
+                <label for="Passwd">Password</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                    </span>
+                    @Html.Password("Passwd", "", new { @class = "form-control", placeholder = "Enter your password", required = "required" })
+                </div>
+            </div>
+
+            <!-- Error Message -->
+            @if (ViewBag.ErrMsg != null)
+            {
+                <div class="error-message">
+                    @ViewBag.ErrMsg
+                </div>
+            }
+
+            <!-- Remember Me (Optional) -->
+            <!--
+            <div class="form-options">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="remember" name="remember">
+                    <label for="remember">Remember me</label>
+                </div>
+                <a href="#" class="forgot-password">Forgot password?</a>
+            </div>
+            -->
+            <!-- Submit Button -->
+            <button type="submit" class="btn-login">Login</button>
+        }
+
+        <!-- Optional Footer -->
+        <!--
+        <div class="login-footer">
+            <p>Need help? <a href="#">Contact Support</a></p>
+        </div>
+        -->
+    </div>
+</body>
+</html>
