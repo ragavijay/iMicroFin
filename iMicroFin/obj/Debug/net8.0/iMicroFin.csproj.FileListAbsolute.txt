@@ -33,6 +33,7 @@ C:\Project\iMicroFin\iMicroFin\obj\Debug\net8.0\iMicroFin.csproj.CoreCompileInpu
 C:\Project\iMicroFin\iMicroFin\obj\Debug\net8.0\iMicroFin.MvcApplicationPartsAssemblyInfo.cache
 C:\Project\iMicroFin\iMicroFin\obj\Debug\net8.0\iMicroFin.RazorAssemblyInfo.cache
 C:\Project\iMicroFin\iMicroFin\obj\Debug\net8.0\iMicroFin.RazorAssemblyInfo.cs
+C:\Project\iMicroFin\iMicroFin\obj\Debug\net8.0\iMicroFin.sourcelink.json
 C:\Project\iMicroFin\iMicroFin\obj\Debug\net8.0\rjimswa.dswa.cache.json
 C:\Project\iMicroFin\iMicroFin\obj\Debug\net8.0\rjsmrazor.dswa.cache.json
 C:\Project\iMicroFin\iMicroFin\obj\Debug\net8.0\rjsmcshtml.dswa.cache.json

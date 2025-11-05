@@ -1,6 +1,6 @@
-INSERT INTO `branch` VALUES (1,'Nagamalai Pudukottai','Nagamalai Pudukottai','manager');
-INSERT INTO `groupcenter` VALUES ('00101','1','kumaram',1),('00102', 2,'koodal nagar',1),('00103',3,'pothumbu',1),('00104',4,'pothumbu_02',1),('00105',5,'kumaram_02',1);
-INSERT INTO `membergroup` VALUES ('0010101', 1,'kumaram_01',1),('0010102',2,'kumaram_02',2),('0010103',3,'pothumani',3),('0010104',4,'pothumani_02',4);
+
+INSERT INTO `groupcenter` VALUES ('00101','1','Kumaram',1),('00102', 2,'Koodal nagar',1),('00103',3,'pothumbu',1),('00104',4,'pothumbu_02',1),('00105',5,'kumaram_02',1);
+INSERT INTO `membergroup` VALUES ('0010101', 1,'Kumaram_01',1),('0010102',2,'kumaram_02',2),('0010103',3,'pothumani',3),('0010104',4,'pothumani_02',4);
 INSERT INTO `member` VALUES 
 	('01010101',1,1,1,'R.SHANTHI',0,'1989-04-09',0,0,'RAJARAM','MURALIDHARAN','no.4-7/31 south street','vadipatti taluk','kumaram',NULL,'Madurai','625018',20,3,NULL,'9788238069','965146210428',NULL,'24/g/0985908','NFX0731141','31053504438','SBIN0007563','MURALIDHARAN','husband','882581896988','1985-01-01',0,0,NULL,NULL),
 	('01010102',2,1,0,'MALARVIZHI.A',0,'1983-01-01',0,0,'PITCHAI','ANANDARAJ','no.46 south street','kumaram','anjal nagar,',NULL,'Madurai','625018',20,2,NULL,'9500870677','206478025448',NULL,NULL,'NFX0440576','301100050304518','TMBL0000301','ANANDARAJ','hushand','243526008642','1980-01-01',0,0,NULL,NULL),

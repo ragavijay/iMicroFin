@@ -1,0 +1,92 @@
+﻿@{
+    ViewBag.Title = "Manage Groups";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="~/css/group.css" />
+<link rel="stylesheet" href="~/css/autocomplete.css" />
+
+<div class="manage-groups-container">
+    <!-- Left Panel: Groups List -->
+    <div class="groups-list-panel">
+        <div class="panel-header">
+            <h2>Groups</h2>
+        </div>
+
+        <button class="btn-new" onclick="createNewGroup()">+ Add New Group</button>
+
+        <input type="text"
+               class="search-box"
+               id="searchBox"
+               placeholder="Search by Group Code, Name, or Center..."
+               onkeyup="searchGroups()">
+
+        <div id="groupsList">
+            <div class="loading">Loading groups...</div>
+        </div>
+
+        <div class="pagination" id="pagination"></div>
+        <div class="page-info" id="pageInfo"></div>
+    </div>
+
+    <!-- Right Panel: Group Form -->
+    <div class="group-form-panel" id="groupFormPanel" style="display: none;">
+        <div class="panel-header">
+            <h2 id="formTitle">Edit Group</h2>
+        </div>
+
+        <form id="groupForm" onsubmit="saveGroup(event)">
+            <div class="form-group">
+                <label>Group Code</label>
+                <input type="text"
+                       id="groupCode"
+                       readonly
+                       placeholder="Auto-generated">
+                <input type="hidden" id="groupId">
+            </div>
+
+            <div class="form-group">
+                <label>Group Name <span style="color: red;">*</span></label>
+                <input type="text"
+                       id="groupName"
+                       maxlength="40"
+                       required
+                       placeholder="Enter group name">
+                <div class="error-message" id="errorMessage"></div>
+            </div>
+
+            <div class="form-group">
+                <label>Center <span style="color: red;">*</span></label>
+                <div class="center-fields">
+                    <input type="text"
+                           id="centerName"
+                           class="autocomplete-input"
+                           autocomplete="off"
+                           required
+                           placeholder="Select center">
+                    <input type="text"
+                           id="centerCode"
+                           readonly
+                           placeholder="Center Code">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Leader Name</label>
+                <input type="text"
+                       id="leaderName"
+                       maxlength="100"
+                       placeholder="Enter leader name (optional)">
+            </div>
+
+            <div class="form-buttons">
+                <button type="submit" class="btn-primary" id="saveBtn">Save</button>
+                <button type="button" class="btn-cancel" onclick="cancelEdit()">Cancel</button>
+            </div>
+            <div class="success-message" id="successMessage"></div>
+        </form>
+    </div>
+</div>
+
+<script src="~/js/autocomplete.js"></script>
+<script src="~/js/group.js"></script>

@@ -1,6 +1,9 @@
+wwwroot\css\autocomplete.css
+wwwroot\css\center.css
 wwwroot\css\daterangepicker.css
 wwwroot\css\font-awesome.min.css
 wwwroot\css\form.css
+wwwroot\css\group.css
 wwwroot\css\home.css
 wwwroot\css\login.css
 wwwroot\css\main.css
@@ -9,6 +12,8 @@ wwwroot\css\menu.css
 wwwroot\css\select2.min.css
 wwwroot\css\site.css
 wwwroot\favicon.ico
+wwwroot\js\autocomplete.js
+wwwroot\js\center.js
 wwwroot\js\home.js
 wwwroot\js\site.js
 wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css
@@ -68,3 +73,4 @@ wwwroot\lib\jquery\dist\jquery.js
 wwwroot\lib\jquery\dist\jquery.min.js
 wwwroot\lib\jquery\dist\jquery.min.map
 wwwroot\lib\jquery\LICENSE.txt
+wwwroot\js\group.js

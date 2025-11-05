@@ -6,7 +6,7 @@ namespace iMicroFin.DAO
 {
     public static class DBService
     {
-        public static string GetUserType(LoginViewModel login)
+        public static string GetUserType(Login login)
         {
             String userType = "";
             using (MySqlConnection con = new MySqlConnection(ConfigHelper.GetConnectionString()))

@@ -28,16 +28,12 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXBwXExvZ2luLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Project/iMicroFin/iMicroFin/Views/Center/GroupCenterForm.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2VudGVyXEdyb3VwQ2VudGVyRm9ybS5jc2h0bWw=
+[C:/Project/iMicroFin/iMicroFin/Views/Center/ManageCenters.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2VudGVyXE1hbmFnZUNlbnRlcnMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Project/iMicroFin/iMicroFin/Views/Center/ViewGroupCenters.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2VudGVyXFZpZXdHcm91cENlbnRlcnMuY3NodG1s
-build_metadata.AdditionalFiles.CssScope = 
-
-[C:/Project/iMicroFin/iMicroFin/Views/Shared/Error.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXEVycm9yLmNzaHRtbA==
+[C:/Project/iMicroFin/iMicroFin/Views/Group/ManageGroup.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcR3JvdXBcTWFuYWdlR3JvdXAuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Project/iMicroFin/iMicroFin/Views/Shared/_Layout.cshtml]

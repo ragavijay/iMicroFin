@@ -11,11 +11,13 @@
     <link rel="stylesheet" href="~/css/form.css" />
     <link href="~/css/material-design-iconic-font.min.css" rel="stylesheet" media="all">
     <link href="~/css/font-awesome.min.css" rel="stylesheet" media="all">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i,800,800i" rel="stylesheet">
     <link href="~/css/select2.min.css" rel="stylesheet" media="all">
     <link href="~/css/daterangepicker.css" rel="stylesheet" media="all">
     <link href="~/css/main.css" rel="stylesheet" media="all">
     <link href="~/css/menu.css" rel="stylesheet" media="all">
+    <script src="~/js/home.js"></script>
 </head>
 <body>
     @{
@@ -44,7 +46,7 @@
     <aside class="sidebar" id="sidebar">
         <!-- Sidebar Header -->
         <div class="sidebar-header">
-            <h3>MFI System</h3>
+            <h3>iMicroFin</h3>
             <button class="toggle-btn" onclick="toggleSidebar()">
                 <i class="fa fa-angle-left"></i>
             </button>
@@ -76,8 +78,7 @@
                         <span class="nav-arrow">▼</span>
                     </a>
                     <ul class="submenu">
-                        <li><a class="submenu-link" asp-controller="Center" asp-action="GroupCenterForm">Add Center</a></li>
-                        <li><a class="submenu-link" asp-controller="Center" asp-action="ViewGroupCenters">View Centers</a></li>
+                        <li><a class="submenu-link" asp-controller="Center" asp-action="ManageCenters">Manage Centers</a></li>
                     </ul>
                 </li>
 
@@ -88,8 +89,7 @@
                         <span class="nav-arrow">▼</span>
                     </a>
                     <ul class="submenu">
-                        <li><a class="submenu-link" asp-controller="Group" asp-action="MemberGroupForm">Add Group</a></li>
-                        <li><a class="submenu-link" asp-controller="Group" asp-action="ViewMemberGroups">View Groups</a></li>
+                        <li><a class="submenu-link" asp-controller="Group" asp-action="ManageGroup">Manage Groups</a></li>
                     </ul>
                 </li>
 
@@ -190,7 +190,7 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
-    <script src="~/js/home.js"></script>
+    
     <script src="~/js/select2.min.js"></script>
     <script src="~/js/moment.min.js"></script>
     <script src="~/js/daterangepicker.js"></script>

@@ -5,13 +5,13 @@ namespace iMicroFin.DAO
 {
     public class CenterDBService
     {
-        public static int AddGroupCenter(GroupCenterViewModel center)
+        public static int AddCenter(Center center)
         {
             int statusCode = 0;
             using (MySqlConnection con = new MySqlConnection(ConfigHelper.GetConnectionString()))
             {
                 con.Open();
-                using (MySqlCommand cmd = new MySqlCommand("AddGroupCenter", con))
+                using (MySqlCommand cmd = new MySqlCommand("AddCenter", con))
                 {
                     cmd.CommandType = System.Data.CommandType.StoredProcedure;
 
@@ -31,8 +31,9 @@ namespace iMicroFin.DAO
                     statusCode = Convert.ToInt32(cmd.Parameters["@pStatusCode"].Value);
                     if (statusCode == 1)
                     {
-                        string centerCode = cmd.Parameters["@pCenterCode"].Value.ToString();
-                        center.CenterCode = centerCode;
+
+                        string centerCode = cmd.Parameters["@pCenterCode"].Value?.ToString()??"";
+                        center.CenterCode = centerCode; 
                         center.CenterId = Convert.ToInt32(centerCode.Substring(3));
                     }
                 }
@@ -40,13 +41,13 @@ namespace iMicroFin.DAO
             return statusCode;
         }
 
-        public static List<GroupCenterViewModel> GetAllGroupCenters(int branchId)
+        public static List<Center> GetAllCenters(int branchId)
         {
-            List<GroupCenterViewModel> centers = new List<GroupCenterViewModel>();
+            List<Center> centers = new List<Center>();
             using (MySqlConnection con = new MySqlConnection(ConfigHelper.GetConnectionString()))
             {
                 con.Open();
-                using (MySqlCommand cmd = new MySqlCommand("GetAllGroupCenters", con))
+                using (MySqlCommand cmd = new MySqlCommand("GetAllCenters", con))
                 {
                     cmd.CommandType = System.Data.CommandType.StoredProcedure;
                     cmd.Parameters.Add("@pBranchId", MySqlDbType.Int32);
@@ -55,10 +56,10 @@ namespace iMicroFin.DAO
                     {
                         while (rdr.Read())
                         {
-                            GroupCenterViewModel center = new GroupCenterViewModel();
-                            center.CenterCode = rdr["CenterCode"].ToString();
+                            Center center = new Center();
+                            center.CenterCode = rdr["CenterCode"]?.ToString()??"";
                             center.CenterId = Convert.ToInt32(rdr["CenterId"].ToString());
-                            center.CenterName = rdr["CenterName"].ToString();
+                            center.CenterName = rdr["CenterName"]?.ToString()??"";
                             centers.Add(center);
                         }
                     }
@@ -66,13 +67,13 @@ namespace iMicroFin.DAO
             }
             return centers;
         }
-        public static GroupCenterViewModel GetGroupCenter(string centerCode)
+        public static Center? GetCenter(string centerCode)
         {
-            GroupCenterViewModel center = null;
+            Center? center = null;
             using (MySqlConnection con = new MySqlConnection(ConfigHelper.GetConnectionString()))
             {
                 con.Open();
-                using (MySqlCommand cmd = new MySqlCommand("GetGroupCenter", con))
+                using (MySqlCommand cmd = new MySqlCommand("GetCenter", con))
                 {
                     cmd.CommandType = System.Data.CommandType.StoredProcedure;
                     cmd.Parameters.Add("@pCenterCode", MySqlDbType.VarChar,4);
@@ -81,10 +82,10 @@ namespace iMicroFin.DAO
                     {
                         if (rdr.Read())
                         {
-                            center = new GroupCenterViewModel();
-                            center.CenterCode = rdr["CenterCode"].ToString();
+                            center = new Center();
+                            center.CenterCode = rdr["CenterCode"]?.ToString()??"";
                             center.CenterId = Convert.ToInt32(rdr["CenterId"].ToString());
-                            center.CenterName = rdr["CenterName"].ToString();
+                            center.CenterName = rdr["CenterName"]?.ToString()??"";
                         }
                     }
                 }
@@ -92,14 +93,14 @@ namespace iMicroFin.DAO
             return center;
         }
 
-        public static int EditGroupCenter(GroupCenterViewModel center)
+        public static int EditCenter(Center center)
         {
 
             int statusCode = 0;
             using (MySqlConnection con = new MySqlConnection(ConfigHelper.GetConnectionString()))
             {
                 con.Open();
-                using (MySqlCommand cmd = new MySqlCommand("EditGroupCenter", con))
+                using (MySqlCommand cmd = new MySqlCommand("EditCenter", con))
                 {
                     cmd.CommandType = System.Data.CommandType.StoredProcedure;
 
@@ -119,13 +120,13 @@ namespace iMicroFin.DAO
             return statusCode;
         }
 
-        public static List<GroupCenterViewModel> GetAllGroupCentersByPattern(String centerNamePattern)
+        public static List<Center> GetAllCentersByPattern(String centerNamePattern, int branchId)
         {
-            List<GroupCenterViewModel> centers = new List<GroupCenterViewModel>();
+            List<Center> centers = new List<Center>();
             using (MySqlConnection con = new MySqlConnection(ConfigHelper.GetConnectionString()))
             {
                 con.Open();
-                using (MySqlCommand cmd = new MySqlCommand("GetAllGroupCentersByPattern", con))
+                using (MySqlCommand cmd = new MySqlCommand("GetAllCentersByPattern", con))
                 {
                     cmd.CommandType = System.Data.CommandType.StoredProcedure;
                     cmd.Parameters.Add("@pCenterNamePattern", MySqlDbType.VarChar, 40);
@@ -134,9 +135,9 @@ namespace iMicroFin.DAO
                     {
                         while (rdr.Read())
                         {
-                            GroupCenterViewModel center = new GroupCenterViewModel();
-                            center.CenterCode = rdr["CenterCode"].ToString();
-                            center.CenterName = rdr["CenterName"].ToString();
+                            Center center = new Center();
+                            center.CenterCode = rdr["CenterCode"]?.ToString()??"";
+                            center.CenterName = rdr["CenterName"]?.ToString() ?? "";
                             centers.Add(center);
                         }
                     }

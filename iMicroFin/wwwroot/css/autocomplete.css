@@ -1,0 +1,120 @@
+﻿/* wwwroot/css/autocomplete.css - Modern Autocomplete Styles */
+
+.autocomplete-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    max-height: 300px;
+    overflow-y: auto;
+    background: white;
+    border: 1px solid #ddd;
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-top: -1px;
+}
+
+.autocomplete-item {
+    padding: 12px 15px;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+    .autocomplete-item:last-child {
+        border-bottom: none;
+    }
+
+    .autocomplete-item:hover {
+        background-color: #f5f5f5;
+    }
+
+    .autocomplete-item.autocomplete-active {
+        background-color: #2196F3;
+        color: white;
+    }
+
+        .autocomplete-item.autocomplete-active .autocomplete-code {
+            color: #e3f2fd;
+        }
+
+.autocomplete-code {
+    color: #666;
+    font-size: 0.9em;
+    margin-left: 8px;
+}
+
+.autocomplete-no-results,
+.autocomplete-error {
+    padding: 12px 15px;
+    text-align: center;
+    color: #666;
+    font-style: italic;
+}
+
+.autocomplete-error {
+    color: #f44336;
+}
+
+/* Loading indicator */
+.autocomplete-loading {
+    padding: 12px 15px;
+    text-align: center;
+    color: #666;
+}
+
+    .autocomplete-loading::after {
+        content: '...';
+        animation: dots 1.5s steps(4, end) infinite;
+    }
+
+@keyframes dots {
+    0%, 20% {
+        content: '.';
+    }
+
+    40% {
+        content: '..';
+    }
+
+    60%, 100% {
+        content: '...';
+    }
+}
+
+/* Scrollbar styling for dropdown */
+.autocomplete-dropdown::-webkit-scrollbar {
+    width: 8px;
+}
+
+.autocomplete-dropdown::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 0 0 4px 0;
+}
+
+.autocomplete-dropdown::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+    .autocomplete-dropdown::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+
+/* Input styling when autocomplete is active */
+.autocomplete-input:focus {
+    border-color: #2196F3;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
+}
+
+/* Highlight matched text */
+.autocomplete-match {
+    font-weight: bold;
+    color: #2196F3;
+}

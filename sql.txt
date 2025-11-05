@@ -39,7 +39,7 @@ CREATE TABLE BranchUser (
 );
 
 -- Version 2.0 (Modified: CenterCode added as pKey)
-CREATE TABLE GroupCenter (
+CREATE TABLE Center (
     CenterCode CHAR(5),
 	CenterId INT,
     CenterName VARCHAR(40) UNIQUE,
@@ -53,9 +53,9 @@ CREATE TABLE MemberGroup (
     GroupCode CHAR(7), 
 	GroupId INT,
     GroupName VARCHAR(40) UNIQUE,
-    CenterCode CHAR(4),
+    CenterCode CHAR(5),
     CONSTRAINT pKey_MG_GroupCode PRIMARY KEY (GroupCode),
-    CONSTRAINT fKey_MG_CenterId FOREIGN KEY (CenterCode) REFERENCES GroupCenter(CenterCode)
+    CONSTRAINT fKey_MG_CenterId FOREIGN KEY (CenterCode) REFERENCES Center(CenterCode)
 );
 
 -- Version 2.0 (Modified: MemberCode added as pKey)
@@ -102,7 +102,7 @@ CREATE TABLE Member (
 
 -- Version 2.0
 CREATE TABLE FamilyMember (
-	MemberCode CHAR(8),
+	MemberCode CHAR(9),
 	SNo INT,
 	FamilyMemberName VARCHAR(50),
 	Relationship VARCHAR(30),
@@ -160,7 +160,7 @@ CREATE TABLE CashReceipt (
 ); 
 -- ProcessingFee: ReceiptType='P'; EWI: ReceiptType='I'  
 
---Patch 26 Apr 2020
+-- Patch 26 Apr 2020
 -- alter table cashreceipt drop FOREIGN KEY fKey_CR_LoanCode
 -- alter table cashreceipt add constraint fKey_CR_LoanCode FOREIGN KEY (LoanCode) REFERENCES Loan (LoanCode) ON UPDATE CASCADE
 
@@ -200,11 +200,11 @@ DELIMITER ;
 SELECT GetBranchName(1); 
 
 
--- AddGroupCenter
+-- AddCenter
 -- Version 2.0 (Modified: CenterCode instead of CenterId)
 DELIMITER //
-DROP PROCEDURE IF EXISTS `AddGroupCenter`//
-CREATE PROCEDURE AddGroupCenter(OUT pCenterCode CHAR(5), pCenterName VARCHAR(40), pBranchId INT, OUT pStatusCode INT)
+DROP PROCEDURE IF EXISTS `AddCenter`//
+CREATE PROCEDURE AddCenter(OUT pCenterCode CHAR(5), pCenterName VARCHAR(40), pBranchId INT, OUT pStatusCode INT)
 BEGIN
 	DECLARE vCheck INT;
 	DECLARE vCenterId INT;
@@ -212,16 +212,16 @@ BEGIN
 	DECLARE CONTINUE HANDLER FOR 1062 SET vCheck=0;
 	SET pStatusCode:=1;
 	SET vCheck:=1;
-	SELECT MAX(CenterId) INTO vCenterId FROM GroupCenter WHERE BranchId=pBranchId;
+	SELECT MAX(CenterId) INTO vCenterId FROM Center WHERE BranchId=pBranchId;
 	IF vCenterId IS NULL THEN
 		SET vCenterId := 1;
 	ELSE
 		SET vCenterId := vCenterId + 1;
 	END IF;
 	SET pCenterCode := CONCAT(LPAD(pBranchId,3,'0'),LPAD(vCenterId,2,'0'));
-	INSERT INTO GroupCenter(CenterCode, CenterId, CenterName, BranchId) VALUES(pCenterCode, vCenterId, pCenterName, pBranchId);
+	INSERT INTO Center(CenterCode, CenterId, CenterName, BranchId) VALUES(pCenterCode, vCenterId, pCenterName, pBranchId);
 	IF vCheck=0 THEN
-		SELECT COUNT(*) INTO vCheck FROM GroupCenter WHERE CenterName=pCenterName;
+		SELECT COUNT(*) INTO vCheck FROM Center WHERE CenterName=pCenterName;
 		IF vCheck>0 THEN
 			SET pStatusCode:=0;
             COMMIT;
@@ -232,56 +232,56 @@ BEGIN
 END;//
 DELIMITER ;
 
--- GetAllGroupCenters
+-- GetAllCenters
 -- Version 2.0 (Modified: CenterCode instead of CenterId)
 DELIMITER //
-DROP PROCEDURE IF EXISTS `GetAllGroupCenters`//
-CREATE PROCEDURE GetAllGroupCenters(pBranchId INT)
+DROP PROCEDURE IF EXISTS `GetAllCenters`//
+CREATE PROCEDURE GetAllCenters(pBranchId INT)
 BEGIN
-	SELECT CenterCode, CenterId, CenterName FROM GroupCenter WHERE BranchId = pBranchId ORDER BY CenterCode;
+	SELECT CenterCode, CenterId, CenterName FROM Center WHERE BranchId = pBranchId ORDER BY CenterCode;
 END//
 DELIMITER ;
 -- Test
-CALL GetAllGroupCenters(1);
+CALL GetAllCenters(1);
 
--- GetGroupCenter
+-- GetCenter
 -- Version 2.0 (Modified: CenterCode instead of CenterId)
 DELIMITER //
-DROP PROCEDURE IF EXISTS `GetGroupCenter`//
-CREATE PROCEDURE GetGroupCenter(pCenterCode CHAR(5))
+DROP PROCEDURE IF EXISTS `GetCenter`//
+CREATE PROCEDURE GetCenter(pCenterCode CHAR(5))
 BEGIN
-	SELECT CenterCode, CenterId, CenterName FROM GroupCenter WHERE CenterCode = pCenterCode;
+	SELECT CenterCode, CenterId, CenterName FROM Center WHERE CenterCode = pCenterCode;
 END//
 DELIMITER ;
 
 -- Test
-CALL GetGroupCenter('00101');
+CALL GetCenter('00101');
 
--- EditGroupCenter
+-- EditCenter
 -- Version 2.0 (Modified: CenterCode instead of CenterId)
 DELIMITER //
-DROP PROCEDURE IF EXISTS `EditGroupCenter`//
-CREATE PROCEDURE EditGroupCenter(pCenterCode CHAR(5), pCenterName VARCHAR(40), OUT pStatusCode INT)
+DROP PROCEDURE IF EXISTS `EditCenter`//
+CREATE PROCEDURE EditCenter(pCenterCode CHAR(5), pCenterName VARCHAR(40), OUT pStatusCode INT)
 BEGIN
 	DECLARE EXIT HANDLER FOR SQLEXCEPTION SET pStatusCode=0;
-	UPDATE GroupCenter SET CenterName=pCenterName WHERE CenterCode = pCenterCode;
+	UPDATE Center SET CenterName=pCenterName WHERE CenterCode = pCenterCode;
     COMMIT;
 	SET pStatusCode:=1;
 END;//
 DELIMITER ;
 
--- GetAllGroupCentersByPattern
+-- GetAllCentersByPattern
 -- Version 2.0 (Modified: CenterCode instead of CenterId)
 DELIMITER // 
-DROP PROCEDURE IF EXISTS `GetAllGroupCentersByPattern`//
-CREATE PROCEDURE GetAllGroupCentersByPattern(pCenterNamePattern VARCHAR(40))
+DROP PROCEDURE IF EXISTS `GetAllCentersByPattern`//
+CREATE PROCEDURE GetAllCentersByPattern(pCenterNamePattern VARCHAR(40))
 BEGIN
-	SELECT CenterCode, CenterName FROM GroupCenter WHERE LOWER(CenterName) LIKE CONCAT(LOWER(pCenterNamePattern),'%') ORDER BY CenterName;
+	SELECT CenterCode, CenterName FROM Center WHERE LOWER(CenterName) LIKE CONCAT(LOWER(pCenterNamePattern),'%') ORDER BY CenterName;
 END//
 DELIMITER ;
 
 -- Test
-CALL GetAllGroupCentersByPattern('nag');
+CALL GetAllCentersByPattern('nag');
 
 
 -- AddMemberGroup (20-04-2019)
@@ -321,7 +321,7 @@ DELIMITER //
 DROP PROCEDURE IF EXISTS `GetMemberGroup`//
 CREATE PROCEDURE GetMemberGroup(pGroupCode CHAR(7))
 BEGIN
-	SELECT MG.GroupId, MG.GroupCode, MG.GroupName, MG.CenterCode, GC.CenterName FROM  MemberGroup MG INNER JOIN GroupCenter GC ON MG.CenterCode = GC.CenterCode  WHERE MG.GroupCode = pGroupCode;
+	SELECT MG.GroupId, MG.GroupCode, MG.GroupName, MG.CenterCode, GC.CenterName FROM  MemberGroup MG INNER JOIN Center GC ON MG.CenterCode = GC.CenterCode  WHERE MG.GroupCode = pGroupCode;
 END//
 DELIMITER ;
 
@@ -334,7 +334,7 @@ DELIMITER //
 DROP PROCEDURE IF EXISTS `GetAllMemberGroups`//
 CREATE PROCEDURE GetAllMemberGroups(pBranchId INT)
 BEGIN
-	SELECT MG.GroupCode, MG.GroupId, MG.GroupName, MG.CenterCode, GC.CenterName FROM  MemberGroup MG INNER JOIN GroupCenter GC ON MG.CenterCode = GC.CenterCode  WHERE GC.BranchId = pBranchId;
+	SELECT MG.GroupCode, MG.GroupId, MG.GroupName, MG.CenterCode, GC.CenterName FROM  MemberGroup MG INNER JOIN Center GC ON MG.CenterCode = GC.CenterCode  WHERE GC.BranchId = pBranchId;
 END//
 DELIMITER ;
 -- Test
@@ -359,7 +359,7 @@ DROP PROCEDURE IF EXISTS `GetAllMemberGroupsByPattern`//
 CREATE PROCEDURE GetAllMemberGroupsByPattern(pGroupNamePattern VARCHAR(40))
 BEGIN
 	SELECT MG.GroupCode, MG.GroupName, GC.CenterName, IFNULL((SELECT MemberName FROM Member M WHERE M.GroupCode=MG.GroupCode AND M.MemberType=1),'NA') AS LeaderName FROM 
-		MemberGroup MG INNER JOIN GroupCenter GC 
+		MemberGroup MG INNER JOIN Center GC 
 		ON MG.CenterCode = GC.CenterCode WHERE LOWER(GroupName) LIKE CONCAT(LOWER(pGroupNamePattern),'%') ORDER BY GroupName;
 END//
 DELIMITER ;
@@ -463,7 +463,7 @@ BEGIN
 		M.NoOfYears, M.HouseType, M.PropertyOwnership, M.Phone, 
 		M.MemberAadharNumber, M.PAN, M.RationCardNo, M.VoterIDNo, M.AccountNumber, M.IFSC, M.BankCustomerId,  
 		M.NomineeName, M.Relationship, M.NomineeAadharNumber, M.NomineeDOB
-		FROM  Member M INNER JOIN MemberGroup MG ON M.GroupCode=MG.GroupCode INNER JOIN GroupCenter GC ON MG.CenterCode = GC.CenterCode  
+		FROM  Member M INNER JOIN MemberGroup MG ON M.GroupCode=MG.GroupCode INNER JOIN Center GC ON MG.CenterCode = GC.CenterCode  
 	WHERE M.GroupCode = pGroupCode;
 END//
 DELIMITER ;
@@ -485,7 +485,7 @@ BEGIN
 		M.NoOfYears, M.HouseType, M.PropertyOwnership, M.Phone, 
 		M.MemberAadharNumber, M.PAN, M.RationCardNo, M.VoterIDNo, M.AccountNumber, M.IFSC, M.BankCustomerId,  
 		M.NomineeName, M.Relationship, M.NomineeAadharNumber, M.NomineeDOB
-		FROM  Member M INNER JOIN MemberGroup MG ON M.GroupCode=MG.GroupCode INNER JOIN GroupCenter GC ON MG.CenterCode = GC.CenterCode  
+		FROM  Member M INNER JOIN MemberGroup MG ON M.GroupCode=MG.GroupCode INNER JOIN Center GC ON MG.CenterCode = GC.CenterCode  
 		WHERE M.MemberCode = pMemberCode;
 END//
 DELIMITER ;
@@ -726,7 +726,7 @@ SELECT CheckGroup(1);
 -- Version 2.0 (Modified: GroupCode instead of GroupId)
 DELIMITER //
 DROP FUNCTION IF EXISTS `GetGroupCode`//
-CREATE FUNCTION GetGroupCode(pMemberCode CHAR(9)) RETURNS CHAR(6)
+CREATE FUNCTION GetGroupCode(pMemberCode CHAR(9)) RETURNS CHAR(7)
 READS SQL DATA
 BEGIN
 	DECLARE vGroupCode CHAR(7);
@@ -893,7 +893,7 @@ CALL GetLoan(1)
 -- Version 2.0 (Modified: GroupCode instead of GroupId)
 DELIMITER //
 DROP PROCEDURE IF EXISTS `EditLoan`//
-CREATE PROCEDURE EditLoan(pLoanCode CHAR(10), pMemberCode CHAR(8), pBranchId INT, pLoanPurpose VARCHAR(40), pLoanAmount INT,pLoanDate DATE, 
+CREATE PROCEDURE EditLoan(pLoanCode CHAR(10), pMemberCode CHAR(9), pBranchId INT, pLoanPurpose VARCHAR(40), pLoanAmount INT,pLoanDate DATE, 
 						pLoanDisposalDate DATE, pProcessingFeeRate INT, pProcessingFee INT, pInsuranceRate INT, pInsurance INT, 
 						pTenure INT, pInterestRate INT, pEWI INT, OUT pStatusCode INT)
 BEGIN

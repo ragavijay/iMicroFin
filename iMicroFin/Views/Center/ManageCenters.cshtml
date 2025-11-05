@@ -1,0 +1,68 @@
+﻿@{
+    ViewBag.Title = "Manage Centers";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@* Place this file at: Views/Center/Index.cshtml *@
+
+<link rel="stylesheet" href="~/css/center.css" />
+
+<div class="manage-centers-container">
+    <!-- Left Panel: Centers List -->
+    <div class="centers-list-panel">
+        <div class="panel-header">
+            <h2>Centers</h2>
+        </div>
+
+        <button class="btn-new" onclick="createNewCenter()">+ Add New Center</button>
+
+        <input type="text"
+               class="search-box"
+               id="searchBox"
+               placeholder="Search by Center Code or Name..."
+               onkeyup="searchCenters()">
+
+        <div id="centersList">
+            <div class="loading">Loading centers...</div>
+        </div>
+
+        <div class="pagination" id="pagination"></div>
+        <div class="page-info" id="pageInfo"></div>
+    </div>
+
+    <!-- Right Panel: Center Form -->
+    <div class="center-form-panel" id="centerFormPanel" style="display: none;">
+        <div class="panel-header">
+            <h2 id="formTitle">Edit Center</h2>
+        </div>
+
+        <form id="centerForm" onsubmit="saveCenter(event)">
+            <div class="form-group">
+                <label>Center Code</label>
+                <input type="text"
+                       id="centerCode"
+                       readonly
+                       placeholder="Auto-generated">
+                <input type="hidden" id="centerId">
+            </div>
+
+            <div class="form-group">
+                <label>Center Name <span style="color: red;">*</span></label>
+                <input type="text"
+                       id="centerName"
+                       maxlength="40"
+                       required
+                       placeholder="Enter center name">
+                <div class="error-message" id="errorMessage"></div>
+            </div>
+
+            <div class="form-buttons">
+                <button type="submit" class="btn-primary" id="saveBtn">Save</button>
+                <button type="button" class="btn-cancel" onclick="cancelEdit()">Cancel</button>
+            </div>
+            <div class="success-message" id="successMessage"></div>
+        </form>
+    </div>
+</div>
+
+<script src="~/js/center.js"></script>

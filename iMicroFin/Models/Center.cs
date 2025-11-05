@@ -5,7 +5,7 @@ using System.Web;
 
 namespace iMicroFin.Models
 {
-    public class GroupCenterViewModel
+    public class Center
     {
         public string CenterCode { get; set; } = string.Empty;
         public int CenterId { get; set; } 

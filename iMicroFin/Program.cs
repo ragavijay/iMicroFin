@@ -25,8 +25,8 @@ namespace iMicroFin
             builder.Services.AddHttpContextAccessor();
 
             // Add Cookie Authentication
-            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCookie(options =>
+            builder.Services.AddAuthentication("MyAuthCookie")
+                .AddCookie("MyAuthCookie",options =>
                 {
                     options.LoginPath = "/App/Login"; // Redirect here if not authenticated
                     options.LogoutPath = "/App/Logout";
@@ -34,8 +34,12 @@ namespace iMicroFin
                     options.SlidingExpiration = true;
                     options.Cookie.HttpOnly = true;
                     options.Cookie.IsEssential = true;
-                    options.Cookie.Name = ".MicroFin.Auth";
+                    options.Cookie.Name = ".iMicroFin.Auth";
                 });
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+            });
 
             builder.Services.AddHttpContextAccessor();
 

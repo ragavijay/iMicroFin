@@ -1,9 +1,9 @@
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
-using System.Security.Claims;
 using iMicroFin.DAO;
 using iMicroFin.Models;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace iMicroFin.Controllers
 {
@@ -23,13 +23,16 @@ namespace iMicroFin.Controllers
             return View();
         }
 
-        [AllowAnonymous]
+        [Authorize]
         [HttpGet]
         public ActionResult Home()
         {
-            string userType;
-            userType = HttpContext.Session.GetString("userType");
-            if (userType.Equals("A") || userType.Equals("D") || userType.Equals("M"))
+            string? userType = HttpContext.Session.GetString("userType");
+
+            if (!string.IsNullOrEmpty(userType) &&
+                (userType.Equals("A") ||
+                 userType.Equals("D") ||
+                 userType.Equals("M")))
             {
                 return View();
             }
@@ -40,9 +43,10 @@ namespace iMicroFin.Controllers
             }
         }
 
+
         [AllowAnonymous]
         [HttpPost]
-        public ActionResult Home(LoginViewModel login)
+        public async Task<IActionResult> Home(Login login)
         {
             string userType;
             userType = DBService.GetUserType(login);
@@ -52,18 +56,34 @@ namespace iMicroFin.Controllers
                 HttpContext.Session.SetString("userId", login.UserId);
                 HttpContext.Session.SetInt32("branchId", 1);
                 HttpContext.Session.SetString("branch", DBService.GetBranchName(1));
-                //FormsAuthentication.SetAuthCookie(login.UserId, true);
 
-                var claims = new List<Claim>
+                if (userType.Equals("A"))
+                {
+                    var claims = new List<Claim>
                     {
                         new Claim(ClaimTypes.Name, login.UserId ?? ""),
-                        new Claim(ClaimTypes.Role, userType),
-                        new Claim("BranchId", "1")
+                        new Claim(ClaimTypes.Role,  "Admin"),
+
                     };
+                    var identity = new ClaimsIdentity(claims, "MyAuthCookie");
+                    var principal = new ClaimsPrincipal(identity);
+                    await HttpContext.SignInAsync("MyAuthCookie", principal);
+                    return View();
+                }
+                else 
+                {
+                    var claims = new List<Claim>
+                        {
+                            new Claim(ClaimTypes.Name, login.UserId),
+                            new Claim(ClaimTypes.Role, "User")
+                        };
 
+                    var identity = new ClaimsIdentity(claims, "MyAuthCookie");
+                    var principal = new ClaimsPrincipal(identity);
 
-
-                return View();
+                    await HttpContext.SignInAsync("MyAuthCookie", principal);
+                    return View();
+                }
             }
             else
             {
@@ -72,10 +92,15 @@ namespace iMicroFin.Controllers
             }
         }
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
+  
+
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> Logout()
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            await HttpContext.SignOutAsync("MyAuthCookie");
+            return RedirectToAction("Login");
         }
+
     }
 }
