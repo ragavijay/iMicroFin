@@ -308,6 +308,7 @@ BEGIN
 		SELECT COUNT(*) INTO vCheck FROM MemberGroup WHERE GroupName=pGroupName;
 		IF vCheck>0 THEN
 			SET pStatusCode:=0;
+            COMMIT;
 		ELSE
 			SET pStatusCode:=-1;
 		END IF;
@@ -349,6 +350,7 @@ BEGIN
 	DECLARE EXIT HANDLER FOR SQLEXCEPTION SET pStatusCode=0;
 	UPDATE MemberGroup SET GroupName=pGroupName WHERE GroupCode = pGroupCode;
 	SET pStatusCode:=1;
+    COMMIT;
 END;//
 DELIMITER ;
 
@@ -439,6 +441,7 @@ AddMember: BEGIN
 					   pNomineeName, pRelationship, pNomineeAadharNumber, pNomineeDOB);
 	IF vCheck=0 THEN
 		SELECT COUNT(*) INTO vCheck FROM Member WHERE MemberAadharNumber = pMemberAadharNumber;
+        COMMIT;
 		IF vCheck>0 THEN
 			SET pStatusCode := -1;
 		ELSE
@@ -557,6 +560,7 @@ EditMember:BEGIN
 		WHERE MemberCode=pMemberCode;
 	IF vCheck=0 THEN
 		SELECT COUNT(*) INTO vCheck FROM Member WHERE MemberAadharNumber = pMemberAadharNumber AND MemberCode<>pMemberCode;
+        COMMIT;
 		IF vCheck>0 THEN
 			SET pStatusCode := -1;
 		ELSE
@@ -616,6 +620,7 @@ BEGIN
 	INSERT INTO FamilyMember(MemberCode, SNo, FamilyMemberName, Relationship, OccupationType, MonthlyIncome, Qualification) 
 					   VALUES
 					   (pMemberCode, pSNo, pFamilyMemberName, pRelationship, pOccupationType, pMonthlyIncome, pQualification );
+	COMMIT;
 END//
 DELIMITER ;
 
@@ -637,6 +642,7 @@ BEGIN
 	UPDATE FamilyMember SET FamilyMemberName=pFamilyMemberName, Relationship=pRelationship, 
 						OccupationType=pOccupationType, MonthlyIncome=pMonthlyIncome, Qualification=pQualification
 						WHERE MemberCode=pMemberCode AND SNo=pSNo;
+	COMMIT;
 END//
 DELIMITER ;
 

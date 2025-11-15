@@ -1,0 +1,115 @@
+﻿@model iMicroFin.Models.Member
+@{
+    ViewBag.Title = "Member";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    <center>
+        <div id="print">
+            <table class="tg">
+                <tr> <td colspan="2"> <img src="/Content/Images/logo.jpg" /> <h3>Athirstam Microfinance Pvt. Ltd.</h3> </td> <td colspan="2"> <img width="150" src="@Model.GetPhotoPath()" alt="NA" /> </td> </tr>
+                <tr> <td> <b>Center Name</b> </td> <td> @Model.CenterName </td> <td colspan="2"> </td> </tr>
+                <tr> <td> <b>Group Name</b> </td> <td> @Model.GroupName </td> <td> <b>Leader Name</b> </td> <td> @Model.LeaderName </td> </tr>
+                <tr> <td> <b>Member Code </b> </td> <td> @Model.MemberCode </td> <td > <b>Current Loan</b> </td> <td> @if (Model.CurrentLoanCode != "0")
+                {  @Html.ActionLink("View", "ViewLoan", "Loan", new { id = Model.CurrentLoanCode }, null); <space/>
+                        @Html.ActionLink("Edit", "LoanForm", "Loan", new { id = Model.CurrentLoanCode }, null);  }
+                        else
+                        { @Html.Label("NA"); }
+                </td> </tr>
+                <tr> <td> <b>Member Name </b> </td> <td> @Model.MemberName </td> <td> <b>Member Type</b> </td> <td> @Model.MemberType </td>  </tr>
+                <tr> <td> <b>Father's Name</b> </td> <td> @Model.FName </td> <td> <b>Husband's Name</b> </td> <td> @Model.HName </td> </tr>
+                <tr> <td> <b>Nominee Name</b> </td> <td> @Model.NomineeName </td> <td> <b>Relationship</b> </td> <td> @Model.Relationship </td></tr>
+                <tr> <td colspan="4" align="center"> <b>Personal Details</b> </td></tr>
+                <tr> <td> <b>Member DOB</b> </td> <td> @Model.DOB.ToString("dd-MM-yyyy") </td> <td> <b>Age</b> </td> <td> @Model.GetMemberAge() </td>  </tr>
+                <tr> <td> <b>Nominee DOB</b> </td> <td> @Model.NomineeDOB.ToString("dd-MM-yyyy") </td> <td> <b>Age</b> </td> <td> @Model.GetNomineeAge() </td>  </tr>
+                <tr> <td> <b>Gender</b> </td> <td> @Model.Gender </td> <td> <b>Marital Status</b> </td> <td> @Model.MaritalStatus </td>  </tr>
+                <tr> <td> <b>Religion </b> </td> <td> @Model.Religion </td> <td colspan="2"> </td> </tr>
+                <tr> <td> <b>Aadhar</b> </td> <td> @Model.MemberAadharNumber </td> <td> <b>Nominee's Aadhar</b> </td> <td> @Model.NomineeAadharNumber </td></tr>
+                <tr> <td> <b>PAN</b> </td> <td> @Model.PAN </td> <td> <b>Voter ID</b> </td> <td> @Model.VoterIDNo </td></tr>
+                <tr> <td> <b>Ration Card No.</b> </td> <td> @Model.RationCardNo </td><td colspan="2"> </td>  </tr>
+                <tr> <td> <b>Account No.</b> </td> <td> @Model.AccountNumber </td> <td> <b>IFSC</b> </td> <td> @Model.IFSC </td></tr>
+                <tr> <td> <b>Customer Id (Bank)</b> </td> <td colspan="3"> @Model.BankCustomerId </td></tr>
+                <tr> <td> <b>Bank</b> </td> <td> <span id="bankName"> </span> </td> <td> <b>Branch</b> </td> <td> <span id="bankBranch"> </span></td></tr>
+                <tr> <td> <b>Bank Address</b> </td> <td colspan="3"> <span id="bankAddress"> </span> </td></tr>
+                <tr> <td> <b>Address</b> </td> <td colspan="3"> @Model.AddressLine1 <br /> @Model.AddressLine2 <br /> @Model.AddressLine3 <br /> @Model.AddressLine4 <br />  @Model.City, PIN- @Model.Pincode </td>  </tr>
+                <tr> <td> <b>Taluk</b> </td> <td> @Model.Taluk </td> <td> <b>Panchayat</b> </td> <td> @Model.Panchayat </td></tr>
+                <tr> <td> <b>Mobile No.</b> </td> <td> @Model.Phone </td><td colspan="2"> </td>  </tr>
+                <tr> <td> <b>No of Years in household</b> </td> <td> @Model.NoOfYears </td><td colspan="2"> </td>  </tr>
+                <tr> <td> <b>House Type</b> </td> <td> @Model.HouseType </td> <td> <b>Property Ownership</b> </td> <td> @Model.PropertyOwnership </td></tr>
+                <tr> <td> <b>Occupation</b> </td> <td> @Model.Occupation </td> <td> <b>Occupation Type</b> </td> <td> @Model.OccupationType </td></tr>
+                <tr> 
+                        <td> <b>Family Members</b> </td> 
+                        <td colspan="3"> 
+                            @if(Model.FamilyMembers.Count>0)
+                            {
+                                <table class="tg">
+                                    <tr> <th> S. No </th> <th> Name </th> <th> Relationship </th><th> Occupation </th> <th> Monthly Income </th> <th> Qualification </th> </tr>
+                                    @foreach (var familyMember in @Model.FamilyMembers)
+                                    {
+                                        <tr>
+                                            <td> @familyMember.SNo </td>
+                                            <td> @familyMember.FamilyMemberName </td>
+                                            <td> @familyMember.Relationship </td>
+                                            <td> @familyMember.OccupationType </td>
+                                            <td> @familyMember.MonthlyIncome</td>
+                                            <td> @familyMember.Qualification</td>
+                                        </tr>
+                                    }
+                                </table>
+                            }
+                        </td>
+                </tr>
+        </table>
+    </div>
+        <input type="button" value="print" onclick="printMember()"/>
+    </center>
+}
+<script>
+    getBank();
+    function printMember() {
+        var divContents = document.getElementById("print").innerHTML;
+        var printWindow = window.open('', '', 'height=600,width=600');
+        printWindow.document.write('<html><head><title>AMF</title>');
+        printWindow.document.write('<link rel="stylesheet" href="/Content/home.css" />');
+        printWindow.document.write('</head><body >');
+        printWindow.document.write(divContents);
+        printWindow.document.write('</body></html>');
+        printWindow.document.close();
+        printWindow.print();
+    }
+    function getBank() {
+        var ifsc = '@Model.IFSC';
+        var bankName = document.getElementById("bankName");
+        var bankBranch = document.getElementById("bankBranch");
+        if (ifsc == '') {
+            bankName.innerHTML = '';
+            bankBranch.innerHTML = '';
+            bankAddress.innerHTML = '';
+            return;
+        }
+        var ajaxReq = new XMLHttpRequest();
+        ajaxReq.onreadystatechange = function () {
+            if (this.readyState == 1) {
+                bankName.innerHTML = "Loading....";
+                bankBranch.innerHTML = "Loading....";
+                bankAddress.innerHTML = "Loading....";
+            } else if (this.readyState == 4) {
+                if (this.status == 200) {
+                    var bankInfo = JSON.parse(this.responseText);
+                    bankName.innerHTML = bankInfo.BANK;
+                    bankBranch.innerHTML = bankInfo.BRANCH;
+                    bankAddress.innerHTML = bankInfo.ADDRESS;
+                } else {
+                    bankName.innerHTML = "";
+                    bankBranch.innerHTML = "";
+                    bankAddress.innerHTML = "";
+                }
+            }
+        };
+        ajaxReq.open("GET", "https://ifsc.razorpay.com/" + ifsc, true);
+        ajaxReq.send();
+    }
+</script>

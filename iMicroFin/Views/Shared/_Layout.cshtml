@@ -70,18 +70,6 @@
                         <span class="nav-text">Home</span>
                     </a>
                 </li>
-
-                <li class="nav-item">
-                    <a class="nav-link" onclick="toggleSubmenu(this)" data-title="Center">
-                        <span class="nav-icon"><i class="fa fa-building"></i></span>
-                        <span class="nav-text">Center</span>
-                        <span class="nav-arrow">▼</span>
-                    </a>
-                    <ul class="submenu">
-                        <li><a class="submenu-link" asp-controller="Center" asp-action="ManageCenters">Manage Centers</a></li>
-                    </ul>
-                </li>
-
                 <li class="nav-item">
                     <a class="nav-link" onclick="toggleSubmenu(this)" data-title="Group">
                         <span class="nav-icon"><i class="fa fa-users"></i></span>
@@ -89,6 +77,7 @@
                         <span class="nav-arrow">▼</span>
                     </a>
                     <ul class="submenu">
+                        <li><a class="submenu-link" asp-controller="Center" asp-action="ManageCenters">Manage Centers</a></li>
                         <li><a class="submenu-link" asp-controller="Group" asp-action="ManageGroup">Manage Groups</a></li>
                     </ul>
                 </li>

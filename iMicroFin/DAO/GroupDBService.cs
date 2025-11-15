@@ -1,5 +1,4 @@
-﻿using iMicroFin.DAO;
-using iMicroFin.Models;
+﻿using iMicroFin.Models;
 using MySql.Data.MySqlClient;
 using System.Data;
 
@@ -159,7 +158,7 @@ namespace iMicroFin.DAO
             return statusCode;
         }
 
-        public static List<MemberGroup> GetAllMemberGroupsByPattern(String groupNamePattern)
+        public static List<MemberGroup> GetAllMemberGroupsByPattern(String groupNamePattern,int branchId)
         {
             List<MemberGroup> groups = new List<MemberGroup>();
             using (MySqlConnection con = new MySqlConnection(ConfigHelper.GetConnectionString()))

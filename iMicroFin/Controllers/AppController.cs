@@ -1,5 +1,6 @@
 using iMicroFin.DAO;
 using iMicroFin.Models;
+using iMicroFin.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,17 +10,18 @@ namespace iMicroFin.Controllers
 {
     public class AppController : Controller
     {
-        private readonly ILogger<AppController> _logger;
+        private readonly IPathService _pathService;
 
-        public AppController(ILogger<AppController> logger)
+        public AppController(IPathService pathService)
         {
-            _logger = logger;
+            _pathService = pathService;
         }
 
         [AllowAnonymous]
         [HttpGet]
         public IActionResult Login()
         {
+            string? webrootpath = _pathService.WebRootPath;
             return View();
         }
 

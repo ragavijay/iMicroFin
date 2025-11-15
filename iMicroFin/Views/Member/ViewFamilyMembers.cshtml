@@ -1,0 +1,56 @@
+﻿@model IEnumerable<iMicroFin.Models.FamilyMember>
+
+@{
+    ViewBag.Title = "ViewFamilyMembers";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Family members of @ViewBag.MemberName </h2>
+
+<p>
+    @Html.ActionLink("Add Family Member", "FamilyMemberForm" , new { id = @ViewBag.MemberCode })
+</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.SNo)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.FamilyMemberName)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Relationship)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.MonthlyIncome)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Qualification)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.SNo)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.FamilyMemberName)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Relationship)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.MonthlyIncome)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Qualification)
+        </td>
+        <td>
+            @Html.ActionLink("Edit", "FamilyMemberForm", new { id=item.MemberCode + " " + item.SNo })
+        </td>
+    </tr>
+}
+
+</table>

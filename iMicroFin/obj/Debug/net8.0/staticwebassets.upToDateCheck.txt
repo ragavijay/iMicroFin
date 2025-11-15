@@ -12,9 +12,16 @@ wwwroot\css\menu.css
 wwwroot\css\select2.min.css
 wwwroot\css\site.css
 wwwroot\favicon.ico
+wwwroot\FileUploads\Img\Aadhar\001010101.jpg
+wwwroot\FileUploads\Img\Member\001010101.jpg
 wwwroot\js\autocomplete.js
 wwwroot\js\center.js
+wwwroot\js\daterangepicker.js
+wwwroot\js\global.js
+wwwroot\js\group.js
 wwwroot\js\home.js
+wwwroot\js\member-form.js
+wwwroot\js\select2.min.js
 wwwroot\js\site.js
 wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css
 wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css.map
@@ -73,4 +80,3 @@ wwwroot\lib\jquery\dist\jquery.js
 wwwroot\lib\jquery\dist\jquery.min.js
 wwwroot\lib\jquery\dist\jquery.min.map
 wwwroot\lib\jquery\LICENSE.txt
-wwwroot\js\group.js

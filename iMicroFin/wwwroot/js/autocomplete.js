@@ -241,8 +241,41 @@ class MultiFieldAutoComplete extends AutoComplete {
         this.fieldNames = config.fieldNames;
     }
 
+    handleInput(e) {
+        const value = e.target.value.trim();
+
+        // Clear all hidden fields when input changes
+        this.hiddenElements.forEach(el => {
+            if (el) el.value = '';
+        });
+
+        // Clear previous timer
+        if (this.debounceTimer) {
+            clearTimeout(this.debounceTimer);
+        }
+
+        if (value.length < this.minChars) {
+            this.closeList();
+            return;
+        }
+
+        // Debounce the API call
+        this.debounceTimer = setTimeout(() => {
+            this.fetchSuggestions(value);
+        }, this.debounceTime);
+    }
+
+    formatItem(item) {
+        // Override for custom formatting
+        // Default: show main field with additional info
+        const displayText = item[this.fieldNames[this.fieldNames.length - 1]] || '';
+        const code = item[this.fieldNames[0]] || '';
+
+        return `<strong>${displayText}</strong> <span class="autocomplete-code">(${code})</span>`;
+    }
+
     selectItem(item) {
-        // Set visible input
+        // Set visible input (last field in fieldNames)
         const displayField = this.fieldNames[this.fieldNames.length - 1];
         this.inputElement.value = item[displayField] || '';
 
@@ -260,6 +293,36 @@ class MultiFieldAutoComplete extends AutoComplete {
         }
 
         this.inputElement.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    async fetchSuggestions(searchText) {
+        // Cancel previous request
+        if (this.currentRequest) {
+            this.currentRequest.abort();
+        }
+
+        const controller = new AbortController();
+        this.currentRequest = controller;
+
+        try {
+            const response = await fetch(`${this.serviceUrl}/${encodeURIComponent(searchText)}`, {
+                signal: controller.signal
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const data = await response.json();
+            // Handle both direct array and wrapped response
+            const items = data.groups || data.centers || data;
+            this.displaySuggestions(items);
+        } catch (error) {
+            if (error.name !== 'AbortError') {
+                console.error('Autocomplete error:', error);
+                this.showError('Failed to load suggestions');
+            }
+        }
     }
 }
 

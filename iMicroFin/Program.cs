@@ -1,6 +1,7 @@
-using Microsoft.Extensions.Configuration;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using iMicroFin.DAO;
+using iMicroFin.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.Extensions.Configuration;
 namespace iMicroFin
 {
     public class Program
@@ -42,6 +43,8 @@ namespace iMicroFin
             });
 
             builder.Services.AddHttpContextAccessor();
+
+            builder.Services.AddSingleton<IPathService, PathService>();
 
             var app = builder.Build();
 

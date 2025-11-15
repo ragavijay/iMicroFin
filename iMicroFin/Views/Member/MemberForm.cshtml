@@ -1,0 +1,538 @@
+﻿@model iMicroFin.Models.Member
+@using iMicroFin.Models;
+@using System.Globalization;
+@{
+    ViewBag.Title = "Add/Edit Member";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="~/css/autocomplete.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<style>
+    .image-preview-container {
+        margin-top: 10px;
+        display: none;
+    }
+
+    .image-preview {
+        max-width: 200px;
+        max-height: 200px;
+        border: 2px solid #ddd;
+        border-radius: 4px;
+        padding: 5px;
+        background: white;
+    }
+
+    .preview-label {
+        font-size: 12px;
+        color: #666;
+        margin-top: 5px;
+        display: block;
+    }
+
+    .clear-image-btn {
+        background: #f44336;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+        margin-top: 5px;
+    }
+
+        .clear-image-btn:hover {
+            background: #d32f2f;
+        }
+</style>
+
+<div class="page-wrapper bg-gra-03 p-t-45 p-b-50">
+    <div class="wrapper wrapper--w790">
+        <div class="card card-5">
+            <div class="card-heading">
+                <h2 class="title">Member</h2>
+            </div>
+            <div class="card-body">
+                @using (Html.BeginForm("Member", "Member", FormMethod.Post, new { @onsubmit = "return validateForm();", @enctype = "multipart/form-data" }))
+                {
+                    <!--Member Id -->
+                    <div class="form-row">
+                        <div class="name">Member Id</div>
+                        <div class="value">
+                            <div class="input-group">
+                                @Html.TextBoxFor(m => m.MemberCode, new { id = "MemberCode", @class = "input--style-5", @placeholder = "auto-generated", @readonly = "true", @autocomplete = "off" })
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--GroupName and GroupId -->
+                    <div class="form-row m-b-55">
+                        <div class="name">Group</div>
+                        <div class="value">
+                            <div class="row row-space">
+                                <div class="col-2">
+                                    <div class="input-group-desc">
+                                        @Html.TextBoxFor(m => m.GroupName, new { id = "GroupName", @autocomplete = "off", @class = "input--style-5 autocomplete-input", @placeholder = "select group", @required = "true", @tabindex = "1" })
+                                        @Html.HiddenFor(m => m.GroupCode, new { id = "GroupCode" })
+                                        <label class="label--desc">Group Name</label>
+                                    </div>
+                                </div>
+                                <div class="col-2">
+                                    <div class="input-group-desc">
+                                        <input type="text" id="GroupCodeDisplay" class="input--style-5" readonly />
+                                        <label class="label--desc">Group Id</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--CenterName and LeaderName -->
+                    <div class="form-row m-b-55">
+                        <div class="name">Center/Leader</div>
+                        <div class="value">
+                            <div class="row row-space">
+                                <div class="col-2">
+                                    <div class="input-group-desc">
+                                        @Html.TextBoxFor(m => m.CenterName, new { id = "CenterName", @class = "input--style-5", @readonly = "true", @autocomplete = "off" })
+                                        <label class="label--desc">Center</label>
+                                    </div>
+                                </div>
+                                <div class="col-2">
+                                    <div class="input-group-desc">
+                                        @Html.TextBoxFor(m => m.LeaderName, new { id = "LeaderName", @class = "input--style-5", @readonly = "true", @autocomplete = "off" })
+                                        <label class="label--desc">Leader</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Member Type -->
+                    <div class="form-row">
+                        <div class="name">Type</div>
+                        <div class="value">
+                            <div class="input-group">
+                                <div class="rs-select2 js-select-simple select--no-search">
+                                    @Html.DropDownListFor(m => m.MemberType, new SelectList(Enum.GetValues(typeof(EMemberType))), new { @tabindex = "2" })
+                                    <div class="select-dropdown"></div>
+                                    <p style='color:red;'> @ViewBag.ErrMemberType</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--Member Name-->
+                    <div class="form-row">
+                        <div class="name">Member's Name</div>
+                        <div class="value">
+                            <div class="input-group">
+                                @Html.TextBoxFor(m => m.MemberName, new { @class = "input--style-5", @required = "true", @autocomplete = "off", @style = "text-transform:uppercase", @maxlength = "50", @tabindex = "3" })
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--Gender and DOB -->
+                    <div class="form-row m-b-55">
+                        <div class="name">Gender/DOB</div>
+                        <div class="value">
+                            <div class="row row-space">
+                                <div class="col-2">
+                                    <div class="rs-select2 js-select-simple select--no-search">
+                                        @Html.DropDownListFor(m => m.Gender, new SelectList(Enum.GetValues(typeof(EGender))), new { @tabindex = "4" })
+                                        <div class="select-dropdown"></div>
+                                    </div>
+                                </div>
+                                <div class="col-2">
+                                    <div class="input-group-desc">
+                                        @Html.TextBox("DOB",
+                                        (Model == null || Model.DOB == DateTime.MinValue) ? "" : Model.DOB.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture),
+                                            new
+                                            {
+                                                @class = "input--style-5 date-picker",
+                                                @required = "true",
+                                                @autocomplete = "off",
+                                                @tabindex = "5",
+                                                @placeholder = "DD/MM/YYYY"
+                                            })
+                                        <p id="errDob" style='color:red;'> </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                <!--Marital Status and Religion -->
+                <div class="form-row m-b-55">
+                    <div class="name">Marital Status/ Religion</div>
+                    <div class="value">
+                        <div class="row row-space">
+                            <div class="col-2">
+                                <div class="rs-select2 js-select-simple select--no-search">
+                                    @Html.DropDownListFor(m => m.MaritalStatus, new SelectList(Enum.GetValues(typeof(EMaritalStatus))), new { @tabindex = "6" })
+                                    <div class="select-dropdown"></div>
+                                </div>
+                            </div>
+                            <div class="col-2">
+                                <div class="rs-select2 js-select-simple select--no-search">
+                                    @Html.DropDownListFor(m => m.Religion, new SelectList(Enum.GetValues(typeof(EReligion))), new { @tabindex = "7" })
+                                    <div class="select-dropdown"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--Father's and Husband's Name -->
+                <div class="form-row m-b-55">
+                    <div class="name">Father/ Husband's Name</div>
+                    <div class="value">
+                        <div class="row row-space">
+                            <div class="col-2">
+                                <div class="input-group-desc">
+                                    @Html.TextBoxFor(m => m.FName, new { @class = "input--style-5", @required = "true", @autocomplete = "off", @style = "text-transform:uppercase", @tabindex = "8", @maxlength = "50" })
+                                    <label class="label--desc">Father's Name</label>
+                                </div>
+                            </div>
+                            <div class="col-2">
+                                <div class="input-group-desc">
+                                    @Html.TextBoxFor(m => m.HName, new { @class = "input--style-5", @autocomplete = "off", @tabindex = "9", @style = "text-transform:uppercase", @maxlength = "50" })
+                                    <label class="label--desc">Husband's Name</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--Occupation -->
+                <div class="form-row m-b-55">
+                    <div class="name">Occupation</div>
+                    <div class="value">
+                        <div class="row row-space">
+                            <div class="col-2">
+                                <div class="rs-select2 js-select-simple select--no-search">
+                                    @Html.DropDownListFor(m => m.Occupation, new SelectList(Enum.GetValues(typeof(EOccupation))), new { @tabindex = "10" })
+                                    <div class="select-dropdown"></div>
+                                </div>
+                            </div>
+                            <div class="col-2">
+                                <div class="rs-select2 js-select-simple select--no-search">
+                                    @Html.DropDownListFor(m => m.OccupationType, new SelectList(Enum.GetValues(typeof(EOccupationType))), new { @tabindex = "11" })
+                                    <div class="select-dropdown"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--Address-->
+                <div class="form-row">
+                    <div class="name">Address</div>
+                    <div class="value">
+                        <div class="input-group">
+                            @Html.TextBoxFor(m => m.AddressLine1, new { @class = "input--style-5", @required = "true", @autocomplete = "off", @tabindex = "12", @maxlength = "40" })
+                            @Html.TextBoxFor(m => m.AddressLine2, new { @class = "input--style-5", @required = "true", @autocomplete = "off", @tabindex = "13", @maxlength = "40" })
+                            @Html.TextBoxFor(m => m.AddressLine3, new { @class = "input--style-5", @autocomplete = "off", @tabindex = "14", @maxlength = "40" })
+                            @Html.TextBoxFor(m => m.AddressLine4, new { @class = "input--style-5", @autocomplete = "off", @tabindex = "15", @maxlength = "40" })
+                        </div>
+                    </div>
+                </div>
+
+                <!--Taluk and Panchayat -->
+                <div class="form-row m-b-55">
+                    <div class="name"> </div>
+                    <div class="value">
+                        <div class="row row-space">
+                            <div class="col-2">
+                                <div class="input-group-desc">
+                                    @Html.TextBoxFor(m => m.Taluk, new { @class = "input--style-5", @autocomplete = "off", @tabindex = "16", @maxlength = "40" })
+                                    <label class="label--desc">Taluk</label>
+                                </div>
+                            </div>
+                            <div class="col-2">
+                                <div class="input-group-desc">
+                                    @Html.TextBoxFor(m => m.Panchayat, new { @class = "input--style-5", @autocomplete = "off", @tabindex = "17", @maxlength = "40" })
+                                    <label class="label--desc">Panchayat</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--City and PIN -->
+                <div class="form-row m-b-55">
+                    <div class="name">City/PIN</div>
+                    <div class="value">
+                        <div class="row row-space">
+                            <div class="col-2">
+                                <div class="input-group-desc">
+                                    @Html.TextBoxFor(m => m.City, new { @class = "input--style-5", @required = "true", @autocomplete = "off", @tabindex = "18", @maxlength = "30" })
+                                    <label class="label--desc">City</label>
+                                </div>
+                            </div>
+                            <div class="col-2">
+                                <div class="input-group-desc">
+                                    @Html.TextBoxFor(m => m.Pincode, new { @class = "input--style-5", @required = "true", @autocomplete = "off", @tabindex = "19", @pattern = @"^[1-9][0-9]{5}$" })
+                                    <label class="label--desc">Pincode</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--No Of Years-->
+                <div class="form-row">
+                    <div class="name">No. of years residing</div>
+                    <div class="value">
+                        <div class="input-group">
+                            @Html.TextBoxFor(m => m.NoOfYears, new { @class = "input--style-5", @required = "true", @autocomplete = "off", @tabindex = "20" })
+                        </div>
+                    </div>
+                </div>
+
+                <!--House type and ownership -->
+                <div class="form-row m-b-55">
+                    <div class="name">House-type/ Ownership</div>
+                    <div class="value">
+                        <div class="row row-space">
+                            <div class="col-2">
+                                <div class="rs-select2 js-select-simple select--no-search">
+                                    @Html.DropDownListFor(m => m.HouseType, new SelectList(Enum.GetValues(typeof(EHouseType))), new { @tabindex = "21" })
+                                    <div class="select-dropdown"></div>
+                                </div>
+                            </div>
+                            <div class="col-2">
+                                <div class="rs-select2 js-select-simple select--no-search">
+                                    @Html.DropDownListFor(m => m.PropertyOwnership, new SelectList(Enum.GetValues(typeof(EPropertyOwnership))), new { @tabindex = "22" })
+                                    <div class="select-dropdown"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--Phone-->
+                <div class="form-row">
+                    <div class="name">Phone</div>
+                    <div class="value">
+                        <div class="input-group">
+                            @Html.TextBoxFor(m => m.Phone, new { @class = "input--style-5", @required = "true", @autocomplete = "off", @tabindex = "23", @pattern = @"^[1-9][0-9]{9}$" })
+                        </div>
+                    </div>
+                </div>
+
+                <!--Account No and IFSC -->
+                <div class="form-row m-b-55">
+                    <div class="name">Acc. No/ IFSC</div>
+                    <div class="value">
+                        <div class="row row-space">
+                            <div class="col-2">
+                                <div class="input-group-desc">
+                                    @Html.TextBoxFor(m => m.AccountNumber, new { @class = "input--style-5", @required = "true", @autocomplete = "off", @tabindex = "24", @maxlength = "20" })
+                                    <label class="label--desc">Account Number</label>
+                                </div>
+                            </div>
+                            <div class="col-2">
+                                <div class="input-group-desc">
+                                    @Html.TextBoxFor(m => m.IFSC, new { @class = "input--style-5", @required = "true", @autocomplete = "off", @tabindex = "25", @style = "text-transform:uppercase", @maxlength = "11", @onblur = "getBank();" })
+                                    <label class="label--desc">IFSC</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--Retype Accno-->
+                <div class="form-row">
+                    <div class="name">Retype Account No.</div>
+                    <div class="value">
+                        <div class="input-group">
+                            @Html.TextBoxFor(m => m.RAccountNumber, new { @class = "input--style-5", @required = "true", @autocomplete = "off", @tabindex = "26", @maxlength = "20" })
+                            <p id="ErrAccountNumber" style='color:red;'> </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!--BankCustomerId-->
+                <div class="form-row">
+                    <div class="name">Customer Id (Bank)</div>
+                    <div class="value">
+                        <div class="input-group">
+                            @Html.TextBoxFor(m => m.BankCustomerId, new { @class = "input--style-5", @required = "true", @autocomplete = "off", @tabindex = "27", @maxlength = "20" })
+                        </div>
+                    </div>
+                </div>
+
+                <!--Bank and Branch -->
+                <div class="form-row m-b-55">
+                    <div class="name">Bank/Branch</div>
+                    <div class="value">
+                        <div class="row row-space">
+                            <div class="col-2">
+                                <div class="input-group-desc">
+                                    <input type="text" id="BankName" class="input--style-5" readonly autocomplete="off" />
+                                    <label class="label--desc">Bank Name</label>
+                                </div>
+                            </div>
+                            <div class="col-2">
+                                <div class="input-group-desc">
+                                    <input type="text" id="BankBranch" class="input--style-5" readonly autocomplete="off" />
+                                    <label class="label--desc">Branch</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--Aadhar and PAN -->
+                <div class="form-row m-b-55">
+                    <div class="name">Aadhar/ PAN</div>
+                    <div class="value">
+                        <div class="row row-space">
+                            <div class="col-2">
+                                <div class="input-group-desc">
+                                    @Html.TextBoxFor(m => m.MemberAadharNumber, new { @class = "input--style-5", @required = "true", @autocomplete = "off", @tabindex = "28", @pattern = @"^[1-9][0-9]{11}$" })
+                                    <p style='color:red;'> @ViewBag.ErrMemberAadharNumber </p>
+                                    <label class="label--desc">Aadhar</label>
+                                </div>
+                            </div>
+                            <div class="col-2">
+                                <div class="input-group-desc">
+                                    @Html.TextBoxFor(m => m.PAN, new { @class = "input--style-5", @autocomplete = "off", @tabindex = "29", @style = "text-transform:uppercase", @pattern = "[a-zA-Z]{5}[0-9]{4}[a-zA-Z]{1}" })
+                                    <label class="label--desc">PAN</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--Retype AadharNumber-->
+                <div class="form-row">
+                    <div class="name">Retype Aadhar Number</div>
+                    <div class="value">
+                        <div class="input-group">
+                            @Html.TextBoxFor(m => m.RMemberAadharNumber, new { @class = "input--style-5", @required = "true", @autocomplete = "off", @tabindex = "30", @pattern = @"^[1-9][0-9]{11}$" })
+                            <p id="ErrRMemberAadharNumber" style='color:red;'> </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!--Ration Card and Voter ID -->
+                <div class="form-row m-b-55">
+                    <div class="name">Ration/ Voter ID Card No.</div>
+                    <div class="value">
+                        <div class="row row-space">
+                            <div class="col-2">
+                                <div class="input-group-desc">
+                                    @Html.TextBoxFor(m => m.RationCardNo, new { @class = "input--style-5", @autocomplete = "off", @tabindex = "31", @maxlength = "30" })
+                                    <label class="label--desc">Ration Card No.</label>
+                                </div>
+                            </div>
+                            <div class="col-2">
+                                <div class="input-group-desc">
+                                    @Html.TextBoxFor(m => m.VoterIDNo, new { @class = "input--style-5", @autocomplete = "off", @tabindex = "32", @maxlength = "30" })
+                                    <label class="label--desc">Voter ID Card No.</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--Nominee Name and Relationship -->
+                <div class="form-row m-b-55">
+                    <div class="name">Nominee</div>
+                    <div class="value">
+                        <div class="row row-space">
+                            <div class="col-2">
+                                <div class="input-group-desc">
+                                    @Html.TextBoxFor(m => m.NomineeName, new { @class = "input--style-5", @required = "true", @autocomplete = "off", @tabindex = "33", @style = "text-transform:uppercase", @maxlength = "50" })
+                                    <label class="label--desc">Nominee Name</label>
+                                </div>
+                            </div>
+                            <div class="col-2">
+                                <div class="rs-select2 js-select-simple select--no-search">
+                                    @Html.DropDownListFor(m => m.Relationship, new SelectList(Enum.GetValues(typeof(ERelationship))), new { @tabindex = "34" })
+                                    <div class="select-dropdown"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--Nominee Aadhar and DOB -->
+                <div class="form-row m-b-55">
+                    <div class="name">Nominee Aadhar/ DOB</div>
+                    <div class="value">
+                        <div class="row row-space">
+                            <div class="col-2">
+                                <div class="input-group-desc">
+                                    @Html.TextBoxFor(m => m.NomineeAadharNumber, new { @class = "input--style-5", @required = "true", @autocomplete = "off", @tabindex = "35", @pattern = @"^[1-9][0-9]{11}$" })
+                                    <p style='color:red;'> @ViewBag.ErrNomineeAadharNumber </p>
+                                    <label class="label--desc">Nominee Aadhar</label>
+                                </div>
+                            </div>
+                            <div class="col-2">
+                                <div class="input-group-desc">
+                                    @Html.TextBox("NomineeDOB",
+                                            (Model == null || Model.NomineeDOB == DateTime.MinValue) ? "" : Model.NomineeDOB.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture),
+                                            new
+                                            {
+                                                @class = "input--style-5 date-picker",
+                                                @required = "true",
+                                                @autocomplete = "off",
+                                                @tabindex = "36",
+                                                @placeholder = "DD/MM/YYYY"
+                                            })
+                                    <label class="label--desc">DOB</label>
+                                    <p id="errNomineeDob" style='color:red;'> </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--Photo-->
+                <div class="form-row">
+                    <div class="name">Photo</div>
+                    <div class="value">
+                        <div class="input-group">
+                            <input type="file" name="Photo" id="photoInput" accept="image/*" class="input--style-5" tabindex="37" onchange="previewImage(this, 'photoPreviewContainer', 'photoPreview')" />
+                            <div id="photoPreviewContainer" class="image-preview-container">
+                                <img id="photoPreview" class="image-preview" alt="Photo Preview" />
+                                <button type="button" class="clear-image-btn" onclick="clearImage('photoInput', 'photoPreviewContainer')">Clear Image</button>
+                                <span class="preview-label">Photo Preview</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--Aadhar-->
+                <div class="form-row">
+                    <div class="name">Aadhar Document</div>
+                    <div class="value">
+                        <div class="input-group">
+                            <input type="file" name="Aadhar" id="aadharInput" accept="image/*" class="input--style-5" tabindex="38" onchange="previewImage(this, 'aadharPreviewContainer', 'aadharPreview')" />
+                            <div id="aadharPreviewContainer" class="image-preview-container">
+                                <img id="aadharPreview" class="image-preview" alt="Aadhar Preview" />
+                                <button type="button" class="clear-image-btn" onclick="clearImage('aadharInput', 'aadharPreviewContainer')">Clear Image</button>
+                                <span class="preview-label">Aadhar Document Preview</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--Save-->
+                <div>
+                    <p style='color:red;'> @ViewBag.ErrTryAgain </p>
+                    <button class="btn btn--radius-2 btn--red" type="submit" tabindex="39">Save</button>
+                </div>
+                                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/js/autocomplete.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="~/js/member-form.js"></script>

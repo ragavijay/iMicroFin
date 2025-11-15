@@ -1,0 +1,62 @@
+﻿@model IEnumerable<iMicroFin.Models.Member>
+
+@{
+    ViewBag.Title = "View Members";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Members</h2>
+@Html.ActionLink("Downolad", "ExportMembers", new { id = ViewBag.GroupCode })
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.MemberCode)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.MemberName)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.GroupName)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.CenterName)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.LeaderName)
+        </th>
+        <th>
+            Family Member
+        </th>
+        <th></th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.MemberCode)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.MemberName)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.GroupName)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.CenterName)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.LeaderName)
+        </td>
+        <td>
+            @Html.ActionLink("Edit", "ViewFamilyMembers", new { id = item.MemberCode })
+        </td>
+        <td>
+            @Html.ActionLink("View", "ViewMember", new { id = item.MemberCode })
+        </td>
+        <td>
+            @Html.ActionLink("Edit", "MemberForm", new { id=item.MemberCode })
+        </td>
+    </tr>
+}
+</table>

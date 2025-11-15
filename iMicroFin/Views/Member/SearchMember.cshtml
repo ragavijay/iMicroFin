@@ -1,0 +1,98 @@
+﻿@{
+    ViewBag.Title = "SearchMember";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="page-wrapper bg-gra-03 p-t-45 p-b-50">
+    <div class="wrapper wrapper--w790">
+        <div class="card card-5">
+            <div class="card-heading">
+                <h2 class="title">Search Member</h2>
+            </div>
+            <div class="card-body">
+                <!--Search By-->
+                <div class="form-row m-b-55">
+                    <div class="name">Search By</div>
+                    <div class="value">
+                        <div class="rs-select2 js-select-simple select--no-search">
+                            <select id="SearchType">
+                                <option value="Aadhar">Aadhar</option>
+                                <option value="Phone">Phone</option>
+                                <option value="Name">Name</option>
+                            </select>
+                            <div class="select-dropdown"></div>
+                        </div>
+                    </div>
+                </div>
+                <!--Search Text -->
+                <div class="form-row m-b-55">
+                    <div class="name">Search Text</div>
+                    <div class="value">
+                        <div class="row row-space">
+                            <div class="col-2">
+                                <div class="input-group-desc">
+                                    <input class="input--style-5" id="SearchText" name="SearchText" type="text" value="" />
+                                    <p id="errSearchText" style='color:red;'> </p>
+                            </div>
+                        </div>
+                        <div class="col-2">
+                            <div class="input-group-desc">
+                                <button class="btn btn--blue" type="button" onclick="getMember();" tabindex="2">Get</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+                <!-- Result -->
+                <div class="form-row m-b-55">
+                    <div class="name">Result</div>
+                    <div class="value">
+                        <div class="input-group">
+                            <span id="result">  </span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function getMember() {
+        var searchText = document.getElementById("SearchText").value;
+        var searchType = document.getElementById("SearchType").value;
+        var result = document.getElementById("result");
+        result.innerHTML = 'Searching...';
+        if (searchText == '') {
+            document.getElementById("errSearchText").innerHTML = "Please enter " + searchType;
+            return;
+        }
+        var xhttp = new XMLHttpRequest();
+        document.getElementById("errSearchText").innerHTML = "";
+        xhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                var response = JSON.parse(this.responseText);
+                if (response.length == 0) {
+                    result.innerHTML = "Not found";
+               } else {
+                    var resultString = "";
+                    for (var i = 0; i < response.length; i++) {
+                        resultString += response[i].MemberName + "<space> <a href='/Member/ViewMember/" + response[i].MemberCode + "'>View</a> <space/>"
+                                        + "<a href='/Member/MemberForm/" + response[i].MemberCode + "'>Edit</a><br/>";
+                    }
+                    result.innerHTML = resultString;
+                }
+            }
+        };
+        if (searchType == 'Aadhar') {
+            xhttp.open("GET", "../api/GetMemberByAadhar/" + searchText, true);
+        } else if (searchType == 'Phone') {
+            xhttp.open("GET", "../api/GetMemberByPhone/" + searchText, true);
+        } else {
+            xhttp.open("GET", "../api/GetMemberByName/" + searchText, true);
+        }
+        xhttp.send();
+    }
+</script>
+
+

@@ -135,8 +135,27 @@ namespace iMicroFin.Controllers
                 }
             }
         }
-    }
 
+        [HttpGet]
+        [Route("GetGroupListByPattern/{pattern}")]
+        public IActionResult GetGroupListByPattern(string pattern)
+        {
+            var branchId = HttpContext.Session.GetInt32("branchId");
+            if (!branchId.HasValue)
+            {
+                return Json(new { success = false, message = "Session expired" });
+            }
+
+            List<MemberGroup> groups = GroupDBService.GetAllMemberGroupsByPattern(pattern, branchId.Value);
+
+            return Json(new
+            {
+                success = true,
+                groups = groups
+            });
+        }
+
+    }
     // Helper class to receive camelCase JSON
     public class GroupRequest
     {

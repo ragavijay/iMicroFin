@@ -1,0 +1,114 @@
+﻿@model iMicroFin.Models.FamilyMember
+@using iMicroFin.Models;
+@using System.Globalization;
+@{
+    ViewBag.Title = "Add/Edit Family Member";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="page-wrapper bg-gra-03 p-t-45 p-b-50">
+    <div class="wrapper wrapper--w790">
+        <div class="card card-5">
+            <div class="card-heading">
+                <h2 class="title">Family Member</h2>
+            </div>
+            <div class="card-body">
+                @using (Html.BeginForm("FamilyMember", "Member", FormMethod.Post, new { @onsubmit = "return validateForm();" }))
+                {
+                    <!--Member Code -->
+                    <div class="form-row">
+                        <div class="name">Member Code</div>
+                        <div class="value">
+                            <div class="input-group">
+                                @Html.TextBoxFor(m => m.MemberCode, new { @class = "input--style-5", @readonly = "true", @autocomplete = "off" })
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--SNo -->
+                    <div class="form-row">
+                        <div class="name">S. No.</div>
+                        <div class="value">
+                            <div class="input-group">
+                                @Html.TextBoxFor(m => m.SNo, new { @class = "input--style-5", @placeholder="auto generated", @readonly = "true", @autocomplete = "off" })
+                            </div>
+                        </div>
+                    </div>
+
+                    
+
+                    <!--Family Member Name-->
+                    <div class="form-row">
+                        <div class="name">Family Member's Name</div>
+                        <div class="value">
+                            <div class="input-group">
+                                @Html.TextBoxFor(m => m.FamilyMemberName, new { @class = "input--style-5", @required = "true", @autocomplete = "off", @maxlength = "50", @style = "text-transform:uppercase", @tabindex = "1"})
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--Relationship-->
+                    <div class="form-row">
+                        <div class="name">Relationship</div>
+                        <div class="value">
+                            <div class="input-group">
+                                @Html.TextBoxFor(m => m.Relationship, new { @class = "input--style-5", @required = "true", @autocomplete = "off", @maxlength = "30", @style = "text-transform:uppercase", @tabindex = "2" })
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!--Occupation type-->
+                    <div class="form-row">
+                        <div class="name">Occupation Type</div>
+                        <div class="value">
+                            <div class="rs-select2 js-select-simple select--no-search">
+                                @Html.DropDownListFor(m => m.OccupationType, new SelectList(Enum.GetValues(typeof(EOccupationType))), new { @tabindex = "3" })
+                                <div class="select-dropdown"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--Monthly Income-->
+                    <div class="form-row">
+                        <div class="name">Monthly Income</div>
+                        <div class="value">
+                            <div class="input-group">
+                                @Html.TextBoxFor(m => m.MonthlyIncome, new { @class = "input--style-5", @autocomplete = "off", @maxlength = "10", @style = "text-transform:uppercase", @tabindex = "4" })
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!--Qualification-->
+                    <div class="form-row">
+                        <div class="name">Qualification</div>
+                        <div class="value">
+                            <div class="input-group">
+                                @Html.TextBoxFor(m => m.Qualification, new { @class = "input--style-5", @autocomplete = "off", @maxlength = "10", @tabindex = "5" })
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--Save-->
+                    <div>
+                        <p style='color:red;'> @ViewBag.ErrTryAgain </p>
+                        <button class="btn btn--radius-2 btn--red" type="submit"  tabindex = "6">Save</button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var SNo = document.getElementById("SNo");
+    var MonthlyIncome = document.getElementById("MonthlyIncome");
+    if (SNo.value == "0") {
+        SNo.value = "";
+    }
+    if (MonthlyIncome.value == "0") {
+        MonthlyIncome.value = "";
+    }
+    function validateForm() {
+        document.getElementById("FamilyMemberName").value = document.getElementById("FamilyMemberName").value.toUpperCase();
+        document.getElementById("Relationship").value = document.getElementById("Relationship").value.toUpperCase();
+        return true;
+    }
+</script>
