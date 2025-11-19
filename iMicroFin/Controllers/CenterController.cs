@@ -125,8 +125,8 @@ namespace iMicroFin.Controllers
             }
         }
         [HttpGet]
-        [Route("GetCentersListByPattern/{pattern}")]
-        public IActionResult GetCentersListByPattern(string pattern)
+        [Route("GetCentersListByPattern/{pattern?}")]
+        public IActionResult GetCentersListByPattern(string pattern = "")
         {
             var branchId = HttpContext.Session.GetInt32("branchId");
             if (!branchId.HasValue)
@@ -134,7 +134,18 @@ namespace iMicroFin.Controllers
                 return Json(new { success = false, message = "Session expired" });
             }
 
-            List<Center> centers = CenterDBService.GetAllCentersByPattern(pattern, branchId.Value);
+            List<Center> centers;
+
+            if (string.IsNullOrEmpty(pattern))
+            {
+                // Return all centers when no pattern is provided
+                centers = CenterDBService.GetAllCenters(branchId.Value);
+            }
+            else
+            {
+                // Return filtered centers
+                centers = CenterDBService.GetAllCentersByPattern(pattern, branchId.Value);
+            }
 
             return Json(new
             {

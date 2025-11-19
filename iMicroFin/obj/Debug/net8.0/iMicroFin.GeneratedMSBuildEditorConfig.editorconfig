@@ -36,8 +36,24 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcR3JvdXBcTWFuYWdlR3JvdXAuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Project/iMicroFin/iMicroFin/Views/Member/FamilyMemberForm.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWVtYmVyXEZhbWlseU1lbWJlckZvcm0uY3NodG1s
+[C:/Project/iMicroFin/iMicroFin/Views/Loan/GroupLoanForm.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTG9hblxHcm91cExvYW5Gb3JtLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Project/iMicroFin/iMicroFin/Views/Loan/LoanForm.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTG9hblxMb2FuRm9ybS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Project/iMicroFin/iMicroFin/Views/Loan/LoanStatusForm.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTG9hblxMb2FuU3RhdHVzRm9ybS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Project/iMicroFin/iMicroFin/Views/Loan/ViewLoan.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTG9hblxWaWV3TG9hbi5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Project/iMicroFin/iMicroFin/Views/Loan/ViewLoans.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTG9hblxWaWV3TG9hbnMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Project/iMicroFin/iMicroFin/Views/Member/MemberForm.cshtml]
@@ -46,10 +62,6 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Project/iMicroFin/iMicroFin/Views/Member/SearchMember.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWVtYmVyXFNlYXJjaE1lbWJlci5jc2h0bWw=
-build_metadata.AdditionalFiles.CssScope = 
-
-[C:/Project/iMicroFin/iMicroFin/Views/Member/ViewFamilyMembers.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWVtYmVyXFZpZXdGYW1pbHlNZW1iZXJzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Project/iMicroFin/iMicroFin/Views/Member/ViewMember.cshtml]

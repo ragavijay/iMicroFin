@@ -25,8 +25,12 @@ class AutoComplete {
         this.inputElement.addEventListener('input', (e) => this.handleInput(e));
         this.inputElement.addEventListener('keydown', (e) => this.handleKeydown(e));
         this.inputElement.addEventListener('focus', () => {
-            if (this.inputElement.value.length >= this.minChars) {
-                this.fetchSuggestions(this.inputElement.value);
+            const value = this.inputElement.value.trim();
+            // Show all results when clicking on empty field OR show filtered results
+            if (value.length === 0) {
+                this.fetchSuggestions(''); // Fetch all centers
+            } else if (value.length >= this.minChars) {
+                this.fetchSuggestions(value);
             }
         });
 

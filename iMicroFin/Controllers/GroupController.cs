@@ -137,8 +137,8 @@ namespace iMicroFin.Controllers
         }
 
         [HttpGet]
-        [Route("GetGroupListByPattern/{pattern}")]
-        public IActionResult GetGroupListByPattern(string pattern)
+        [Route("GetGroupListByPattern/{pattern?}")]
+        public IActionResult GetGroupListByPattern(string pattern = "")
         {
             var branchId = HttpContext.Session.GetInt32("branchId");
             if (!branchId.HasValue)
@@ -146,7 +146,18 @@ namespace iMicroFin.Controllers
                 return Json(new { success = false, message = "Session expired" });
             }
 
-            List<MemberGroup> groups = GroupDBService.GetAllMemberGroupsByPattern(pattern, branchId.Value);
+            List<MemberGroup> groups;
+
+            if (string.IsNullOrEmpty(pattern))
+            {
+                // Return all groups when no pattern is provided
+                groups = GroupDBService.GetAllMemberGroups(branchId.Value);
+            }
+            else
+            {
+                // Return filtered groups
+                groups = GroupDBService.GetAllMemberGroupsByPattern(pattern, branchId.Value);
+            }
 
             return Json(new
             {

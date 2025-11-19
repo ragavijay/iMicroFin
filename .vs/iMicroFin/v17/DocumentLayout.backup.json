@@ -3,16 +3,12 @@
   "WorkspaceRootPath": "C:\\Project\\iMicroFin\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{856031B0-CE58-4D83-9CBF-68E5BB4313F1}|iMicroFin\\iMicroFin.csproj|c:\\project\\imicrofin\\imicrofin\\views\\group\\managegroup.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{856031B0-CE58-4D83-9CBF-68E5BB4313F1}|iMicroFin\\iMicroFin.csproj|solutionrelative:imicrofin\\views\\group\\managegroup.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+      "AbsoluteMoniker": "D:0:0:{856031B0-CE58-4D83-9CBF-68E5BB4313F1}|iMicroFin\\iMicroFin.csproj|c:\\project\\imicrofin\\imicrofin\\views\\member\\viewmember.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{856031B0-CE58-4D83-9CBF-68E5BB4313F1}|iMicroFin\\iMicroFin.csproj|solutionrelative:imicrofin\\views\\member\\viewmember.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{856031B0-CE58-4D83-9CBF-68E5BB4313F1}|iMicroFin\\iMicroFin.csproj|c:\\project\\imicrofin\\imicrofin\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{856031B0-CE58-4D83-9CBF-68E5BB4313F1}|iMicroFin\\iMicroFin.csproj|solutionrelative:imicrofin\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{856031B0-CE58-4D83-9CBF-68E5BB4313F1}|iMicroFin\\iMicroFin.csproj|c:\\project\\imicrofin\\imicrofin\\views\\member\\memberform.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{856031B0-CE58-4D83-9CBF-68E5BB4313F1}|iMicroFin\\iMicroFin.csproj|solutionrelative:imicrofin\\views\\member\\memberform.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+      "AbsoluteMoniker": "D:0:0:{856031B0-CE58-4D83-9CBF-68E5BB4313F1}|iMicroFin\\iMicroFin.csproj|c:\\project\\imicrofin\\imicrofin\\wwwroot\\css\\view-member.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
+      "RelativeMoniker": "D:0:0:{856031B0-CE58-4D83-9CBF-68E5BB4313F1}|iMicroFin\\iMicroFin.csproj|solutionrelative:imicrofin\\wwwroot\\css\\view-member.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
     }
   ],
   "DocumentGroupContainers": [
@@ -22,45 +18,32 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "ManageGroup.cshtml",
-              "DocumentMoniker": "C:\\Project\\iMicroFin\\iMicroFin\\Views\\Group\\ManageGroup.cshtml",
-              "RelativeDocumentMoniker": "iMicroFin\\Views\\Group\\ManageGroup.cshtml",
-              "ToolTip": "C:\\Project\\iMicroFin\\iMicroFin\\Views\\Group\\ManageGroup.cshtml",
-              "RelativeToolTip": "iMicroFin\\Views\\Group\\ManageGroup.cshtml",
-              "ViewState": "AgIAADkAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-11-15T03:58:44.787Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "MemberForm.cshtml",
-              "DocumentMoniker": "C:\\Project\\iMicroFin\\iMicroFin\\Views\\Member\\MemberForm.cshtml",
-              "RelativeDocumentMoniker": "iMicroFin\\Views\\Member\\MemberForm.cshtml",
-              "ToolTip": "C:\\Project\\iMicroFin\\iMicroFin\\Views\\Member\\MemberForm.cshtml",
-              "RelativeToolTip": "iMicroFin\\Views\\Member\\MemberForm.cshtml",
-              "ViewState": "AgIAAGcAAAAAAAAAAAAmwHYAAAA/AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-11-15T03:52:53.613Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "_Layout.cshtml",
-              "DocumentMoniker": "C:\\Project\\iMicroFin\\iMicroFin\\Views\\Shared\\_Layout.cshtml",
-              "RelativeDocumentMoniker": "iMicroFin\\Views\\Shared\\_Layout.cshtml",
-              "ToolTip": "C:\\Project\\iMicroFin\\iMicroFin\\Views\\Shared\\_Layout.cshtml",
-              "RelativeToolTip": "iMicroFin\\Views\\Shared\\_Layout.cshtml",
-              "ViewState": "AgIAAGMAAAAAAAAAAAAAAEgAAAAAAAAAAAAAAA==",
+              "Title": "view-member.css",
+              "DocumentMoniker": "C:\\Project\\iMicroFin\\iMicroFin\\wwwroot\\css\\view-member.css",
+              "RelativeDocumentMoniker": "iMicroFin\\wwwroot\\css\\view-member.css",
+              "ToolTip": "C:\\Project\\iMicroFin\\iMicroFin\\wwwroot\\css\\view-member.css",
+              "RelativeToolTip": "iMicroFin\\wwwroot\\css\\view-member.css",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
+              "WhenOpened": "2025-11-19T03:44:58.447Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "ViewMember.cshtml",
+              "DocumentMoniker": "C:\\Project\\iMicroFin\\iMicroFin\\Views\\Member\\ViewMember.cshtml",
+              "RelativeDocumentMoniker": "iMicroFin\\Views\\Member\\ViewMember.cshtml",
+              "ToolTip": "C:\\Project\\iMicroFin\\iMicroFin\\Views\\Member\\ViewMember.cshtml",
+              "RelativeToolTip": "iMicroFin\\Views\\Member\\ViewMember.cshtml",
+              "ViewState": "AgIAAEQBAAAAAAAAAAAAABgAAAAOAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-11-15T03:22:12.544Z",
+              "WhenOpened": "2025-11-19T03:44:11.723Z",
               "EditorCaption": ""
             }
           ]

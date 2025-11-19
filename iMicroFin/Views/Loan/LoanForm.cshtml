@@ -1,0 +1,306 @@
+﻿@model iMicroFin.Models.Loan
+@using System.Globalization;
+@{
+    ViewBag.Title = "LoanForm";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="~/css/loan.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<!-- Schedule Modal -->
+<div id="schedule" class="schedule-modal" style="display:none">
+    <div class="schedule-content">
+        <div class="schedule-header">
+            <h3>Loan Repayment Schedule</h3>
+        </div>
+
+        <div class="schedule-info">
+            <div class="info-row">
+                <span class="info-label">Loan Id:</span>
+                <span id="scheduleLoanId" class="info-value"></span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Member Id:</span>
+                <span id="scheduleMemberId" class="info-value"></span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Member Name:</span>
+                <span id="scheduleMemberName" class="info-value"></span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Loan Amount:</span>
+                <span id="scheduleLoanAmount" class="info-value"></span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Interest Rate:</span>
+                <span id="scheduleInterestRate" class="info-value"></span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Weekly Due:</span>
+                <span id="scheduleEwi" class="info-value"></span>
+            </div>
+        </div>
+
+        <div class="schedule-table-container">
+            <table id="scheduleTable" class="schedule-table">
+                <thead>
+                    <tr>
+                        <th>Week</th>
+                        <th>Opening Balance</th>
+                        <th>Principal</th>
+                        <th>Interest</th>
+                        <th>Closing Balance</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div class="schedule-actions">
+            <button type="button" class="btn-secondary" onclick="closeSchedule()">Close</button>
+            <button type="button" class="btn-primary" onclick="printSchedule()">Print</button>
+        </div>
+    </div>
+</div>
+
+<!-- Loan Form -->
+<div id="LoanForm" class="page-wrapper bg-gra-03 p-t-45 p-b-50">
+    <div class="wrapper wrapper--w790">
+        <div class="card card-5">
+            <div class="card-heading">
+                <h2 class="title">Loan Application</h2>
+            </div>
+            <div class="card-body">
+                @using (Html.BeginForm("SaveLoan", "Loan", FormMethod.Post, new { @onsubmit = "return validateOnSubmit();" }))
+                {
+                    @Html.AntiForgeryToken()
+
+                    <!--Loan Id -->
+                    <div class="form-row">
+                        <div class="name">Loan Id</div>
+                        <div class="value">
+                            <div class="input-group">
+                                @Html.TextBox("LoanCode", Model?.LoanCode, new { @id = "LoanId", @class = "input--style-5", @placeholder = "auto-generated", @readonly = "true", @autocomplete = "off" })
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--MemberId -->
+                    <div class="form-row m-b-55">
+                        <div class="name">Member Id</div>
+                        <div class="value">
+                            <div class="row row-space">
+                                <div class="col-2">
+                                    <div class="input-group-desc">
+                                        @if (Model == null)
+                                        {
+                                            @Html.TextBox("MemberCode", "", new { id = "MemberCode", @class = "input--style-5", @autocomplete = "off", @placeholder = "enter member id", @required = "true", @tabindex = "1" })
+                                        }
+                                        else
+                                        {
+                                            @Html.TextBox("MemberCode", Model.MemberCode, new { id = "MemberCode", @class = "input--style-5", @autocomplete = "off", @readonly = "true", @tabindex = "1" })
+                                        }
+                                        <p id="errMemberCode" class="error-text"></p>
+                                    </div>
+                                </div>
+                                <div class="col-2">
+                                    <div class="input-group-desc">
+                                        @if (Model == null)
+                                        {
+                                            <button class="btn btn--blue" type="button" onclick="checkMember();" tabindex="2">Get Member</button>
+                                        }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="loanInfo" style="@ViewBag.DisplayMode">
+                    <!--Member Name -->
+                    <div class="form-row">
+                        <div class="name">Member Name</div>
+                        <div class="value">
+                            <div class="input-group">
+                                @Html.TextBox("MemberName", Model?.MemberName, new { id = "MemberName", @class = "input--style-5", @autocomplete = "off", @readonly = "true", @required = "true" })
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--Loan Purpose -->
+                    <div class="form-row">
+                        <div class="name">Loan Purpose</div>
+                        <div class="value">
+                            <div class="input-group">
+                                @Html.TextBox("LoanPurpose", Model?.LoanPurpose, new { id = "LoanPurpose", @class = "input--style-5", @autocomplete = "off", @maxlength = "40", @required = "true", @tabindex = "3" })
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--Loan Amount -->
+                    <div class="form-row">
+                        <div class="name">Loan Amount (Rs.)</div>
+                        <div class="value">
+                            <div class="input-group">
+                                @Html.TextBox("LoanAmount", Model?.LoanAmount, new { id = "LoanAmount", @class = "input--style-5", @autocomplete = "off", @required = "true", @type = "number", @min = "0", @tabindex = "4" })
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--Loan Date -->
+                    <div class="form-row">
+                        <div class="name">Loan Date</div>
+                        <div class="value">
+                            <div class="input-group">
+                                @Html.TextBox("LoanDate",
+                                (Model == null || Model.LoanDate == null || Model.LoanDate == DateTime.MinValue) ? "" : Model.LoanDate.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture),
+                                new
+                                {
+                                    @id = "LoanDate",
+                                    @class = "input--style-5 date-picker",
+                                    @required = "true",
+                                    @autocomplete = "off",
+                                    @tabindex = "5",
+                                    @placeholder = "DD/MM/YYYY"
+                                })
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--Loan Disposal Date -->
+                    <div class="form-row">
+                        <div class="name">Loan Disposal Date</div>
+                        <div class="value">
+                            <div class="input-group">
+                                @Html.TextBox("LoanDisposalDate",
+                                                                (Model == null || Model.LoanDisposalDate == null || Model.LoanDisposalDate == DateTime.MinValue) ? "" : Model.LoanDisposalDate.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture),
+                                                                new
+                                                                {
+                                                                    @id = "LoanDisposalDate",
+                                                                    @class = "input--style-5 date-picker",
+                                                                    @required = "true",
+                                                                    @autocomplete = "off",
+                                                                    @tabindex = "6",
+                                                                    @placeholder = "DD/MM/YYYY"
+                                                                })
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--Processing Fee -->
+                    <div class="form-row m-b-55">
+                        <div class="name">Processing Fee</div>
+                        <div class="value">
+                            <div class="row row-space">
+                                <div class="col-2">
+                                    <div class="input-group-desc">
+                                        @Html.TextBox("ProcessingFeeRate", Model?.ProcessingFeeRate, new { id = "ProcessingFeeRate", @autocomplete = "off", @class = "input--style-5", @required = "true", @type = "number", @step = "0.01", @tabindex = "7" })
+                                        <label class="label--desc">Rate (%)</label>
+                                    </div>
+                                </div>
+                                <div class="col-2">
+                                    <div class="input-group-desc">
+                                        @Html.TextBox("ProcessingFee", Model?.ProcessingFee, new { id = "ProcessingFee", @class = "input--style-5", @autocomplete = "off", @readonly = "true", @required = "true" })
+                                        <label class="label--desc">Amount (Rs.)</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--Insurance -->
+                    <div class="form-row m-b-55">
+                        <div class="name">Insurance</div>
+                        <div class="value">
+                            <div class="row row-space">
+                                <div class="col-2">
+                                    <div class="input-group-desc">
+                                        @Html.TextBox("InsuranceRate", Model?.InsuranceRate, new { id = "InsuranceRate", @autocomplete = "off", @class = "input--style-5", @required = "true", @type = "number", @step = "0.01", @tabindex = "8" })
+                                        <label class="label--desc">Rate (%)</label>
+                                    </div>
+                                </div>
+                                <div class="col-2">
+                                    <div class="input-group-desc">
+                                        @Html.TextBox("Insurance", Model?.Insurance, new { id = "Insurance", @class = "input--style-5", @autocomplete = "off", @readonly = "true", @required = "true" })
+                                        <label class="label--desc">Amount (Rs.)</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--Tenure -->
+                    <div class="form-row">
+                        <div class="name">Tenure (Weeks)</div>
+                        <div class="value">
+                            <div class="input-group">
+                                @Html.TextBox("Tenure", Model?.Tenure, new { id = "Tenure", @class = "input--style-5", @autocomplete = "off", @required = "true", @type = "number", @min = "1", @tabindex = "9" })
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--Interest Rate -->
+                    <div class="form-row m-b-55">
+                        <div class="name">Interest Rate</div>
+                        <div class="value">
+                            <div class="row row-space">
+                                <div class="col-2">
+                                    <div class="input-group-desc">
+                                        @Html.TextBox("InterestRate", Model?.InterestRate, new { id = "InterestRate", @autocomplete = "off", @class = "input--style-5", @required = "true", @type = "number", @step = "0.01", @tabindex = "10" })
+                                        <label class="label--desc">Rate (% p.a.)</label>
+                                    </div>
+                                </div>
+                                <div class="col-2">
+                                    <div class="input-group-desc">
+                                        <button class="btn btn--blue" type="button" onclick="calculateInterestRate()">Calculate Rate</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--EWI -->
+                    <div class="form-row">
+                        <div class="name">Weekly Due (Rs.)</div>
+                        <div class="value">
+                            <div class="input-group">
+                                @Html.TextBox("Ewi", Model?.Ewi, new { id = "Ewi", @class = "input--style-5", @autocomplete = "off", @readonly = "true", @required = "true" })
+                                <p id="ErrEwi" class="error-text">@ViewBag.ErrEWi</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--Repayment Amount & Schedule -->
+                    <div class="form-row m-b-55">
+                        <div class="name">Repayment</div>
+                        <div class="value">
+                            <div class="row row-space">
+                                <div class="col-2">
+                                    <div class="input-group-desc">
+                                        @Html.TextBox("RepaymentAmount", Model?.RepaymentAmount, new { id = "RepaymentAmount", @class = "input--style-5", @autocomplete = "off", @readonly = "true", @required = "true" })
+                                        <label class="label--desc">Total Amount (Rs.)</label>
+                                    </div>
+                                </div>
+                                <div class="col-2">
+                                    <div class="input-group-desc">
+                                        <button class="btn btn--blue" type="button" onclick="showSchedule()" tabindex="11">View Schedule</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--Save -->
+                    <div>
+                        <button class="btn btn--radius-2 btn--red" type="submit" tabindex="12">Save Loan</button>
+                        <p class="error-text">@ViewBag.ErrTryAgain</p>
+                    </div>
+                </div>
+                                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="~/js/loan-form.js"></script>

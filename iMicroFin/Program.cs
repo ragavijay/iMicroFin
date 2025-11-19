@@ -20,7 +20,7 @@ namespace iMicroFin
                 options.IdleTimeout = TimeSpan.FromMinutes(30); // Session timeout
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
-                options.Cookie.Name = ".MicroFin.Session";
+                options.Cookie.Name = ".iMicroFin.Session";
             });
             // Add HttpContextAccessor (needed for session access)
             builder.Services.AddHttpContextAccessor();

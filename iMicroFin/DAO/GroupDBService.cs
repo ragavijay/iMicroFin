@@ -65,6 +65,7 @@ namespace iMicroFin.DAO
                             group.GroupName = rdr["GroupName"]?.ToString() ?? "";
                             group.CenterCode = rdr["CenterCode"]?.ToString() ?? "";
                             group.CenterName = rdr["CenterName"]?.ToString() ?? "";
+                            group.LeaderName = rdr["LeaderName"]?.ToString() ?? "";
                             group.isLoanRunning = false;
                             groups.Add(group);
                         }
@@ -119,6 +120,7 @@ namespace iMicroFin.DAO
                             group.GroupName = rdr["GroupName"]?.ToString() ?? "";
                             group.CenterCode = rdr["CenterCode"]?.ToString() ?? "";
                             group.CenterName = rdr["CenterName"]?.ToString() ?? "";
+                            group.LeaderName = rdr["LeaderName"]?.ToString() ?? "";
                         }
                     }
                 }

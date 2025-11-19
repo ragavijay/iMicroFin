@@ -1,0 +1,96 @@
+﻿@model iMicroFin.Models.ViewLoansViewModel
+@{
+    ViewBag.Title = "View Loans";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="~/css/autocomplete.css" />
+<link rel="stylesheet" href="~/css/members.css" />
+
+<div class="members-container">
+    <div class="members-header">
+        <h2>Group Loans</h2>
+    </div>
+
+    <!-- Group Selection Panel -->
+    <div class="group-selection-panel">
+        <div class="group-search-row">
+            <div class="form-field">
+                <label>Group Name <span style="color: red;">*</span></label>
+                <input type="text"
+                       id="groupName"
+                       class="form-input autocomplete-input"
+                       placeholder="Search and select group..."
+                       autocomplete="off">
+                <input type="hidden" id="groupCode">
+            </div>
+
+            <div class="form-field">
+                <label>Group Code</label>
+                <input type="text"
+                       id="groupCodeDisplay"
+                       class="form-input"
+                       readonly
+                       placeholder="Auto-filled">
+            </div>
+
+            <div class="form-field">
+                <label>Center Name</label>
+                <input type="text"
+                       id="centerName"
+                       class="form-input"
+                       readonly
+                       placeholder="Auto-filled">
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn-add-member" id="addLoanBtn" onclick="addNewLoan()" style="display: none;">
+                + New Loan
+            </button>
+            <button class="btn-add-member" id="addGroupLoanBtn" onclick="addNewGroupLoan()" style="display: none;">
+                + New Group Loan
+            </button>
+            <button class="btn-export" id="exportBtn" onclick="exportLoans()" style="display: none;">
+                📥 Download
+            </button>
+        </div>
+    </div>
+
+    <!-- Loans Table -->
+    <div class="members-table-container" id="loansTableContainer" style="display: none;">
+        <table class="table table-striped members-table">
+            <thead>
+                <tr>
+                    <th>Loan Code</th>
+                    <th>Member Code</th>
+                    <th>Member Name</th>
+                    <th>Loan Amount</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="loansTableBody">
+                <!-- Loans will be loaded here -->
+            </tbody>
+        </table>
+
+        <div id="noLoansMessage" class="no-members-message" style="display: none;">
+            <p>No loans found for this group.</p>
+            <button class="btn-add-member" onclick="addNewLoan()">+ Add First Loan</button>
+        </div>
+    </div>
+
+    <div class="loading-message" id="loadingMessage" style="display: none;">
+        Loading loans...
+    </div>
+</div>
+
+<script src="~/js/autocomplete.js"></script>
+<script src="~/js/view-loans.js"></script>
+<script>
+    // Pass initial group data from server if available
+    const initialGroupCode = '@(Model?.GroupCode ?? "")';
+    const initialGroupName = '@(Model?.GroupName ?? "")';
+    const initialCenterName = '@(Model?.CenterName ?? "")';
+</script>

@@ -38,7 +38,6 @@
         public EHouseType HouseType { get; set; }
         public EPropertyOwnership PropertyOwnership { get; set; }
         public string Phone { get; set; } = string.Empty;
-        public List<FamilyMember>? FamilyMembers { get; set; }
         public string MemberAadharNumber { get; set; } = string.Empty;
         public string RMemberAadharNumber { get; set; } = string.Empty;
         public string PAN { get; set; } = string.Empty;
@@ -117,5 +116,13 @@
             memory.Position = 0;
             return memory;
         }
+    }
+    public class ViewMembersViewModel
+    {
+        public string GroupCode { get; set; } = string.Empty;
+        public string GroupName { get; set; } = string.Empty;
+        public string LeaderName { get; set; } = string.Empty;
+        public string CenterCode { get; set; } = string.Empty;
+        public string CenterName { get; set; } = string.Empty;
     }
 }

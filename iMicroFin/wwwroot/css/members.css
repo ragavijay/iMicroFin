@@ -1,0 +1,260 @@
+﻿/* wwwroot/css/members.css */
+
+.members-container {
+    margin: 20px;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.members-header {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #2196F3;
+}
+
+    .members-header h2 {
+        margin: 0;
+        color: #333;
+    }
+
+.group-selection-panel {
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.group-search-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1.5fr;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+}
+
+    .form-field label {
+        font-weight: bold;
+        margin-bottom: 5px;
+        color: #333;
+        font-size: 14px;
+    }
+
+.form-input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border-color 0.3s;
+}
+
+    .form-input:focus {
+        outline: none;
+        border-color: #2196F3;
+        box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
+    }
+
+    .form-input[readonly] {
+        background: #f5f5f5;
+        cursor: not-allowed;
+        color: #666;
+    }
+
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-start;
+}
+
+.btn-add-member {
+    background: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.3s;
+}
+
+    .btn-add-member:hover {
+        background: #45a049;
+    }
+
+.btn-export {
+    background: #2196F3;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.3s;
+}
+
+    .btn-export:hover {
+        background: #1976D2;
+    }
+
+.members-table-container {
+    margin-top: 20px;
+    overflow-x: auto;
+}
+
+.members-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+}
+
+    .members-table thead {
+        background: #f5f5f5;
+    }
+
+    .members-table th {
+        padding: 12px;
+        text-align: left;
+        font-weight: 600;
+        color: #333;
+        border-bottom: 2px solid #ddd;
+    }
+
+    .members-table td {
+        padding: 12px;
+        border-bottom: 1px solid #eee;
+        color: #666;
+    }
+
+    .members-table tbody tr:hover {
+        background: #f9f9f9;
+    }
+
+.action-links {
+    display: flex;
+    gap: 10px;
+}
+
+.action-link {
+    padding: 5px 10px;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 13px;
+    transition: all 0.2s;
+}
+
+.action-link-view {
+    color: #2196F3;
+    border: 1px solid #2196F3;
+}
+
+    .action-link-view:hover {
+        background: #2196F3;
+        color: white;
+    }
+
+.action-link-edit {
+    color: #FF9800;
+    border: 1px solid #FF9800;
+}
+
+    .action-link-edit:hover {
+        background: #FF9800;
+        color: white;
+    }
+
+.no-members-message {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+}
+
+    .no-members-message p {
+        font-size: 16px;
+        margin-bottom: 20px;
+    }
+
+.loading-message {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+    font-size: 16px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .group-search-row {
+        grid-template-columns: 1fr;
+    }
+
+    .members-table {
+        font-size: 12px;
+    }
+
+        .members-table th,
+        .members-table td {
+            padding: 8px;
+        }
+}
+
+/* Loan Status Badges */
+.loan-status-P {
+    background: #FFC107;
+    color: #000;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.loan-status-A {
+    background: #2196F3;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.loan-status-O {
+    background: #FF9800;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.loan-status-C {
+    background: #4CAF50;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.loan-status-R {
+    background: #F44336;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.action-link-approve {
+    color: #4CAF50;
+    border: 1px solid #4CAF50;
+}
+
+    .action-link-approve:hover {
+        background: #4CAF50;
+        color: white;
+    }

@@ -1,0 +1,182 @@
+﻿@model iMicroFin.Models.MemberLoan
+
+@{
+    ViewBag.Title = "Loan Status";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<link rel="stylesheet" href="/css/loan-status-form.css" />
+<div class="loan-status-container">
+    <div class="loan-status-card">
+        <div class="card-header">
+            <h2>Loan Status Review</h2>
+        </div>
+
+        <div class="card-body">
+            @using (Html.BeginForm("SaveLoanStatus", "Loan", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+
+                <!-- Member & Center Information -->
+                <div class="info-section">
+                    <h3 style="margin-bottom: 1rem; color: #212529;">Member & Center Details</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">Center Name</span>
+                            <span class="info-value">@Model.member.CenterName</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Group Name</span>
+                            <span class="info-value">@Model.member.GroupName</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Leader Name</span>
+                            <span class="info-value">@Model.member.LeaderName</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Member Code</span>
+                            <span class="info-value">@Model.member.MemberCode</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Member Name</span>
+                            <span class="info-value">@Model.member.MemberName</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Member Type</span>
+                            <span class="info-value">@Model.member.MemberType</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Loan Information -->
+                <div class="info-section">
+                    <h3 style="margin-bottom: 1rem; color: #212529;">Loan Details</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">Loan ID</span>
+                            <span class="info-value">@Model.loan.LoanCode</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Loan Amount</span>
+                            <span class="info-value">₹ @Model.loan.LoanAmount.ToString("N2")</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Purpose</span>
+                            <span class="info-value">@Model.loan.LoanPurpose</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Processing Fee Rate</span>
+                            <span class="info-value">@Model.loan.ProcessingFeeRate%</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Processing Fee</span>
+                            <span class="info-value">₹ @Model.loan.ProcessingFee.ToString("N2")</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Insurance Rate</span>
+                            <span class="info-value">@Model.loan.InsuranceRate%</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Insurance Amount</span>
+                            <span class="info-value">₹ @Model.loan.Insurance.ToString("N2")</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Tenure</span>
+                            <span class="info-value">@Model.loan.Tenure weeks</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Interest Rate</span>
+                            <span class="info-value">@Model.loan.InterestRate%</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Weekly Due</span>
+                            <span class="info-value">₹ @Model.loan.Ewi.ToString("N2")</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Total Repayment</span>
+                            <span class="info-value">₹ @Model.loan.RepaymentAmount.ToString("N2")</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hidden Fields -->
+                <input type="hidden" name="LoanCode" value="@Model.loan.LoanCode" />
+                <input type="hidden" name="MemberCode" value="@Model.loan.MemberCode" />
+
+                <!-- Status Update Form -->
+                <div class="form-section">
+                    <h3>Update Loan Status</h3>
+
+                    <div class="form-group">
+                        <label class="form-label" for="LoanStatus">
+                            Loan Status <span style="color: #dc3545;">*</span>
+                        </label>
+                        <select id="LoanStatus" name="LoanStatus" class="form-control" required>
+                            <option value="">-- Select Status --</option>
+                            <option value='P'>Pending</option>
+                            <option value='A'>Approved</option>
+                            <option value='R'>Rejected</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="StatusRemarks">
+                            Remarks
+                        </label>
+                        <input class="form-control"
+                               type="text"
+                               id="StatusRemarks"
+                               name="StatusRemarks"
+                               maxlength="200"
+                               placeholder="Enter any remarks or comments...">
+                    </div>
+
+                    <div class="btn-group">
+                        <button class="btn btn-primary" type="submit">
+                            💾 Save Status
+                        </button>
+                        <button class="btn btn-secondary" type="button" onclick="window.history.back();">
+                            ← Cancel
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set current values
+        var loanStatus = document.getElementById("LoanStatus");
+        var statusRemarks = document.getElementById("StatusRemarks");
+
+        loanStatus.value = '@Model.loan.LoanStatus';
+        statusRemarks.value = '@Html.Raw(Model.loan.StatusRemarks ?? "")';
+
+        // Form validation
+        var form = document.querySelector('form');
+        form.addEventListener('submit', function(e) {
+            if (!loanStatus.value) {
+                e.preventDefault();
+                alert('Please select a loan status before saving.');
+                loanStatus.focus();
+            }
+        });
+
+        // Add change indicator
+        loanStatus.addEventListener('change', function() {
+            if (this.value === 'A') {
+                this.style.borderColor = '#28a745';
+            } else if (this.value === 'R') {
+                this.style.borderColor = '#dc3545';
+            } else {
+                this.style.borderColor = '#ffc107';
+            }
+        });
+
+        // Trigger initial color
+        loanStatus.dispatchEvent(new Event('change'));
+    });
+</script>

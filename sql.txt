@@ -100,19 +100,6 @@ CREATE TABLE Member (
     CONSTRAINT fKey_M_GroupCode FOREIGN KEY (GroupCode) REFERENCES MemberGroup(GroupCode)
 );
 
--- Version 2.0
-CREATE TABLE FamilyMember (
-	MemberCode CHAR(9),
-	SNo INT,
-	FamilyMemberName VARCHAR(50),
-	Relationship VARCHAR(30),
-	OccupationType INT,
-	MonthlyIncome INT,
-	Qualification VARCHAR(20),
-	CONSTRAINT pKey_FM_MemberCode_SNo PRIMARY KEY(MemberCode, SNo),
-	CONSTRAINT fKey_FM_MemberCode FOREIGN KEY (MemberCode) REFERENCES Member(MemberCode)
-);
-
 -- Version 2.0 (LoanCode added)
 CREATE TABLE Loan (
     LoanCode CHAR(10),
@@ -322,7 +309,17 @@ DELIMITER //
 DROP PROCEDURE IF EXISTS `GetMemberGroup`//
 CREATE PROCEDURE GetMemberGroup(pGroupCode CHAR(7))
 BEGIN
-	SELECT MG.GroupId, MG.GroupCode, MG.GroupName, MG.CenterCode, GC.CenterName FROM  MemberGroup MG INNER JOIN Center GC ON MG.CenterCode = GC.CenterCode  WHERE MG.GroupCode = pGroupCode;
+    SELECT 
+        MG.GroupId, 
+        MG.GroupCode, 
+        MG.GroupName, 
+        MG.CenterCode, 
+        GC.CenterName,
+        M.MemberName AS LeaderName
+    FROM MemberGroup MG 
+    INNER JOIN Center GC ON MG.CenterCode = GC.CenterCode
+    LEFT JOIN Member M ON MG.GroupCode = M.GroupCode AND M.MemberType = 1
+    WHERE MG.GroupCode = pGroupCode;
 END//
 DELIMITER ;
 
@@ -335,7 +332,10 @@ DELIMITER //
 DROP PROCEDURE IF EXISTS `GetAllMemberGroups`//
 CREATE PROCEDURE GetAllMemberGroups(pBranchId INT)
 BEGIN
-	SELECT MG.GroupCode, MG.GroupId, MG.GroupName, MG.CenterCode, GC.CenterName FROM  MemberGroup MG INNER JOIN Center GC ON MG.CenterCode = GC.CenterCode  WHERE GC.BranchId = pBranchId;
+	SELECT MG.GroupCode, MG.GroupId, MG.GroupName, MG.CenterCode, GC.CenterName, M.MemberName AS LeaderName 	
+		FROM  MemberGroup MG INNER JOIN Center GC ON MG.CenterCode = GC.CenterCode  
+        LEFT JOIN Member M ON MG.GroupCode = M.GroupCode AND M.MemberType = 1
+        WHERE GC.BranchId = pBranchId;
 END//
 DELIMITER ;
 -- Test
@@ -570,82 +570,6 @@ EditMember:BEGIN
 END;//
 DELIMITER ;
 
--- GetFamilyMembers
--- Version 2.0 (Modified:MemberCode instead of MemberId)
-DELIMITER //
-DROP PROCEDURE IF EXISTS `GetFamilyMembers`//
-CREATE PROCEDURE GetFamilyMembers(pMemberCode CHAR(9))
-BEGIN
-	SELECT SNo, FamilyMemberName, Relationship, OccupationType, MonthlyIncome, Qualification 
-		FROM FamilyMember WHERE MemberCode = pMemberCode ORDER BY SNo;
-END//
-DELIMITER ;
---Test
-CALL GetFamilyMembers(1)
-
--- GetFamilyMember
--- Version 2.0 (Modified:MemberCode instead of MemberId)
-DELIMITER //
-DROP PROCEDURE IF EXISTS `GetFamilyMember`//
-CREATE PROCEDURE GetFamilyMember(pMemberCode CHAR(9), pSNo INT)
-BEGIN
-	SELECT SNo, FamilyMemberName, Relationship, OccupationType, MonthlyIncome, Qualification 
-		FROM FamilyMember WHERE MemberCode = pMemberCode AND SNo=pSNo;
-END//
-DELIMITER ;
--- Test
-CALL GetFamilyMember(1,1)
-
--- AddFamilyMember
--- Version 2.0 (Modified:MemberCode instead of MemberId)
-DELIMITER //
-DROP PROCEDURE IF EXISTS `AddFamilyMember`//
-CREATE PROCEDURE AddFamilyMember(pMemberCode CHAR(9), 
-							OUT pSNo INT, 
-							pFamilyMemberName VARCHAR(50),
-							pRelationship VARCHAR(30),
-							pOccupationType INT,
-							pMonthlyIncome INT,
-							pQualification VARCHAR(20),
-							OUT pStatusCode INT)
-BEGIN
-    DECLARE CONTINUE HANDLER FOR SQLEXCEPTION SET pStatusCode=0;
-	SET pStatusCode := 1;
-	SELECT MAX(SNo) INTO pSNo FROM FamilyMember WHERE MemberCode=pMemberCode;
-	IF pSNo IS NULL THEN
-		SET pSNo := 1;
-	ELSE
-		SET pSNo := pSNo + 1;
-	END IF;
-	INSERT INTO FamilyMember(MemberCode, SNo, FamilyMemberName, Relationship, OccupationType, MonthlyIncome, Qualification) 
-					   VALUES
-					   (pMemberCode, pSNo, pFamilyMemberName, pRelationship, pOccupationType, pMonthlyIncome, pQualification );
-	COMMIT;
-END//
-DELIMITER ;
-
--- EditFamilyMember
--- Version 2.0 (Modified:MemberCode instead of MemberId)
-DELIMITER //
-DROP PROCEDURE IF EXISTS `EditFamilyMember`//
-CREATE PROCEDURE EditFamilyMember(pMemberCode CHAR(9), 
-							pSNo INT, 
-							pFamilyMemberName VARCHAR(50),
-							pRelationship VARCHAR(30),
-							pOccupationType INT,
-							pMonthlyIncome INT,
-							pQualification VARCHAR(20),
-							OUT pStatusCode INT)
-BEGIN
-    DECLARE CONTINUE HANDLER FOR SQLEXCEPTION SET pStatusCode=0;
-	SET pStatusCode := 1;
-	UPDATE FamilyMember SET FamilyMemberName=pFamilyMemberName, Relationship=pRelationship, 
-						OccupationType=pOccupationType, MonthlyIncome=pMonthlyIncome, Qualification=pQualification
-						WHERE MemberCode=pMemberCode AND SNo=pSNo;
-	COMMIT;
-END//
-DELIMITER ;
-
 -- GetMemberByAadhar
 -- Version 2.0 (Modified: MemberCode instead of MemerId
 DELIMITER //
@@ -698,7 +622,7 @@ BEGIN
 END//
 DELIMITER ;
 -- Test
-SELECT CheckMember(1);
+SELECT CheckMember('001010101');
 
 
 -- CheckGroup 

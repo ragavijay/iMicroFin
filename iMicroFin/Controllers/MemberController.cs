@@ -95,82 +95,36 @@ namespace iMicroFin.Controllers
 
         [HttpGet]
         [Route("ViewMembers/{id?}")]
-        public ActionResult ViewMembers(string id)
+        public ActionResult ViewMembers(string? id)
         {
-            string groupCode = id;
-            groupCode = "0010101";
-            List<Member> members = MemberDBService.GetAllMembers(groupCode);
-            ViewBag.GroupCode = id;
-            return View("ViewMembers", members);
+            var viewModel = new ViewMembersViewModel();
+
+            if (!string.IsNullOrEmpty(id))
+            {
+                // Get group details
+                MemberGroup? group = GroupDBService.GetMemberGroup(id);
+                if (group != null)
+                {
+                    viewModel.GroupCode = group.GroupCode;
+                    viewModel.GroupName = group.GroupName;
+                    viewModel.LeaderName = group.LeaderName;
+                    viewModel.CenterCode = group.CenterCode;
+                    viewModel.CenterName = group.CenterName;
+                }
+            }
+
+            return View("ViewMembers",viewModel);
         }
+
 
         [HttpGet]
         [Route("ViewMember/{id?}")]
         public ActionResult ViewMember(string id)
         {
             Member? member = MemberDBService.GetMember(id);
-            if(member!=null) 
-                member.FamilyMembers = MemberDBService.GetFamilyMembers(id);
             return View(member);
         }
 
-        [HttpGet]
-        [Route("ViewFamilyMembers/{id?}")]
-        public ActionResult ViewFamilyMembers(string id)
-        {
-            List<FamilyMember> familyMembers = MemberDBService.GetFamilyMembers(id);
-            @ViewBag.MemberName = MemberDBService.GetMember(id)?.MemberName??"";
-            @ViewBag.MemberCode= id;
-            return View("ViewFamilyMembers",familyMembers);
-        }
-
-        [HttpGet]
-        [Route("FamilyMemberForm/{id?}")]
-        public ActionResult FamilyMemberForm(string id)
-        {
-            string[] input= id.Split(' ');
-            if (input.Length == 1)
-            {
-                Member? member = MemberDBService.GetMember(id);
-                FamilyMember familyMember = new FamilyMember();
-                familyMember.MemberCode = member?.MemberCode??"";
-                familyMember.OccupationType = EOccupationType.None;
-                return View(familyMember);
-            } else
-            {
-                string memberCode = input[0];
-                int sNo = Convert.ToInt32(input[1]);
-                FamilyMember? familyMember = MemberDBService.GetFamilyMember(memberCode, sNo);
-                return View(familyMember);
-            }
-
-        }
-
-        [HttpPost]
-        [Route("SaveFamilyMember")]
-        public ActionResult FamilyMember(FamilyMember familyMember)
-        {
-            int statusCode;
-            if (familyMember.SNo == 0)
-            {
-                statusCode = MemberDBService.AddFamilyMember(familyMember);
-
-            }
-            else
-            {
-                statusCode = MemberDBService.EditFamilyMember(familyMember);
-            }
-            if (statusCode == 0)
-            {
-                @ViewBag.ErrTryAgain = "Try again";
-                return View("FamilyMemberForm", familyMember);
-
-            }
-            else
-            {
-               return ViewFamilyMembers(familyMember.MemberCode);
-            }
-        }
         [HttpGet]
         public ActionResult SearchMember()
         {
@@ -240,6 +194,31 @@ namespace iMicroFin.Controllers
             }
 
             return NotFound();
+        }
+
+        [HttpGet]
+        [Route("GetMembersByGroup/{groupCode}")]
+        public IActionResult GetMembersByGroup(string groupCode)
+        {
+            try
+            {
+                List<Member> members = MemberDBService.GetAllMembers(groupCode);
+
+                return Json(new
+                {
+                    success = true,
+                    members = members,
+                    count = members.Count
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Error loading members: " + ex.Message
+                });
+            }
         }
     }
 }

@@ -5,12 +5,16 @@ wwwroot\css\font-awesome.min.css
 wwwroot\css\form.css
 wwwroot\css\group.css
 wwwroot\css\home.css
+wwwroot\css\loan-status-form.css
+wwwroot\css\loan.css
 wwwroot\css\login.css
 wwwroot\css\main.css
 wwwroot\css\material-design-iconic-font.min.css
+wwwroot\css\members.css
 wwwroot\css\menu.css
 wwwroot\css\select2.min.css
 wwwroot\css\site.css
+wwwroot\css\view-member.css
 wwwroot\favicon.ico
 wwwroot\FileUploads\Img\Aadhar\001010101.jpg
 wwwroot\FileUploads\Img\Member\001010101.jpg
@@ -18,11 +22,15 @@ wwwroot\js\autocomplete.js
 wwwroot\js\center.js
 wwwroot\js\daterangepicker.js
 wwwroot\js\global.js
+wwwroot\js\group-loan-form.js
 wwwroot\js\group.js
 wwwroot\js\home.js
+wwwroot\js\loan-form.js
 wwwroot\js\member-form.js
 wwwroot\js\select2.min.js
 wwwroot\js\site.js
+wwwroot\js\view-loans.js
+wwwroot\js\view-members.js
 wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css
 wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css.map
 wwwroot\lib\bootstrap\dist\css\bootstrap-grid.min.css
@@ -80,3 +88,4 @@ wwwroot\lib\jquery\dist\jquery.js
 wwwroot\lib\jquery\dist\jquery.min.js
 wwwroot\lib\jquery\dist\jquery.min.map
 wwwroot\lib\jquery\LICENSE.txt
+wwwroot\logo.jpg

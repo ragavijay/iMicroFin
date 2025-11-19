@@ -1,62 +1,93 @@
-﻿@model IEnumerable<iMicroFin.Models.Member>
-
+﻿@model iMicroFin.Models.ViewMembersViewModel
 @{
     ViewBag.Title = "View Members";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Members</h2>
-@Html.ActionLink("Downolad", "ExportMembers", new { id = ViewBag.GroupCode })
-<table class="table">
-    <tr>
-        <th>
-            @Html.DisplayNameFor(model => model.MemberCode)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.MemberName)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.GroupName)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.CenterName)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.LeaderName)
-        </th>
-        <th>
-            Family Member
-        </th>
-        <th></th>
-        <th></th>
-    </tr>
+<link rel="stylesheet" href="~/css/autocomplete.css" />
+<link rel="stylesheet" href="~/css/members.css" />
 
-@foreach (var item in Model) {
-    <tr>
-        <td>
-            @Html.DisplayFor(modelItem => item.MemberCode)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.MemberName)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.GroupName)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.CenterName)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.LeaderName)
-        </td>
-        <td>
-            @Html.ActionLink("Edit", "ViewFamilyMembers", new { id = item.MemberCode })
-        </td>
-        <td>
-            @Html.ActionLink("View", "ViewMember", new { id = item.MemberCode })
-        </td>
-        <td>
-            @Html.ActionLink("Edit", "MemberForm", new { id=item.MemberCode })
-        </td>
-    </tr>
-}
-</table>
+<div class="members-container">
+    <div class="members-header">
+        <h2>Group Members</h2>
+    </div>
+
+    <!-- Group Selection Panel -->
+    <div class="group-selection-panel">
+        <div class="group-search-row">
+            <div class="form-field">
+                <label>Group Name <span style="color: red;">*</span></label>
+                <input type="text"
+                       id="groupName"
+                       class="form-input autocomplete-input"
+                       placeholder="Search and select group..."
+                       autocomplete="off">
+                <input type="hidden" id="groupCode">
+            </div>
+
+            <div class="form-field">
+                <label>Group Code</label>
+                <input type="text"
+                       id="groupCodeDisplay"
+                       class="form-input"
+                       readonly
+                       placeholder="Auto-filled">
+            </div>
+
+            <div class="form-field">
+                <label>Leader Name</label>
+                <input type="text"
+                       id="leaderName"
+                       class="form-input"
+                       readonly
+                       placeholder="Auto-filled">
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn-add-member" id="addMemberBtn" onclick="addNewMember()" style="display: none;">
+                + Add New Member
+            </button>
+            <button class="btn-export" id="exportBtn" onclick="exportMembers()" style="display: none;">
+                📥 Download Members
+            </button>
+        </div>
+    </div>
+
+    <!-- Members Table -->
+    <div class="members-table-container" id="membersTableContainer" style="display: none;">
+        <table class="table table-striped members-table">
+            <thead>
+                <tr>
+                    <th>Member Code</th>
+                    <th>Member Name</th>
+                    <th>Group Name</th>
+                    <th>Center Name</th>
+                    <th>Leader Name</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="membersTableBody">
+                <!-- Members will be loaded here -->
+            </tbody>
+        </table>
+
+        <div id="noMembersMessage" class="no-members-message" style="display: none;">
+            <p>No members found for this group.</p>
+            <button class="btn-add-member" onclick="addNewMember()">+ Add First Member</button>
+        </div>
+    </div>
+
+    <div class="loading-message" id="loadingMessage" style="display: none;">
+        Loading members...
+    </div>
+</div>
+
+<script src="~/js/autocomplete.js"></script>
+<script src="~/js/view-members.js"></script>
+<script>
+    // Pass initial group code from server if available
+    const initialGroupCode = '@(Model?.GroupCode ?? "")';
+    const initialGroupName = '@(Model?.GroupName ?? "")';
+    const initialLeaderName = '@(Model?.LeaderName ?? "")';
+</script>

@@ -1,0 +1,170 @@
+﻿@model iMicroFin.Models.MemberLoan
+
+@{
+    ViewBag.Title = "ViewLoan";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    <center>
+       <div id="print">
+            <table class="tg">
+                <tr> <td colspan="2"> <img src="/logo.jpg" /> <h3>Athirshtam Microfinance Pvt. Ltd.</h3> </td> <td colspan="2"> <center><img width="150" src="@Model.member.GetPhotoPath()" alt="NA" /></center> </td> </tr>
+
+                <tr> <td> <b>Center Name</b> </td> <td> @Model.member.CenterName </td> <td> <b>Loan Id</b> </td><td> @Model.loan.LoanCode </td> </tr>
+                <tr> <td> <b>Group Name</b> </td> <td> @Model.member.GroupName </td> <td> <b>Leader Name</b> </td> <td> @Model.member.LeaderName </td> </tr>
+                <tr> <td> <b>Member Id </b> </td> <td> @Model.member.MemberCode </td> <td> <b>Loan Cycle</b> </td> <td> @Model.loan.LoanCycle</td> </tr>
+                <tr> <td> <b>Member Name </b> </td> <td> @Model.member.MemberName </td> <td> <b>Member Type</b> </td> <td> @Model.member.MemberType </td>  </tr>
+                <tr> <td> <b>Father's Name</b> </td> <td> @Model.member.FName </td> <td> <b>Husband's Name</b> </td> <td> @Model.member.HName </td> </tr>
+                <tr> <td> <b>Nominee Name</b> </td> <td> @Model.member.NomineeName </td> <td> <b>Relationship</b> </td> <td> @Model.member.Relationship </td></tr>
+                <tr> <td colspan="4" align="center"> <b>Personal Details</b> </td></tr>
+                <tr> <td> <b>Member DOB</b> </td> <td> @Model.member.DOB.ToString("dd-MM-yyyy") </td> <td> <b>Age</b> </td> <td> @Model.member.GetMemberAge() </td>  </tr>
+                <tr> <td> <b>Nominee DOB</b> </td> <td> @Model.member.NomineeDOB.ToString("dd-MM-yyyy") </td> <td> <b>Age</b> </td> <td> @Model.member.GetNomineeAge() </td>  </tr>
+                <tr> <td> <b>Gender</b> </td> <td> @Model.member.Gender </td> <td> <b>Marital Status</b> </td> <td> @Model.member.MaritalStatus </td>  </tr>
+                <tr> <td> <b>Religion </b> </td> <td> @Model.member.Religion </td> <td colspan="2"> </td> </tr>
+                <tr> <td> <b>Aadhar</b> </td> <td> @Model.member.MemberAadharNumber </td> <td> <b>Nominee's Aadhar</b> </td> <td> @Model.member.NomineeAadharNumber </td></tr>
+                <tr> <td> <b>PAN</b> </td> <td> @Model.member.PAN </td> <td> <b>Voter ID</b> </td> <td> @Model.member.VoterIDNo </td></tr>
+                <tr> <td> <b>Ration Card No.</b> </td> <td> @Model.member.RationCardNo </td><td colspan="2"> </td>  </tr>
+                <tr> <td> <b>Account No.</b> </td> <td> @Model.member.AccountNumber </td> <td> <b>IFSC</b> </td> <td> @Model.member.IFSC </td></tr>
+                <tr> <td> <b>Bank</b> </td> <td> <span id="bankName"> </span> </td> <td> <b>Branch</b> </td> <td> <span id="bankBranch"> </span></td></tr>
+                <tr> <td> <b>Bank Address</b> </td> <td colspan="3"> <span id="bankAddress"> </span> </tr>
+                <tr> <td> <b>Address</b> </td> <td colspan="3"> @Model.member.AddressLine1 <br /> @Model.member.AddressLine2 <br /> @Model.member.AddressLine3 <br /> @Model.member.AddressLine4 <br />  @Model.member.City, PIN- @Model.member.Pincode </td>  </tr>
+                <tr> <td> <b>Taluk</b> </td> <td> @Model.member.Taluk </td> <td> <b>Panchayat</b> </td> <td> @Model.member.Panchayat </td></tr>
+                <tr> <td> <b>Mobile No.</b> </td> <td> @Model.member.Phone </td><td colspan="2"> </td>  </tr>
+                <tr> <td> <b>No of Years in household</b> </td> <td> @Model.member.NoOfYears </td><td colspan="2"> </td>  </tr>
+                <tr> <td> <b>House Type</b> </td> <td> @Model.member.HouseType </td> <td> <b>Property Ownership</b> </td> <td> @Model.member.PropertyOwnership </td></tr>
+                <tr> <td> <b>Occupation</b> </td> <td> @Model.member.Occupation </td> <td> <b>Occupation Type</b> </td> <td> @Model.member.OccupationType </td></tr>
+                <tr> <td> <b>Loan Amount (Rs.)</b> </td> <td> @Model.loan.LoanAmount </td> <td> <b>Purpose</b> </td> <td> @Model.loan.LoanPurpose</td></tr>
+                <tr> <td> <b>Processing Fee (%)</b> </td> <td> @Model.loan.ProcessingFeeRate </td> <td> <b>Processing Fee (Rs.)</b> </td> <td> @Model.loan.ProcessingFee</td></tr>
+                <tr> <td> <b>Insurance (%)</b> </td> <td> @Model.loan.InsuranceRate </td> <td> <b>Insurance (Rs.)</b> </td> <td> @Model.loan.Insurance</td></tr>
+                <tr> <td> <b>Tenure (weeks)</b> </td> <td> @Model.loan.Tenure </td> <td> <b>Interest Rate (%)</b> </td> <td> @Model.loan.InterestRate</td></tr>
+                <tr> <td> <b>Weekly Due (Rs.)</b> </td> <td> @Model.loan.Ewi</td> <td> <b>Repayment Amount(Rs.)</b> </td> <td> @Model.loan.RepaymentAmount</td></tr>
+        </table>
+        <b> Loan Obligation </b>
+           <table class="tg">
+               <tr> <th> S.No. </th> <th> Institution Name</th>  <th>Inst Type </th> <th> Loan Amount</th> <th> Installment Amount </th> <th> Frequency (M/W/F)</th> <th> Tenure</th> <th> Principal Outstanding</th> </tr>
+               <tr> <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td> </tr>
+               <tr> <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td> </tr>
+               <tr> <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td> </tr>
+           </table>
+        <b> Amortization Schedule <br/> </b> 
+        <table width="70%" id="scheduleTable" border="1">
+            <thead>
+                <tr> <td> <b>Week</b></td> <td> <b> Opening Balance </b></td> <td> <b>Principal</b></td> <td> <b>Interest</b> </td> <td> <b>Total</b> </td> <td> <b>Balance</b> </td> </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <b> Declaration</b>
+           <p align="left" style="text-indent: 50px;"> I, <u>@Model.member.MemberName </u> D/o <u>@Model.member.FName </u> living in address <u> @Model.member.AddressLine1  @Model.member.AddressLine2 @Model.member.AddressLine3 @Model.member.AddressLine4 @Model.member.City - @Model.member.Pincode  </u> 
+           received loan for family purpose Rs <u> @Model.loan.LoanAmount</u> from ATHIRSHTAM MICRO FINANCE PRIVATE LTD and I promise I will pay principal with interest. <br /> </p>
+           <br/>
+           <br/>
+           <pre><p align="left"> Nominee Sign                                             Center Leader Sign                                  Member Sign</p></pre>
+           <br />   
+           <br />
+           <p align="left">CIN U67200TN2018PTC126199 </p>
+           <p align="left">ATHIRSHTAM MICRO FINANCE PRIVATE LTD </p>
+           <p align="left">PLOT NO 162, DOOR NO 103/2, RAJ PALACE,</p>
+           <p align="left">KOCHI DANUSHKODI ROAD, NAGAMALAI PUDUKOTTAI,</p>
+           <p align="left">MADURAI- 625019</p>
+    </div>
+        <input type="button" value="print" onclick="printLoan()"/>
+    </center>
+}
+<script>
+    getBank();
+    showSchedule();
+    function printLoan() {
+        var divContents = document.getElementById("print").innerHTML;
+        var printWindow = window.open('', '', 'height=600,width=600');
+        printWindow.document.write('<html><head><title>AMF</title>');
+        printWindow.document.write('<link rel="stylesheet" href="/Content/home.css" />');
+        printWindow.document.write('</head><body >');
+        printWindow.document.write(divContents);
+        printWindow.document.write('</body></html>');
+        printWindow.document.close();
+        printWindow.print();
+    }
+    function getBank() {
+        var ifsc = '@Model.member.IFSC';
+        var bankName = document.getElementById("bankName");
+        var bankBranch = document.getElementById("bankBranch");
+        if (ifsc == '') {
+            bankName.innerHTML = '';
+            bankBranch.innerHTML = '';
+            bankAddress.innerHTML = '';
+            return;
+        }
+        var ajaxReq = new XMLHttpRequest();
+        ajaxReq.onreadystatechange = function () {
+            if (this.readyState == 1) {
+                bankName.innerHTML = "Loading....";
+                bankBranch.innerHTML = "Loading....";
+                bankAddress.innerHTML = "Loading....";
+            } else if (this.readyState == 4) {
+                if (this.status == 200) {
+                    var bankInfo = JSON.parse(this.responseText);
+                    bankName.innerHTML = bankInfo.BANK;
+                    bankBranch.innerHTML = bankInfo.BRANCH;
+                    bankAddress.innerHTML = bankInfo.ADDRESS;
+                } else {
+                    bankName.innerHTML = "";
+                    bankBranch.innerHTML = "";
+                    bankAddress.innerHTML = "";
+                }
+            }
+        };
+        ajaxReq.open("GET", "https://ifsc.razorpay.com/" + ifsc, true);
+        ajaxReq.send();
+    }
+
+    function showSchedule() {
+        var tenure = @Model.loan.Tenure;
+        var interestRate = @Model.loan.InterestRate;
+        var balance = @Model.loan.LoanAmount;
+        var factor = Math.pow(1 + interestRate / 5200, tenure);
+        var ewi = Math.round(balance * interestRate * factor / (factor - 1) / 5200);
+
+        var principal, interest;
+
+        var scheduleTable = document.getElementById("scheduleTable");
+        var currentRow, currentCell;
+        var rows = scheduleTable.rows;
+        var i = rows.length;
+        
+        for (i = 1; i <= tenure; i++) {
+
+            currentRow = scheduleTable.insertRow(-1);
+            //Week
+            currentCell = currentRow.insertCell(-1);
+            currentCell.innerHTML = i;
+            //Balance
+            currentCell = currentRow.insertCell(-1);
+            currentCell.innerHTML = balance.toFixed(2);
+
+            interest = balance * interestRate / 100 / 52;
+            principal = ewi - interest;
+            if(i==tenure) {
+                balance = 0;
+            } else {
+                balance = balance - ewi + interest;
+            }
+            //Principal
+            currentCell = currentRow.insertCell(-1);
+            currentCell.innerHTML = principal.toFixed(2);
+            //Interest
+            currentCell = currentRow.insertCell(-1);
+            currentCell.innerHTML = interest.toFixed(2);
+
+            //Total
+            currentCell = currentRow.insertCell(-1);
+            currentCell.innerHTML = ewi.toFixed(2);
+
+            //Balance
+            currentCell = currentRow.insertCell(-1);
+            currentCell.innerHTML = Math.abs(balance).toFixed(2);
+        }
+    }
+</script>

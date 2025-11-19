@@ -1,115 +1,342 @@
 ﻿@model iMicroFin.Models.Member
 @{
-    ViewBag.Title = "Member";
+    ViewBag.Title = "Member Details";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+<link rel="stylesheet" href="/css/view-member.css" />
+<div class="member-view-container">
+    <div class="member-card" id="printableArea">
+        <div class="card-header">
+            <h2>Member Profile</h2>
+            <div class="header-actions no-print">
+                @if (Model.CurrentLoanCode != "0")
+                {
+                    <a href="@Url.Action("ViewLoan", "Loan", new { id = Model.CurrentLoanCode })" class="btn-icon">
+                        📄 View Loan
+                    </a>
+                    <a href="@Url.Action("LoanForm", "Loan", new { id = Model.CurrentLoanCode })" class="btn-icon">
+                        ✏️ Edit Loan
+                    </a>
+                }
+                <a href="@Url.Action("MemberForm", "Member", new { id = Model.MemberCode })" class="btn-icon">
+                    ✏️ Edit Member
+                </a>
+            </div>
+        </div>
 
-@using (Html.BeginForm())
-{
-    @Html.AntiForgeryToken()
-    <center>
-        <div id="print">
-            <table class="tg">
-                <tr> <td colspan="2"> <img src="/Content/Images/logo.jpg" /> <h3>Athirstam Microfinance Pvt. Ltd.</h3> </td> <td colspan="2"> <img width="150" src="@Model.GetPhotoPath()" alt="NA" /> </td> </tr>
-                <tr> <td> <b>Center Name</b> </td> <td> @Model.CenterName </td> <td colspan="2"> </td> </tr>
-                <tr> <td> <b>Group Name</b> </td> <td> @Model.GroupName </td> <td> <b>Leader Name</b> </td> <td> @Model.LeaderName </td> </tr>
-                <tr> <td> <b>Member Code </b> </td> <td> @Model.MemberCode </td> <td > <b>Current Loan</b> </td> <td> @if (Model.CurrentLoanCode != "0")
-                {  @Html.ActionLink("View", "ViewLoan", "Loan", new { id = Model.CurrentLoanCode }, null); <space/>
-                        @Html.ActionLink("Edit", "LoanForm", "Loan", new { id = Model.CurrentLoanCode }, null);  }
-                        else
-                        { @Html.Label("NA"); }
-                </td> </tr>
-                <tr> <td> <b>Member Name </b> </td> <td> @Model.MemberName </td> <td> <b>Member Type</b> </td> <td> @Model.MemberType </td>  </tr>
-                <tr> <td> <b>Father's Name</b> </td> <td> @Model.FName </td> <td> <b>Husband's Name</b> </td> <td> @Model.HName </td> </tr>
-                <tr> <td> <b>Nominee Name</b> </td> <td> @Model.NomineeName </td> <td> <b>Relationship</b> </td> <td> @Model.Relationship </td></tr>
-                <tr> <td colspan="4" align="center"> <b>Personal Details</b> </td></tr>
-                <tr> <td> <b>Member DOB</b> </td> <td> @Model.DOB.ToString("dd-MM-yyyy") </td> <td> <b>Age</b> </td> <td> @Model.GetMemberAge() </td>  </tr>
-                <tr> <td> <b>Nominee DOB</b> </td> <td> @Model.NomineeDOB.ToString("dd-MM-yyyy") </td> <td> <b>Age</b> </td> <td> @Model.GetNomineeAge() </td>  </tr>
-                <tr> <td> <b>Gender</b> </td> <td> @Model.Gender </td> <td> <b>Marital Status</b> </td> <td> @Model.MaritalStatus </td>  </tr>
-                <tr> <td> <b>Religion </b> </td> <td> @Model.Religion </td> <td colspan="2"> </td> </tr>
-                <tr> <td> <b>Aadhar</b> </td> <td> @Model.MemberAadharNumber </td> <td> <b>Nominee's Aadhar</b> </td> <td> @Model.NomineeAadharNumber </td></tr>
-                <tr> <td> <b>PAN</b> </td> <td> @Model.PAN </td> <td> <b>Voter ID</b> </td> <td> @Model.VoterIDNo </td></tr>
-                <tr> <td> <b>Ration Card No.</b> </td> <td> @Model.RationCardNo </td><td colspan="2"> </td>  </tr>
-                <tr> <td> <b>Account No.</b> </td> <td> @Model.AccountNumber </td> <td> <b>IFSC</b> </td> <td> @Model.IFSC </td></tr>
-                <tr> <td> <b>Customer Id (Bank)</b> </td> <td colspan="3"> @Model.BankCustomerId </td></tr>
-                <tr> <td> <b>Bank</b> </td> <td> <span id="bankName"> </span> </td> <td> <b>Branch</b> </td> <td> <span id="bankBranch"> </span></td></tr>
-                <tr> <td> <b>Bank Address</b> </td> <td colspan="3"> <span id="bankAddress"> </span> </td></tr>
-                <tr> <td> <b>Address</b> </td> <td colspan="3"> @Model.AddressLine1 <br /> @Model.AddressLine2 <br /> @Model.AddressLine3 <br /> @Model.AddressLine4 <br />  @Model.City, PIN- @Model.Pincode </td>  </tr>
-                <tr> <td> <b>Taluk</b> </td> <td> @Model.Taluk </td> <td> <b>Panchayat</b> </td> <td> @Model.Panchayat </td></tr>
-                <tr> <td> <b>Mobile No.</b> </td> <td> @Model.Phone </td><td colspan="2"> </td>  </tr>
-                <tr> <td> <b>No of Years in household</b> </td> <td> @Model.NoOfYears </td><td colspan="2"> </td>  </tr>
-                <tr> <td> <b>House Type</b> </td> <td> @Model.HouseType </td> <td> <b>Property Ownership</b> </td> <td> @Model.PropertyOwnership </td></tr>
-                <tr> <td> <b>Occupation</b> </td> <td> @Model.Occupation </td> <td> <b>Occupation Type</b> </td> <td> @Model.OccupationType </td></tr>
-                <tr> 
-                        <td> <b>Family Members</b> </td> 
-                        <td colspan="3"> 
-                            @if(Model.FamilyMembers.Count>0)
-                            {
-                                <table class="tg">
-                                    <tr> <th> S. No </th> <th> Name </th> <th> Relationship </th><th> Occupation </th> <th> Monthly Income </th> <th> Qualification </th> </tr>
-                                    @foreach (var familyMember in @Model.FamilyMembers)
-                                    {
-                                        <tr>
-                                            <td> @familyMember.SNo </td>
-                                            <td> @familyMember.FamilyMemberName </td>
-                                            <td> @familyMember.Relationship </td>
-                                            <td> @familyMember.OccupationType </td>
-                                            <td> @familyMember.MonthlyIncome</td>
-                                            <td> @familyMember.Qualification</td>
-                                        </tr>
-                                    }
-                                </table>
-                            }
-                        </td>
-                </tr>
-        </table>
+        <div class="card-body">
+            <!-- Header Section with Photo -->
+            <div class="member-header-section">
+                <div>
+                    <div class="section-title">Basic Information</div>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">Center Name</span>
+                            <span class="info-value">@Model.CenterName</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Group Name</span>
+                            <span class="info-value">@Model.GroupName</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Leader Name</span>
+                            <span class="info-value">@Model.LeaderName</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Member Code</span>
+                            <span class="info-value">@Model.MemberCode</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Member Name</span>
+                            <span class="info-value">@Model.MemberName</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Member Type</span>
+                            <span class="info-value">@Model.MemberType</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Current Loan</span>
+                            <span class="info-value">
+                                @if (Model.CurrentLoanCode != "0")
+                                {
+                                    <a href="@Url.Action("ViewLoan", "Loan", new { id = Model.CurrentLoanCode })" class="loan-link">View</a>
+                                    <a href="@Url.Action("LoanForm", "Loan", new { id = Model.CurrentLoanCode })" class="loan-link">Edit</a>
+                                }
+                                else
+                                {
+                                    <span>No Active Loan</span>
+                                }
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="member-photo-container">
+                    <img id="memberPhoto" class="member-photo" style="display:none;" alt="Member Photo" />
+                    <div id="photoPlaceholder" class="photo-placeholder">
+                        No Photo Available
+                    </div>
+                </div>
+            </div>
+
+            <!-- Personal Details -->
+            <div class="section-title">Personal Details</div>
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Father's Name</span>
+                    <span class="info-value">@Model.FName</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Husband's Name</span>
+                    <span class="info-value">@Model.HName</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Date of Birth</span>
+                    <span class="info-value">@Model.DOB.ToString("dd-MMM-yyyy")</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Age</span>
+                    <span class="info-value">@Model.GetMemberAge() years</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Gender</span>
+                    <span class="info-value">@Model.Gender</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Marital Status</span>
+                    <span class="info-value">@Model.MaritalStatus</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Religion</span>
+                    <span class="info-value">@Model.Religion</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Occupation</span>
+                    <span class="info-value">@Model.Occupation</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Occupation Type</span>
+                    <span class="info-value">@Model.OccupationType</span>
+                </div>
+            </div>
+
+            <!-- Nominee Details -->
+            <div class="section-title">Nominee Details</div>
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Nominee Name</span>
+                    <span class="info-value">@Model.NomineeName</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Relationship</span>
+                    <span class="info-value">@Model.Relationship</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Nominee DOB</span>
+                    <span class="info-value">@Model.NomineeDOB.ToString("dd-MMM-yyyy")</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Nominee Age</span>
+                    <span class="info-value">@Model.GetNomineeAge() years</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Nominee Aadhar</span>
+                    <span class="info-value">@Model.NomineeAadharNumber</span>
+                </div>
+            </div>
+
+            <!-- Identity Documents -->
+            <div class="section-title">Identity Documents</div>
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Member Aadhar</span>
+                    <span class="info-value">@Model.MemberAadharNumber</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">PAN Number</span>
+                    <span class="info-value">@Model.PAN</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Voter ID</span>
+                    <span class="info-value">@Model.VoterIDNo</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Ration Card No.</span>
+                    <span class="info-value">@Model.RationCardNo</span>
+                </div>
+            </div>
+
+            <!-- Bank Details -->
+            <div class="section-title">Bank Details</div>
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Account Number</span>
+                    <span class="info-value">@Model.AccountNumber</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">IFSC Code</span>
+                    <span class="info-value">@Model.IFSC</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Customer ID (Bank)</span>
+                    <span class="info-value">@Model.BankCustomerId</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Bank Name</span>
+                    <span class="info-value" id="bankName">Loading...</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Branch</span>
+                    <span class="info-value" id="bankBranch">Loading...</span>
+                </div>
+                <div class="info-item" style="grid-column: 1 / -1;">
+                    <span class="info-label">Bank Address</span>
+                    <span class="info-value" id="bankAddress">Loading...</span>
+                </div>
+            </div>
+
+            <!-- Address Details -->
+            <div class="section-title">Address Details</div>
+            <div class="info-grid">
+                <div class="info-item" style="grid-column: 1 / -1;">
+                    <span class="info-label">Address</span>
+                    <span class="info-value">
+                        @Model.AddressLine1<br />
+                        @if (!string.IsNullOrEmpty(Model.AddressLine2))
+                        {
+                            @Model.AddressLine2
+                            <br />
+ }
+                        @if (!string.IsNullOrEmpty(Model.AddressLine3))
+                        {
+                            @Model.AddressLine3
+                            <br />
+ }
+                        @if (!string.IsNullOrEmpty(Model.AddressLine4))
+                        {
+                            @Model.AddressLine4
+                            <br />
+ }
+                        @Model.City, PIN - @Model.Pincode
+                    </span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Taluk</span>
+                    <span class="info-value">@Model.Taluk</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Panchayat</span>
+                    <span class="info-value">@Model.Panchayat</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Mobile Number</span>
+                    <span class="info-value">@Model.Phone</span>
+                </div>
+            </div>
+
+            <!-- Property Details -->
+            <div class="section-title">Property Details</div>
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Years in Household</span>
+                    <span class="info-value">@Model.NoOfYears years</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">House Type</span>
+                    <span class="info-value">@Model.HouseType</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Property Ownership</span>
+                    <span class="info-value">@Model.PropertyOwnership</span>
+                </div>
+            </div>
+
+            <!-- Print Button -->
+            <div class="print-section">
+                <button class="btn-print" onclick="printMember()">
+                    🖨️ Print Member Details
+                </button>
+            </div>
+        </div>
     </div>
-        <input type="button" value="print" onclick="printMember()"/>
-    </center>
-}
+</div>
+
 <script>
-    getBank();
-    function printMember() {
-        var divContents = document.getElementById("print").innerHTML;
-        var printWindow = window.open('', '', 'height=600,width=600');
-        printWindow.document.write('<html><head><title>AMF</title>');
-        printWindow.document.write('<link rel="stylesheet" href="/Content/home.css" />');
-        printWindow.document.write('</head><body >');
-        printWindow.document.write(divContents);
-        printWindow.document.write('</body></html>');
-        printWindow.document.close();
-        printWindow.print();
+    document.addEventListener('DOMContentLoaded', function() {
+        // Load member photo
+        loadMemberPhoto();
+
+        // Load bank details
+        getBankDetails();
+    });
+
+    // Load member photo from API
+    function loadMemberPhoto() {
+        const memberCode = '@Model.MemberCode';
+        const photoElement = document.getElementById('memberPhoto');
+        const placeholder = document.getElementById('photoPlaceholder');
+
+        fetch(`/Member/GetMemberPhoto/${memberCode}`)
+            .then(response => {
+                if (response.ok) {
+                    return response.blob();
+                }
+                throw new Error('Photo not found');
+            })
+            .then(blob => {
+                const imageUrl = URL.createObjectURL(blob);
+                photoElement.src = imageUrl;
+                photoElement.style.display = 'block';
+                placeholder.style.display = 'none';
+            })
+            .catch(error => {
+                console.log('No photo available:', error);
+                photoElement.style.display = 'none';
+                placeholder.style.display = 'flex';
+            });
     }
-    function getBank() {
-        var ifsc = '@Model.IFSC';
-        var bankName = document.getElementById("bankName");
-        var bankBranch = document.getElementById("bankBranch");
-        if (ifsc == '') {
-            bankName.innerHTML = '';
-            bankBranch.innerHTML = '';
-            bankAddress.innerHTML = '';
+
+    // Get bank details from IFSC
+    function getBankDetails() {
+        const ifsc = '@Model.IFSC';
+        const bankNameEl = document.getElementById('bankName');
+        const bankBranchEl = document.getElementById('bankBranch');
+        const bankAddressEl = document.getElementById('bankAddress');
+
+        if (!ifsc || ifsc === '') {
+            bankNameEl.textContent = 'Not Available';
+            bankBranchEl.textContent = 'Not Available';
+            bankAddressEl.textContent = 'Not Available';
             return;
         }
-        var ajaxReq = new XMLHttpRequest();
-        ajaxReq.onreadystatechange = function () {
-            if (this.readyState == 1) {
-                bankName.innerHTML = "Loading....";
-                bankBranch.innerHTML = "Loading....";
-                bankAddress.innerHTML = "Loading....";
-            } else if (this.readyState == 4) {
-                if (this.status == 200) {
-                    var bankInfo = JSON.parse(this.responseText);
-                    bankName.innerHTML = bankInfo.BANK;
-                    bankBranch.innerHTML = bankInfo.BRANCH;
-                    bankAddress.innerHTML = bankInfo.ADDRESS;
-                } else {
-                    bankName.innerHTML = "";
-                    bankBranch.innerHTML = "";
-                    bankAddress.innerHTML = "";
+
+        // Show loading state
+        bankNameEl.innerHTML = '<span class="loading-bank">Loading...</span>';
+        bankBranchEl.innerHTML = '<span class="loading-bank">Loading...</span>';
+        bankAddressEl.innerHTML = '<span class="loading-bank">Loading...</span>';
+
+        fetch(`https://ifsc.razorpay.com/${ifsc}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Bank details not found');
                 }
-            }
-        };
-        ajaxReq.open("GET", "https://ifsc.razorpay.com/" + ifsc, true);
-        ajaxReq.send();
+                return response.json();
+            })
+            .then(bankInfo => {
+                bankNameEl.textContent = bankInfo.BANK || 'Not Available';
+                bankBranchEl.textContent = bankInfo.BRANCH || 'Not Available';
+                bankAddressEl.textContent = bankInfo.ADDRESS || 'Not Available';
+            })
+            .catch(error => {
+                console.error('Error fetching bank details:', error);
+                bankNameEl.textContent = 'Unable to fetch';
+                bankBranchEl.textContent = 'Unable to fetch';
+                bankAddressEl.textContent = 'Unable to fetch';
+            });
+    }
+
+    // Print member details
+    function printMember() {
+        window.print();
     }
 </script>

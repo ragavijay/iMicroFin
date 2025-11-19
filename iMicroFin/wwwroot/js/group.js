@@ -199,7 +199,10 @@ function populateForm(group, isNew) {
     document.getElementById('groupId').value = group.groupId || 0;
     document.getElementById('centerCode').value = group.centerCode || '';
     document.getElementById('centerName').value = group.centerName || '';
-    document.getElementById('leaderName').value = group.leaderName || '';
+    if (group.groupCod)
+        document.getElementById('leaderName').value = group.leaderName || 'N/A';
+    else
+        document.getElementById('leaderName').value = '';
     document.getElementById('errorMessage').textContent = '';
     document.getElementById('successMessage').textContent = '';
 
