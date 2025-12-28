@@ -2187,6 +2187,104 @@ END//
 DELIMITER ;
 
 DELIMITER //
+DROP PROCEDURE IF EXISTS `GetFinancialReport`//
+CREATE PROCEDURE GetFinancialReport(
+    pFYCode VARCHAR(10),
+    pStartDate DATE,
+    pEndDate DATE
+)
+BEGIN
+    DECLARE vTotalLoansCount INT;
+    DECLARE vTotalLoansDisbursed DECIMAL(15,2);
+    DECLARE vTotalEWIReceived DECIMAL(15,2);
+    DECLARE vTotalEWIExpected DECIMAL(15,2);
+    DECLARE vFutureEWIExpected DECIMAL(15,2);
+    DECLARE vBadLoanPendingAmount DECIMAL(15,2);
+    DECLARE vBadLoanDiscountProvided DECIMAL(15,2);
+    DECLARE vPreClosureDiscountProvided DECIMAL(15,2);
+    DECLARE vActualInterestIncome DECIMAL(15,2);
+    DECLARE vAnticipatedInterestIncome DECIMAL(15,2);
+    
+    -- 1. Total loans disbursed and amount
+    SELECT 
+        COUNT(*),
+        COALESCE(SUM(LoanAmount), 0)
+    INTO vTotalLoansCount, vTotalLoansDisbursed
+    FROM Loan
+    WHERE LoanStatus IN ('A', 'O', 'C', 'S', 'b', 'B')
+        AND LoanDisposalDate BETWEEN pStartDate AND pEndDate;
+    
+    -- 2. Total EWI received (all instalment receipts)
+    SELECT COALESCE(SUM(CR.ReceiptAmount), 0)
+    INTO vTotalEWIReceived
+    FROM CashReceipt CR
+    INNER JOIN Loan L ON CR.LoanCode = L.LoanCode
+    WHERE CR.ReceiptType = 'I'
+        AND L.LoanDisposalDate BETWEEN pStartDate AND pEndDate;
+    
+    -- Calculate total EWI expected from all loans in FY
+    SELECT COALESCE(SUM(L.EWI * L.Tenure), 0)
+    INTO vTotalEWIExpected
+    FROM Loan L
+    WHERE L.LoanStatus IN ('A', 'O', 'C', 'S', 'b', 'B')
+        AND L.LoanDisposalDate BETWEEN pStartDate AND pEndDate;
+    
+    -- 3. Future EWI expected
+    SET vFutureEWIExpected := vTotalEWIExpected - vTotalEWIReceived;
+    IF vFutureEWIExpected < 0 THEN
+        SET vFutureEWIExpected := 0;
+    END IF;
+    
+    -- 4. Bad loan pending amount (status 'b')
+    SELECT COALESCE(SUM(
+        (L.EWI * L.Tenure + L.ProcessingFee + L.Insurance) - 
+        COALESCE((
+            SELECT SUM(CR2.ReceiptAmount) 
+            FROM CashReceipt CR2 
+            WHERE CR2.LoanCode = L.LoanCode
+        ), 0)
+    ), 0)
+    INTO vBadLoanPendingAmount
+    FROM Loan L
+    WHERE L.LoanStatus = 'b'
+        AND L.LoanDisposalDate BETWEEN pStartDate AND pEndDate;
+    
+    -- 5. Bad loan discount provided (from settled bad loans 'B')
+    SELECT COALESCE(SUM(BadLoanDiscount), 0)
+    INTO vBadLoanDiscountProvided
+    FROM Loan
+    WHERE LoanStatus = 'B'
+        AND LoanDisposalDate BETWEEN pStartDate AND pEndDate;
+    
+    -- 6. Pre-closure discount provided
+    SELECT COALESCE(SUM(PreClosureDiscount), 0)
+    INTO vPreClosureDiscountProvided
+    FROM Loan
+    WHERE LoanStatus = 'S'
+        AND LoanDisposalDate BETWEEN pStartDate AND pEndDate;
+    
+    -- 7. Actual Interest Income = Total EWI Received - Total Loans Disbursed
+    SET vActualInterestIncome := vTotalEWIReceived - vTotalLoansDisbursed;
+    
+    -- 8. Anticipated Interest Income = Future EWI Expected
+    SET vAnticipatedInterestIncome := vFutureEWIExpected;
+    
+    -- Return the report
+    SELECT 
+        pFYCode AS FYCode,
+        vTotalLoansCount AS TotalLoansCount,
+        vTotalLoansDisbursed AS TotalLoansDisbursed,
+        vTotalEWIReceived AS TotalEWIReceived,
+        vFutureEWIExpected AS FutureEWIExpected,
+        vBadLoanPendingAmount AS BadLoanPendingAmount,
+        vBadLoanDiscountProvided AS BadLoanDiscountProvided,
+        vPreClosureDiscountProvided AS PreClosureDiscountProvided,
+        vActualInterestIncome AS ActualInterestIncome,
+        vAnticipatedInterestIncome AS AnticipatedInterestIncome;
+END//
+DELIMITER ;
+
+DELIMITER //
 DROP PROCEDURE IF EXISTS `debug_msg`//
 CREATE PROCEDURE debug_msg(msg VARCHAR(255))
 BEGIN
