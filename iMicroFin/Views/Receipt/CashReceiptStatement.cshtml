@@ -1,0 +1,193 @@
+﻿@model IEnumerable<iMicroFin.Models.CashReceiptStatement>
+@{
+    ViewBag.Title = "Cash Receipt Statement";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var totalAmount = Model.Sum(x => x.Amount);
+    var receiptCount = Model.Count();
+}
+
+<link rel="stylesheet" href="~/css/receipt/cash-receipt-statement.css">
+
+<div class="statement-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>💰 Cash Receipt Statement</h1>
+        <p>Detailed report of all cash receipts collected</p>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="stats-container">
+        <div class="stat-card">
+            <div class="stat-label">Total Receipts</div>
+            <div class="stat-value">@receiptCount</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Total Amount Collected</div>
+            <div class="stat-value">₹ @totalAmount.ToString("N2")</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Average Receipt</div>
+            <div class="stat-value">₹ @(receiptCount > 0 ? (totalAmount / receiptCount).ToString("N2") : "0.00")</div>
+        </div>
+    </div>
+
+    <!-- Table Card -->
+    <div class="table-card">
+        <div class="table-header">
+            <h2>Receipt Details</h2>
+            <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text"
+                           id="searchInput"
+                           class="search-input"
+                           placeholder="Search by receipt, member, or loan code..."
+                           onkeyup="filterTable()">
+                </div>
+                <div class="action-buttons no-print">
+                    <button class="btn btn-primary" onclick="window.print()">
+                        🖨️ Print
+                    </button>
+                    <button class="btn btn-export" onclick="exportToCSV()">
+                        📥 Export CSV
+                    </button>
+                    <a href="@Url.Action("CashReceiptStatementForm", "Receipt")" class="btn btn-back">
+                        ← Back
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        @if (Model != null && Model.Any())
+        {
+            <table class="statement-table" id="statementTable">
+                <thead>
+                    <tr>
+                        <th style="text-align: center;">S.No</th>
+                        <th>Receipt ID</th>
+                        <th>Receipt Date</th>
+                        <th>Member Code</th>
+                        <th>Member Name</th>
+                        <th>Loan Code</th>
+                        <th>Description</th>
+                        <th style="text-align: right;">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td style="text-align: center;">@item.SNo</td>
+                            <td class="receipt-id">@item.ReceiptId</td>
+                            <td>@item.ActualReceiptDate.ToString("dd-MMM-yyyy")</td>
+                            <td>@item.MemberCode</td>
+                            <td><strong>@item.MemberName</strong></td>
+                            <td class="loan-code">@item.LoanCode</td>
+                            <td>@item.Description</td>
+                            <td style="text-align: right;">₹ @item.Amount.ToString("N2")</td>
+                        </tr>
+                    }
+                    <!-- Total Row -->
+                    <tr class="total-row">
+                        <td colspan="7" style="text-align: right;">TOTAL</td>
+                        <td style="text-align: right;">₹ @totalAmount.ToString("N2")</td>
+                    </tr>
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="no-data">
+                <div class="no-data-icon">📭</div>
+                <h3>No Receipts Found</h3>
+                <p>No cash receipts were found for the selected date range</p>
+                <a href="@Url.Action("CashReceiptStatementForm", "Receipt")" class="btn btn-primary" style="margin-top: 1rem;">
+                    ← Try Different Dates
+                </a>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    function filterTable() {
+        const input = document.getElementById('searchInput');
+        const filter = input.value.toUpperCase();
+        const table = document.getElementById('statementTable');
+        const tr = table.getElementsByTagName('tr');
+
+        for (let i = 1; i < tr.length - 1; i++) { // Exclude header and total row
+            const row = tr[i];
+            const cells = row.getElementsByTagName('td');
+            let found = false;
+
+            // Search in receipt ID, member code, member name, loan code, and description
+            const receiptId = cells[1]?.textContent || '';
+            const memberCode = cells[3]?.textContent || '';
+            const memberName = cells[4]?.textContent || '';
+            const loanCode = cells[5]?.textContent || '';
+            const description = cells[6]?.textContent || '';
+
+            const searchText = (receiptId + memberCode + memberName + loanCode + description).toUpperCase();
+
+            if (searchText.indexOf(filter) > -1) {
+                found = true;
+            }
+
+            row.style.display = found ? '' : 'none';
+        }
+    }
+
+    function exportToCSV() {
+        const table = document.getElementById('statementTable');
+        let csv = [];
+
+        // Get headers
+        const headers = [];
+        const headerCells = table.querySelectorAll('thead th');
+        headerCells.forEach(cell => {
+            headers.push('"' + cell.textContent.trim() + '"');
+        });
+        csv.push(headers.join(','));
+
+        // Get data rows (only visible ones, exclude total row)
+        const rows = table.querySelectorAll('tbody tr');
+        rows.forEach((row, index) => {
+            if (row.style.display !== 'none' && !row.classList.contains('total-row')) {
+                const rowData = [];
+                const cells = row.querySelectorAll('td');
+                cells.forEach(cell => {
+                    // Remove currency symbols and commas for numeric values
+                    let value = cell.textContent.trim().replace(/₹|,/g, '');
+                    rowData.push('"' + value + '"');
+                });
+                csv.push(rowData.join(','));
+            }
+        });
+
+        // Add total row
+        const totalRow = table.querySelector('.total-row');
+        if (totalRow) {
+            const totalData = [];
+            const totalCells = totalRow.querySelectorAll('td');
+            totalCells.forEach(cell => {
+                let value = cell.textContent.trim().replace(/₹|,/g, '');
+                totalData.push('"' + value + '"');
+            });
+            csv.push(totalData.join(','));
+        }
+
+        // Create and download file
+        const csvContent = csv.join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+
+        link.setAttribute('href', url);
+        link.setAttribute('download', 'Cash_Receipt_Statement_' + new Date().toISOString().split('T')[0] + '.csv');
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+</script>

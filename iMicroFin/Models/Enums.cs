@@ -6,11 +6,11 @@
     }
     public enum EMaritalStatus
     {
-        Married, Seperated, Divorced, Widowed, Unmarried, Untagged
+        NA=-1,Married, Seperated, Divorced, Widowed, Unmarried, Untagged
     }
     public enum EReligion
     {
-        Hindu, Muslim, Christian
+        NA = -1, Hindu, Muslim, Christian
     }
     public enum EMemberType
     {
@@ -18,24 +18,24 @@
     }
     public enum EHouseType
     {
-        ColonyHouse, Thatched, RCC, Tiled
+        NA=-1,ColonyHouse, Thatched, RCC, Tiled
     }
     public enum EPropertyOwnership
     {
-        Self, Rented, Other
+        NA = -1, Self, Rented, Other
     }
     public enum EOccupation
     {
-        Agriculture, Manufacturing, Service, Trading
+        NA = -1, Agriculture, Manufacturing, Service, Trading
     }
     public enum EOccupationType
     {
-        SelfEmployed, Salaried, None
+        NA = -1, SelfEmployed, Salaried, None
     }
 
     public enum ERelationship
     {
-        Father, Husband, Mother, Son, Daughter, Wife, Brother,
+        NA = -1, Father, Husband, Mother, Son, Daughter, Wife, Brother,
         Mother_In_Law, Father_In_Law, Daughter_In_Law,
         Sister_In_Law, Son_In_Law, Brother_In_Law, Other
     }

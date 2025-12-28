@@ -1,0 +1,481 @@
+﻿@model iMicroFin.Models.BadLoanReceipt
+@using System.Globalization;
+@{
+    ViewBag.Title = "Bad Loan Receipt";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="/css/receipt/badloan-receipt-form.css">
+
+<div class="receipt-form-container">
+    <div class="receipt-card">
+        <div class="card-header">
+            <h2>Bad Loan Settlement Receipt</h2>
+        </div>
+
+        <div class="card-body">
+            @using (Html.BeginForm("BadLoanReceipt", "Receipt", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+
+                <!-- Loan Code Section -->
+                <div class="form-section">
+                    <div class="info-box">
+                        <p>⚠️ This form is for processing bad loan settlements. Enter the loan code to fetch bad loan details. You can accept partial payments or full settlement with optional discount.</p>
+                    </div>
+
+                    <div class="form-row-inline">
+                        <div class="form-group">
+                            <label class="form-label" for="LoanCode">
+                                Loan Code <span style="color: #dc3545;">*</span>
+                            </label>
+                            @Html.TextBoxFor(m => m.LoanCode, new {
+                            id = "LoanCode",
+                                                @class = "form-control",
+                                                placeholder = "Enter loan code",
+                                                required = "true",
+                                                tabindex = "1",
+                                                autocomplete = "off"
+                                                })
+                        <div id="errLoanId" class="error-message"></div>
+                    </div>
+                    <div class="form-group">
+                        <button class="btn btn-secondary" type="button" onclick="getLoanDetails()" tabindex="2" id="btnGetLoan">
+                            🔍 Get Loan Details
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bad Loan Receipt Form Data (Hidden Initially) -->
+            <div id="badLoanReceiptFormData" class="hidden-section">
+                <hr style="margin: 2rem 0; border: none; border-top: 2px solid #e9ecef;">
+
+                <!-- Member Details -->
+                <div class="form-section">
+                    <h3 style="margin-bottom: 1rem; color: #212529; font-size: 1.25rem;">Member Details</h3>
+
+                    <div class="form-row-split">
+                        <div class="form-group">
+                            <label class="form-label" for="MemberCode">Member Code</label>
+                            @Html.TextBoxFor(m => m.MemberCode, new {
+                                                        id = "MemberCode",
+                                                        @class = "form-control",
+                                                        @readonly = "readonly",
+                                                        required = "true"
+                                                        })
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="MemberName">Member Name</label>
+                            @Html.TextBoxFor(m => m.MemberName, new {
+                                                        id = "MemberName",
+                                                        @class = "form-control",
+                                                        @readonly = "readonly",
+                                                        required = "true"
+                                                        })
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bad Loan Details -->
+                <div class="form-section">
+                    <h3 style="margin-bottom: 1rem; color: #212529; font-size: 1.25rem;">Bad Loan Settlement Details</h3>
+
+                    <!-- Outstanding Amount Info -->
+                    <div class="pending-info">
+                        <div class="info-card">
+                            <div class="info-card-label">Original Loan</div>
+                            <div class="info-card-value" id="loanAmountDisplay">₹0</div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-card-label">Total Due</div>
+                            <div class="info-card-value" id="totalDueDisplay">₹0</div>
+                        </div>
+                        <div class="info-card success">
+                            <div class="info-card-label">Amount Paid</div>
+                            <div class="info-card-value" id="amountPaidDisplay">₹0</div>
+                        </div>
+                        <div class="info-card warning">
+                            <div class="info-card-label">Pending Amount</div>
+                            <div class="info-card-value" id="pendingAmountDisplay">₹0</div>
+                        </div>
+                    </div>
+
+                    <!-- Hidden fields -->
+                    @Html.HiddenFor(m => m.LoanAmount, new { id = "LoanAmount" })
+                    @Html.HiddenFor(m => m.TotalDue, new { id = "TotalDue" })
+                    @Html.HiddenFor(m => m.AmountPaid, new { id = "AmountPaid" })
+                    @Html.HiddenFor(m => m.PendingAmount, new { id = "PendingAmount" })
+
+                    <!-- Payment Section -->
+                    <div class="form-row-split">
+                        <div class="form-group">
+                            <label class="form-label-with-info">
+                                Payment Amount (₹) <span style="color: #dc3545;">*</span>
+                                <span class="info-icon" data-tooltip="Enter amount member is paying (can be partial or full)">?</span>
+                            </label>
+                            @Html.TextBoxFor(m => m.PaymentAmount, new {
+                                                        id = "PaymentAmount",
+                                                        @class = "form-control",
+                                                        required = "true",
+                                                        type = "number",
+                                                        min = "1",
+                                                        tabindex = "3",
+                                                        placeholder = "Enter payment amount"
+                                                        })
+                            <div class="payment-info" id="paymentInfo"></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label-with-info">
+                                Settlement Discount (₹)
+                                <span class="info-icon" data-tooltip="Optional discount to settle the loan">?</span>
+                            </label>
+                            @Html.TextBoxFor(m => m.SettlementDiscount, new {
+                                                        id = "SettlementDiscount",
+                                                        @class = "form-control",
+                                                        type = "number",
+                                                        min = "0",
+                                                        tabindex = "4",
+                                                        placeholder = "Enter discount (optional)",
+                                                        value = "0"
+                                                        })
+                        </div>
+                    </div>
+
+                    <!-- Remaining Balance Display -->
+                    <div class="balance-display">
+                        <div class="balance-row">
+                            <span class="balance-label">Pending Amount:</span>
+                            <span class="balance-value" id="currentPendingDisplay">₹0</span>
+                        </div>
+                        <div class="balance-row">
+                            <span class="balance-label">Payment Amount:</span>
+                            <span class="balance-value negative" id="paymentDisplay">- ₹0</span>
+                        </div>
+                        <div class="balance-row" id="discountRow" style="display: none;">
+                            <span class="balance-label">Settlement Discount:</span>
+                            <span class="balance-value negative" id="discountDisplay">- ₹0</span>
+                        </div>
+                        <div class="balance-divider"></div>
+                        <div class="balance-row total">
+                            <span class="balance-label"><strong>Remaining Balance:</strong></span>
+                            <span class="balance-value" id="remainingBalanceDisplay"><strong>₹0</strong></span>
+                        </div>
+                    </div>
+
+                    <!-- Settlement Status -->
+                    <div id="settlementStatus" class="settlement-status" style="display: none;">
+                        <div class="status-icon">✓</div>
+                        <div class="status-text">
+                            <strong>Full Settlement</strong>
+                            <p>This payment will fully settle the bad loan</p>
+                        </div>
+                    </div>
+
+                    <!-- Warning/Success Messages -->
+                    <div id="warningBox" class="warning-box" style="display: none;">
+                        <p id="warningMessage"></p>
+                    </div>
+                    <div id="successBox" class="success-box" style="display: none;">
+                        <p id="successMessage"></p>
+                    </div>
+                </div>
+
+                <!-- Receipt Date -->
+                <div class="form-section">
+                    <div class="form-group">
+                        <label class="form-label" for="ActualReceiptDate">
+                            Actual Receipt Date <span style="color: #dc3545;">*</span>
+                        </label>
+                        @Html.TextBoxFor(m => m.ActualReceiptDate, new {
+                                                @class = "form-control date-picker",
+                                                @required = "true",
+                                                @Value = DateTime.Now.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture),
+                                                @autocomplete = "off",
+                                                @tabindex = "5",
+                                                @placeholder = "DD/MM/YYYY"
+                                                })
+                        <div id="errActualReceiptDate" class="error-message"></div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="form-group">
+                    <button class="btn btn-primary" type="submit" tabindex="6" style="width: 100%;">
+                        💾 Generate Bad Loan Receipt
+                    </button>
+                </div>
+            </div>
+                        }
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+    let pendingAmount = 0;
+    let isFullSettlement = false;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        flatpickr(".date-picker", {
+            dateFormat: "d/m/Y",
+            defaultDate: new Date(),
+            maxDate: "today",
+            allowInput: true
+        });
+
+        document.getElementById("LoanCode").addEventListener("input", function() {
+            document.getElementById("badLoanReceiptFormData").classList.add('hidden-section');
+            document.getElementById("errLoanId").classList.remove('show');
+            document.getElementById("errLoanId").textContent = '';
+        });
+
+        document.getElementById("LoanCode").addEventListener("keypress", function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                getLoanDetails();
+            }
+        });
+
+        document.getElementById("PaymentAmount").addEventListener("input", function() {
+            calculateRemainingBalance();
+        });
+
+        document.getElementById("SettlementDiscount").addEventListener("input", function() {
+            calculateRemainingBalance();
+        });
+    });
+
+    async function getLoanDetails() {
+        const loanCodeInput = document.getElementById('LoanCode');
+        const loanCode = loanCodeInput.value.trim();
+        const errorDiv = document.getElementById('errLoanId');
+        const formData = document.getElementById('badLoanReceiptFormData');
+        const btnGetLoan = document.getElementById('btnGetLoan');
+
+        if (!loanCode) {
+            errorDiv.textContent = 'Please enter a loan code';
+            errorDiv.classList.add('show');
+            return;
+        }
+
+        const originalBtnText = btnGetLoan.innerHTML;
+        btnGetLoan.disabled = true;
+        btnGetLoan.innerHTML = 'Loading<span class="loading-spinner"></span>';
+        errorDiv.classList.remove('show');
+        formData.classList.add('hidden-section');
+
+        try {
+            const response = await fetch(`/Receipt/GetBadLoanDetails/${encodeURIComponent(loanCode)}`);
+            const data = await response.json();
+
+            if (data.success && data.loanStatus === 'b') {
+                pendingAmount = data.pendingAmount;
+
+                document.getElementById("MemberCode").value = data.memberCode || '';
+                document.getElementById("MemberName").value = data.memberName || '';
+                document.getElementById("LoanAmount").value = data.loanAmount || '0';
+                document.getElementById("TotalDue").value = data.totalDue || '0';
+                document.getElementById("AmountPaid").value = data.amountPaid || '0';
+                document.getElementById("PendingAmount").value = data.pendingAmount || '0';
+                document.getElementById("PaymentAmount").value = '';
+                document.getElementById("SettlementDiscount").value = '0';
+
+                document.getElementById("loanAmountDisplay").textContent = `₹${data.loanAmount.toLocaleString()}`;
+                document.getElementById("totalDueDisplay").textContent = `₹${data.totalDue.toLocaleString()}`;
+                document.getElementById("amountPaidDisplay").textContent = `₹${data.amountPaid.toLocaleString()}`;
+                document.getElementById("pendingAmountDisplay").textContent = `₹${data.pendingAmount.toLocaleString()}`;
+
+                updatePaymentInfo();
+                calculateRemainingBalance();
+
+                formData.classList.remove('hidden-section');
+                errorDiv.classList.remove('show');
+
+            } else {
+                let errorMessage = '';
+
+                switch(data.loanStatus) {
+                    case 'P':
+                        errorMessage = '⚠️ Loan is pending approval';
+                        break;
+                    case 'A':
+                        errorMessage = '⚠️ Loan is approved but not disbursed';
+                        break;
+                    case 'O':
+                        errorMessage = '⚠️ This is an ongoing loan, not a bad loan';
+                        break;
+                    case 'C':
+                        errorMessage = '🔒 Loan is already closed';
+                        break;
+                    case 'S':
+                        errorMessage = '🔒 Loan is pre-closed';
+                        break;
+                    case 'B':
+                        errorMessage = '✓ Bad loan already settled';
+                        break;
+                    case 'Invalid':
+                    case 'Error':
+                        errorMessage = '❌ ' + (data.message || 'Invalid loan code');
+                        break;
+                    default:
+                        errorMessage = '❌ Only bad loans (status: b) can be processed here';
+                }
+
+                errorDiv.textContent = errorMessage;
+                errorDiv.classList.add('show');
+                formData.classList.add('hidden-section');
+            }
+
+        } catch (error) {
+            console.error('Error fetching loan details:', error);
+            errorDiv.textContent = '❌ Error fetching loan details. Please try again.';
+            errorDiv.classList.add('show');
+            formData.classList.add('hidden-section');
+        } finally {
+            btnGetLoan.disabled = false;
+            btnGetLoan.innerHTML = originalBtnText;
+        }
+    }
+
+        function updatePaymentInfo() {
+        const paymentInfoDiv = document.getElementById("paymentInfo");
+        paymentInfoDiv.innerHTML = `Maximum payment: <strong>₹${pendingAmount.toLocaleString()}</strong><br><small><em>Note: If discount is applied, payment + discount must equal pending amount</em></small>`;
+        }
+
+       function calculateRemainingBalance() {
+        const payment = parseInt(document.getElementById("PaymentAmount").value) || 0;
+        const discount = parseInt(document.getElementById("SettlementDiscount").value) || 0;
+        const warningBox = document.getElementById("warningBox");
+        const warningMessage = document.getElementById("warningMessage");
+        const successBox = document.getElementById("successBox");
+        const successMessage = document.getElementById("successMessage");
+        const settlementStatus = document.getElementById("settlementStatus");
+        const errorDiv = document.getElementById('errLoanId');
+
+        errorDiv.classList.remove('show');
+        warningBox.style.display = 'none';
+        successBox.style.display = 'none';
+        settlementStatus.style.display = 'none';
+
+        document.getElementById("currentPendingDisplay").textContent = `₹${pendingAmount.toLocaleString()}`;
+        document.getElementById("paymentDisplay").textContent = `- ₹${payment.toLocaleString()}`;
+
+        if (discount > 0) {
+            document.getElementById("discountRow").style.display = 'flex';
+            document.getElementById("discountDisplay").textContent = `- ₹${discount.toLocaleString()}`;
+        } else {
+            document.getElementById("discountRow").style.display = 'none';
+        }
+
+        if (payment <= 0 && discount <= 0) {
+            document.getElementById("remainingBalanceDisplay").textContent = `₹${pendingAmount.toLocaleString()}`;
+            return;
+        }
+
+        if (payment > pendingAmount) {
+            warningBox.style.display = 'block';
+            warningMessage.innerHTML = `⚠️ Payment amount cannot exceed pending amount of <strong>₹${pendingAmount.toLocaleString()}</strong>`;
+            document.getElementById("remainingBalanceDisplay").textContent = '₹0';
+            return;
+        }
+
+        // CRITICAL: If discount is mentioned, payment + discount must equal pending amount
+        if (discount > 0) {
+            const totalPayment = payment + discount;
+            if (totalPayment !== pendingAmount) {
+                warningBox.style.display = 'block';
+                warningMessage.innerHTML = `⚠️ When discount is applied, Payment + Discount must equal Pending Amount.<br>Required Payment: <strong>₹${(pendingAmount - discount).toLocaleString()}</strong>`;
+                document.getElementById("remainingBalanceDisplay").textContent = '₹0';
+                return;
+            }
+        }
+
+        // Calculate remaining balance
+        const remainingBalance = pendingAmount - payment - discount;
+        document.getElementById("remainingBalanceDisplay").textContent = `₹${Math.max(0, remainingBalance).toLocaleString()}`;
+
+        // Check if full settlement
+        if (remainingBalance <= 0) {
+            isFullSettlement = true;
+            settlementStatus.style.display = 'flex';
+            successBox.style.display = 'block';
+            if (discount > 0) {
+                successMessage.innerHTML = `✓ Full settlement with payment <strong>₹${payment.toLocaleString()}</strong> + discount <strong>₹${discount.toLocaleString()}</strong>. Loan status will be updated to "Bad Loan - Settled"`;
+            } else {
+                successMessage.innerHTML = `✓ Full settlement with payment <strong>₹${payment.toLocaleString()}</strong>. Loan status will be updated to "Bad Loan - Settled"`;
+            }
+        } else {
+            isFullSettlement = false;
+            successBox.style.display = 'block';
+            successMessage.innerHTML = `✓ Partial payment of <strong>₹${payment.toLocaleString()}</strong>. Remaining balance: <strong>₹${remainingBalance.toLocaleString()}</strong>`;
+        }
+    }
+
+        document.querySelector('form').addEventListener('submit', function(e) {
+        const payment = parseInt(document.getElementById("PaymentAmount").value) || 0;
+        const discount = parseInt(document.getElementById("SettlementDiscount").value) || 0;
+        const errorDiv = document.getElementById('errLoanId');
+
+        if (payment <= 0) {
+            e.preventDefault();
+            errorDiv.textContent = '❌ Please enter a valid payment amount';
+            errorDiv.classList.add('show');
+            return false;
+        }
+
+        if (payment > pendingAmount) {
+            e.preventDefault();
+            errorDiv.textContent = `❌ Payment amount cannot exceed pending amount of ₹${pendingAmount.toLocaleString()}`;
+            errorDiv.classList.add('show');
+            return false;
+        }
+
+        if (discount < 0) {
+            e.preventDefault();
+            errorDiv.textContent = '❌ Discount cannot be negative';
+            errorDiv.classList.add('show');
+            return false;
+        }
+
+        // CRITICAL: If discount is mentioned, it must be full settlement
+        if (discount > 0) {
+            const totalPayment = payment + discount;
+            if (totalPayment !== pendingAmount) {
+                e.preventDefault();
+                errorDiv.textContent = `❌ When discount is applied, Payment + Discount must equal Pending Amount (₹${pendingAmount.toLocaleString()}). Required payment: ₹${(pendingAmount - discount).toLocaleString()}`;
+                errorDiv.classList.add('show');
+                return false;
+            }
+        }
+
+        const remainingBalance = pendingAmount - payment - discount;
+        let confirmMessage = `Are you sure you want to process this bad loan payment?\n\n` +
+            `Pending Amount: ₹${pendingAmount.toLocaleString()}\n` +
+            `Payment Amount: ₹${payment.toLocaleString()}\n`;
+
+        if (discount > 0) {
+            confirmMessage += `Settlement Discount: ₹${discount.toLocaleString()}\n`;
+        }
+
+        confirmMessage += `Remaining Balance: ₹${Math.max(0, remainingBalance).toLocaleString()}\n\n`;
+
+        if (remainingBalance <= 0) {
+            confirmMessage += `✓ This will FULLY SETTLE the bad loan and update status to "Bad Loan - Settled"\n`;
+        } else {
+            confirmMessage += `⚠️ This is a PARTIAL PAYMENT. Member can make additional payments later.\n`;
+        }
+
+        confirmMessage += `\nThis action cannot be undone.`;
+
+        const confirmed = confirm(confirmMessage);
+
+        if (!confirmed) {
+            e.preventDefault();
+            return false;
+        }
+
+        return true;
+    });
+</script>

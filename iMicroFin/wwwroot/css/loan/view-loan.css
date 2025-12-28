@@ -1,0 +1,313 @@
+﻿.loan-view-container {
+    max-width: 1400px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.loan-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+    .card-header h2 {
+        margin: 0;
+        font-size: 1.75rem;
+        font-weight: 600;
+    }
+
+.header-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.btn-icon {
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+    .btn-icon:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: translateY(-2px);
+    }
+
+.card-body {
+    padding: 2rem;
+}
+
+.loan-header-section {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.member-photo-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.member-photo {
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 12px;
+    border: 4px solid #667eea;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.photo-placeholder {
+    width: 200px;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8f9fa;
+    border-radius: 12px;
+    border: 4px dashed #dee2e6;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #212529;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #667eea;
+    display: inline-block;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid #667eea;
+}
+
+.info-label {
+    font-size: 0.875rem;
+    color: #6c757d;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.info-value {
+    font-size: 1rem;
+    color: #212529;
+    font-weight: 600;
+}
+
+.schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+    .schedule-table thead {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .schedule-table th {
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    .schedule-table td {
+        padding: 0.875rem 1rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .schedule-table tbody tr:hover {
+        background: #f8f9fa;
+    }
+
+    .schedule-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+.declaration-box {
+    background: #f8f9fa;
+    padding: 2rem;
+    border-radius: 8px;
+    border-left: 4px solid #667eea;
+    margin: 2rem 0;
+}
+
+    .declaration-box p {
+        line-height: 1.8;
+        color: #212529;
+        text-align: justify;
+    }
+
+.signature-section {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    margin: 3rem 0 2rem 0;
+    text-align: center;
+}
+
+.signature-box {
+    padding: 1rem;
+}
+
+.signature-line {
+    border-top: 2px solid #212529;
+    margin-top: 3rem;
+    padding-top: 0.5rem;
+    font-weight: 600;
+}
+
+.company-info {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-top: 2rem;
+}
+
+    .company-info p {
+        margin: 0.25rem 0;
+        color: #495057;
+        font-size: 0.95rem;
+    }
+
+.print-section {
+    text-align: center;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 2px solid #e9ecef;
+}
+
+.btn-print {
+    padding: 0.875rem 2rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+    .btn-print:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+.loading-bank {
+    color: #667eea;
+    font-style: italic;
+}
+
+@media print {
+    .header-actions, .print-section, .no-print {
+        display: none !important;
+    }
+
+    .loan-card {
+        box-shadow: none;
+        border: 1px solid #dee2e6;
+    }
+
+    .card-header {
+        background: white !important;
+        color: #212529 !important;
+        border-bottom: 2px solid #667eea;
+    }
+
+    body {
+        background: white;
+    }
+
+    .loan-view-container {
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .loan-header-section {
+        grid-template-columns: 1fr;
+    }
+
+    .member-photo-container {
+        order: -1;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .header-actions {
+        flex-direction: column;
+    }
+
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .signature-section {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .schedule-table {
+        font-size: 0.85rem;
+    }
+
+        .schedule-table th,
+        .schedule-table td {
+            padding: 0.5rem;
+        }
+}

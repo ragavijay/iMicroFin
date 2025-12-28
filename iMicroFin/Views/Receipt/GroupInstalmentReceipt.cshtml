@@ -1,0 +1,124 @@
+﻿@model IEnumerable<iMicroFin.Models.GroupInstalmentReceiptInfo>
+@{
+    ViewBag.Title = "Group Instalment Receipts";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var totalInstalments = Model.Sum(x => x.NoOfInstalments);
+    var totalEwi = Model.Sum(x => x.Ewi);
+    var totalDue = Model.Sum(x => x.TotalDue);
+}
+
+<link rel="stylesheet" href="~/css/receipt/group-instalment-receipt.css" />
+
+<style>
+ 
+</style>
+
+<div class="receipt-container">
+    <!-- Success Banner -->
+    <div class="success-banner no-print">
+        <div class="success-icon">✓</div>
+        <div>
+            <h2>Group Receipts Generated Successfully!</h2>
+            <p style="margin: 0; font-size: 1rem;">
+                Instalment receipts created for <strong>@Model.Count()</strong> member(s)
+            </p>
+        </div>
+    </div>
+
+    <!-- Receipt Card -->
+    <div class="receipt-card" id="printableReceipt">
+        <div class="receipt-header">
+            <h3>Group Instalment Receipts</h3>
+
+            <!-- Summary Stats -->
+            <div class="receipt-stats">
+                <div class="stat-box">
+                    <div class="stat-label">Total Members</div>
+                    <div class="stat-value">@Model.Count()</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Total Instalments</div>
+                    <div class="stat-value">@totalInstalments</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Average EWI</div>
+                    <div class="stat-value">₹ @(Model.Count() > 0 ? (totalEwi / Model.Count()).ToString("N2") : "0.00")</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Grand Total</div>
+                    <div class="stat-value">₹ @totalDue.ToString("N2")</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="receipt-body">
+            @if (Model != null && Model.Any())
+            {
+                <table class="receipts-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 8%;">Receipt ID</th>
+                            <th style="width: 12%;">Member Code</th>
+                            <th style="width: 20%;">Member Name</th>
+                            <th style="width: 12%;">Loan Code</th>
+                            <th style="width: 10%; text-align: center;">Instalments</th>
+                            <th style="width: 12%; text-align: right;">EWI (₹)</th>
+                            <th style="width: 14%; text-align: right;">Total Due (₹)</th>
+                            <th style="width: 12%; text-align: center;">Next Due Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="receipt-id">@item.ReceiptId</td>
+                                <td class="member-code">@item.MemberCode</td>
+                                <td>@item.MemberName</td>
+                                <td style="font-family: monospace;">@item.LoanCode</td>
+                                <td style="text-align: center;">@item.NoOfInstalments</td>
+                                <td style="text-align: right;">₹ @item.Ewi.ToString("N2")</td>
+                                <td style="text-align: right;"><strong>₹ @item.TotalDue.ToString("N2")</strong></td>
+                                <td style="text-align: center;">@item.NextDueDate.ToString("dd-MMM-yyyy")</td>
+                            </tr>
+                        }
+                        <!-- Total Row -->
+                        <tr class="total-row">
+                            <td colspan="4" style="text-align: right;">TOTAL</td>
+                            <td style="text-align: center;">@totalInstalments</td>
+                            <td style="text-align: right;">₹ @totalEwi.ToString("N2")</td>
+                            <td style="text-align: right;">₹ @totalDue.ToString("N2")</td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="empty-state">
+                    <div class="empty-state-icon">📋</div>
+                    <h3>No receipts generated</h3>
+                    <p>No data available to display</p>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons no-print">
+        <button class="btn btn-print" onclick="printReceipt()">
+            🖨️ Print Receipts
+        </button>
+        <a href="@Url.Action("GroupInstalmentReceiptForm", "Receipt")" class="btn btn-new">
+            ➕ New Group Receipt
+        </a>
+        <a href="@Url.Action("Index", "Home")" class="btn btn-home">
+            🏠 Home
+        </a>
+    </div>
+</div>
+
+<script>
+    function printReceipt() {
+        window.print();
+    }
+</script>

@@ -1,98 +1,170 @@
 ﻿@{
-    ViewBag.Title = "SearchMember";
+    ViewBag.Title = "Search Member";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="page-wrapper bg-gra-03 p-t-45 p-b-50">
-    <div class="wrapper wrapper--w790">
-        <div class="card card-5">
-            <div class="card-heading">
-                <h2 class="title">Search Member</h2>
-            </div>
-            <div class="card-body">
-                <!--Search By-->
-                <div class="form-row m-b-55">
-                    <div class="name">Search By</div>
-                    <div class="value">
-                        <div class="rs-select2 js-select-simple select--no-search">
-                            <select id="SearchType">
-                                <option value="Aadhar">Aadhar</option>
-                                <option value="Phone">Phone</option>
-                                <option value="Name">Name</option>
-                            </select>
-                            <div class="select-dropdown"></div>
-                        </div>
-                    </div>
-                </div>
-                <!--Search Text -->
-                <div class="form-row m-b-55">
-                    <div class="name">Search Text</div>
-                    <div class="value">
-                        <div class="row row-space">
-                            <div class="col-2">
-                                <div class="input-group-desc">
-                                    <input class="input--style-5" id="SearchText" name="SearchText" type="text" value="" />
-                                    <p id="errSearchText" style='color:red;'> </p>
-                            </div>
-                        </div>
-                        <div class="col-2">
-                            <div class="input-group-desc">
-                                <button class="btn btn--blue" type="button" onclick="getMember();" tabindex="2">Get</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                </div>
-                <!-- Result -->
-                <div class="form-row m-b-55">
-                    <div class="name">Result</div>
-                    <div class="value">
-                        <div class="input-group">
-                            <span id="result">  </span>
-                        </div>
+<link rel="stylesheet" href="~/css/member/search-member.css" />
+
+<div class="search-container">
+    <div class="search-card">
+        <div class="card-header">
+            <h1>Search Member</h1>
+            <p>Find members quickly by Aadhar, Phone, or Name</p>
+        </div>
+
+        <div class="card-body">
+            <form id="searchForm" onsubmit="handleSearch(event)">
+                <!-- Search Type -->
+                <div class="form-group">
+                    <label class="form-label">Search By</label>
+                    <div class="select-wrapper">
+                        <select id="SearchType" required>
+                            <option value="Aadhar">Aadhar Number</option>
+                            <option value="Phone">Phone Number</option>
+                            <option value="Name">Member Name</option>
+                        </select>
                     </div>
                 </div>
 
+                <!-- Search Input -->
+                <div class="form-group">
+                    <label class="form-label">Search Text</label>
+                    <div class="input-group">
+                        <div style="flex: 1;">
+                            <input type="text"
+                                   id="SearchText"
+                                   placeholder="Enter search term..."
+                                   required />
+                            <div class="error-message" id="errSearchText"></div>
+                        </div>
+                        <button type="submit" class="search-btn" id="searchBtn">
+                            <span>Search</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Results Section -->
+            <div class="results-section" id="resultsSection" style="display: none;">
+                <div class="results-label">Search Results</div>
+                <div class="results-container" id="result">
+                    <!-- Results will be populated here -->
+                </div>
             </div>
         </div>
     </div>
 </div>
+
 <script>
-    function getMember() {
-        var searchText = document.getElementById("SearchText").value;
-        var searchType = document.getElementById("SearchType").value;
-        var result = document.getElementById("result");
-        result.innerHTML = 'Searching...';
-        if (searchText == '') {
-            document.getElementById("errSearchText").innerHTML = "Please enter " + searchType;
+    const searchForm = document.getElementById('searchForm');
+    const searchTextInput = document.getElementById('SearchText');
+    const searchTypeSelect = document.getElementById('SearchType');
+    const errorMessage = document.getElementById('errSearchText');
+    const resultsSection = document.getElementById('resultsSection');
+    const resultContainer = document.getElementById('result');
+    const searchBtn = document.getElementById('searchBtn');
+
+    function handleSearch(event) {
+        event.preventDefault();
+
+        const searchText = searchTextInput.value.trim();
+        const searchType = searchTypeSelect.value;
+
+        // Clear previous error
+        errorMessage.textContent = '';
+        errorMessage.classList.remove('show');
+
+        if (!searchText) {
+            errorMessage.textContent = `Please enter a ${searchType.toLowerCase()}`;
+            errorMessage.classList.add('show');
             return;
         }
-        var xhttp = new XMLHttpRequest();
-        document.getElementById("errSearchText").innerHTML = "";
-        xhttp.onreadystatechange = function () {
-            if (this.readyState == 4 && this.status == 200) {
-                var response = JSON.parse(this.responseText);
-                if (response.length == 0) {
-                    result.innerHTML = "Not found";
-               } else {
-                    var resultString = "";
-                    for (var i = 0; i < response.length; i++) {
-                        resultString += response[i].MemberName + "<space> <a href='/Member/ViewMember/" + response[i].MemberCode + "'>View</a> <space/>"
-                                        + "<a href='/Member/MemberForm/" + response[i].MemberCode + "'>Edit</a><br/>";
-                    }
-                    result.innerHTML = resultString;
-                }
-            }
-        };
-        if (searchType == 'Aadhar') {
-            xhttp.open("GET", "../api/GetMemberByAadhar/" + searchText, true);
-        } else if (searchType == 'Phone') {
-            xhttp.open("GET", "../api/GetMemberByPhone/" + searchText, true);
-        } else {
-            xhttp.open("GET", "../api/GetMemberByName/" + searchText, true);
-        }
-        xhttp.send();
+
+        performSearch(searchText, searchType);
     }
+
+    async function performSearch(searchText, searchType) {
+        // Show loading state
+        resultContainer.innerHTML = '<div class="loading-state"><div class="loading-spinner"></div><p>Searching...</p></div>';
+        resultsSection.style.display = 'block';
+        searchBtn.classList.add('loading');
+        searchBtn.disabled = true;
+
+        let endpoint = '';
+        if (searchType === 'Aadhar') {
+            endpoint = `/Member/GetMemberByAadhar/${encodeURIComponent(searchText)}`;
+        } else if (searchType === 'Phone') {
+            endpoint = `/Member/GetMemberByPhone/${encodeURIComponent(searchText)}`;
+        } else {
+            endpoint = `/Member/GetMemberByName/${encodeURIComponent(searchText)}`;
+        }
+
+        try {
+            const response = await fetch(endpoint);
+            const data = await response.json();
+
+            if (data.success && data.statusCode === 1) {
+                displayResults(data.members);
+            } else if (data.statusCode === 0) {
+                resultContainer.innerHTML = '<div class="no-results"><div class="no-results-icon">🔍</div><div class="no-results-text">No members found</div></div>';
+            } else {
+                resultContainer.innerHTML = '<div class="no-results"><div class="no-results-icon">⚠️</div><div class="no-results-text">' + (data.message || 'Unable to fetch members') + '</div></div>';
+            }
+        } catch (error) {
+            console.error('Error fetching members:', error);
+            resultContainer.innerHTML = '<div class="no-results"><div class="no-results-icon">❌</div><div class="no-results-text">Error fetching members. Please try again.</div></div>';
+        } finally {
+            searchBtn.classList.remove('loading');
+            searchBtn.disabled = false;
+        }
+    }
+
+     function displayResults(members) {
+        if (!members || members.length === 0) {
+            resultContainer.innerHTML = '<div class="no-results"><div class="no-results-icon">🔍</div><div class="no-results-text">No members found</div></div>';
+            return;
+        }
+
+        let resultHTML = '';
+        members.forEach((member, index) => {
+            const memberName = member.memberName || member.MemberName || 'N/A';
+            const memberCode = member.memberCode || member.MemberCode || '';
+
+            resultHTML += `
+                <div class="member-item">
+                    <div class="member-name">${escapeHtml(memberName)}</div>
+                    <div class="action-buttons">
+                        <a href="/Member/ViewMember/${memberCode}" class="btn-action btn-view">View</a>
+                        <a href="/Member/MemberForm/${memberCode}" class="btn-action btn-edit">Edit</a>
+                    </div>
+                </div>
+            `;
+        });
+
+        resultHTML += `<div class="results-count">${members.length} member${members.length !== 1 ? 's' : ''} found</div>`;
+        resultContainer.innerHTML = resultHTML;
+    }
+
+    function escapeHtml(text) {
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+        return text.replace(/[&<>"']/g, m => map[m]);
+    }
+
+    // Focus on search input on page load
+    window.addEventListener('load', () => {
+        searchTextInput.focus();
+    });
+
+    // Clear error when user starts typing
+    searchTextInput.addEventListener('input', () => {
+        if (errorMessage.classList.contains('show')) {
+            errorMessage.classList.remove('show');
+        }
+    });
 </script>
-
-

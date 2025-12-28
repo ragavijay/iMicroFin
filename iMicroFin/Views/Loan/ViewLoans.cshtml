@@ -5,7 +5,7 @@
 }
 
 <link rel="stylesheet" href="~/css/autocomplete.css" />
-<link rel="stylesheet" href="~/css/members.css" />
+<link rel="stylesheet" href="~/css/member/view-members.css" />
 
 <div class="members-container">
     <div class="members-header">
@@ -86,11 +86,114 @@
     </div>
 </div>
 
+<!-- Bad Loan Modal -->
+<div id="badLoanModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Mark Loan as Bad Loan</h3>
+            <span class="modal-close" onclick="closeBadLoanModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+            <p class="warning-text">⚠️ Are you sure you want to mark this loan as a bad loan?</p>
+            <div class="loan-details">
+                <p><strong>Loan Code:</strong> <span id="modalLoanCode"></span></p>
+                <p><strong>Member:</strong> <span id="modalMemberName"></span></p>
+            </div>
+            <div class="form-field">
+                <label for="statusRemarks">Remarks <span style="color: red;">*</span></label>
+                <textarea id="statusRemarks"
+                          class="form-textarea"
+                          placeholder="Enter reason for marking as bad loan..."
+                          rows="4"
+                          maxlength="50"></textarea>
+                <small class="char-count"><span id="charCount">0</span>/50 characters</small>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeBadLoanModal()">Cancel</button>
+            <button class="btn-confirm-bad" onclick="confirmBadLoan()">Mark as Bad Loan</button>
+        </div>
+    </div>
+</div>
+
 <script src="~/js/autocomplete.js"></script>
-<script src="~/js/view-loans.js"></script>
+<script src="~/js/loan/view-loans.js"></script>
 <script>
     // Pass initial group data from server if available
     const initialGroupCode = '@(Model?.GroupCode ?? "")';
     const initialGroupName = '@(Model?.GroupName ?? "")';
     const initialCenterName = '@(Model?.CenterName ?? "")';
+
+    let currentBadLoanCode = '';
+
+    // Character counter for remarks
+    document.addEventListener('DOMContentLoaded', function() {
+        const remarksField = document.getElementById('statusRemarks');
+        if (remarksField) {
+            remarksField.addEventListener('input', function() {
+                document.getElementById('charCount').textContent = this.value.length;
+            });
+        }
+    });
+
+    function openBadLoanModal(loanCode, memberName) {
+        currentBadLoanCode = loanCode;
+        document.getElementById('modalLoanCode').textContent = loanCode;
+        document.getElementById('modalMemberName').textContent = memberName;
+        document.getElementById('statusRemarks').value = '';
+        document.getElementById('charCount').textContent = '0';
+        document.getElementById('badLoanModal').style.display = 'flex';
+    }
+
+    function closeBadLoanModal() {
+        document.getElementById('badLoanModal').style.display = 'none';
+        currentBadLoanCode = '';
+    }
+
+    async function confirmBadLoan() {
+        const remarks = document.getElementById('statusRemarks').value.trim();
+
+        if (!remarks) {
+            alert('Please enter remarks for marking this loan as bad');
+            return;
+        }
+
+        try {
+            const response = await fetch('/Loan/MarkAsBadLoan', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    loanCode: currentBadLoanCode,
+                    statusRemarks: remarks
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert('Loan marked as bad loan successfully');
+                closeBadLoanModal();
+                // Reload loans to show updated status
+                const groupCode = document.getElementById('groupCode').value;
+                if (groupCode) {
+                    loadLoans(groupCode);
+                }
+            } else {
+                alert('Error: ' + result.message);
+            }
+        } catch (error) {
+            console.error('Error marking loan as bad:', error);
+            alert('An error occurred. Please try again.');
+        }
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('badLoanModal');
+        if (event.target === modal) {
+            closeBadLoanModal();
+        }
+    }
 </script>

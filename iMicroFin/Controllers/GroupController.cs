@@ -6,7 +6,7 @@ using iMicroFin.Models;
 namespace iMicroFin.Controllers
 {
     [Route("[controller]")]
-    [Authorize]
+    [Authorize(Policy = "DirectorManager")]
     public class GroupController : Controller
     {
         [HttpGet]

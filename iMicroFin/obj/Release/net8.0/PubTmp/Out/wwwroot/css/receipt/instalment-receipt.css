@@ -1,0 +1,233 @@
+﻿.receipt-container {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.success-banner {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 12px;
+    text-align: center;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 12px rgba(17, 153, 142, 0.3);
+}
+
+    .success-banner h2 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1.75rem;
+        font-weight: 600;
+    }
+
+.success-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    animation: scaleIn 0.5s ease;
+}
+
+@keyframes scaleIn {
+    0% {
+        transform: scale(0);
+    }
+
+    50% {
+        transform: scale(1.2);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.receipt-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.receipt-header {
+    background: #f8f9fa;
+    padding: 1.5rem 2rem;
+    border-bottom: 3px solid #667eea;
+    text-align: center;
+}
+
+    .receipt-header h3 {
+        margin: 0 0 0.5rem 0;
+        color: #212529;
+        font-size: 1.5rem;
+    }
+
+.receipt-id {
+    color: #667eea;
+    font-size: 1.25rem;
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+}
+
+.receipt-body {
+    padding: 2rem;
+}
+
+.receipt-info-grid {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.receipt-item {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid #667eea;
+}
+
+.receipt-label {
+    font-weight: 600;
+    color: #495057;
+    font-size: 0.95rem;
+}
+
+.receipt-value {
+    color: #212529;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.receipt-highlight {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-top: 1.5rem;
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 1rem;
+    align-items: center;
+}
+
+    .receipt-highlight .receipt-label {
+        color: white;
+        font-size: 1.1rem;
+    }
+
+    .receipt-highlight .receipt-value {
+        color: white;
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+
+.next-due-box {
+    background: #fff3cd;
+    border-left: 4px solid #ffc107;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-top: 1.5rem;
+    text-align: center;
+}
+
+    .next-due-box .label {
+        font-size: 0.95rem;
+        color: #856404;
+        margin-bottom: 0.5rem;
+    }
+
+    .next-due-box .value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #856404;
+    }
+
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    justify-content: center;
+}
+
+.btn {
+    padding: 0.875rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-print {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+    .btn-print:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+.btn-new {
+    background: #28a745;
+    color: white;
+}
+
+    .btn-new:hover {
+        background: #218838;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+    }
+
+.btn-home {
+    background: #6c757d;
+    color: white;
+}
+
+    .btn-home:hover {
+        background: #5a6268;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(108, 117, 125, 0.4);
+    }
+
+@media print {
+    .success-banner, .action-buttons, .no-print {
+        display: none !important;
+    }
+
+    .receipt-container {
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    .receipt-card {
+        box-shadow: none;
+        border: 1px solid #dee2e6;
+    }
+
+    body {
+        background: white;
+    }
+}
+
+@media (max-width: 768px) {
+    .receipt-item, .receipt-highlight {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+    }
+
+    .btn {
+        width: 100%;
+    }
+}

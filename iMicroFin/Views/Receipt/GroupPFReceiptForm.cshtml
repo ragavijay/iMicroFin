@@ -1,0 +1,258 @@
+﻿@model iMicroFin.Models.GroupPFReceipt
+@using System.Globalization;
+@{
+    ViewBag.Title = "Group Processing Fee Receipt";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="~/css/autocomplete.css" />
+<link rel="stylesheet" href="~/css/receipt/group-pf-receipt-form.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<div class="receipt-form-container">
+    <div class="receipt-card">
+        <div class="card-header">
+            <h2>Group Processing Fee Receipt</h2>
+        </div>
+
+        <div class="card-body">
+            @using (Html.BeginForm("GroupPFReceipt", "Receipt", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+
+                <!-- Info Box -->
+                <div class="form-section">
+                    <div class="info-box">
+                        <p>💡 Select a group to generate processing fee receipts for all eligible members</p>
+                    </div>
+
+                    <!-- Group Selection -->
+                    <div class="form-row-split">
+                        <div class="form-group">
+                            <label class="form-label" for="GroupName">
+                                Group Name <span style="color: #dc3545;">*</span>
+                            </label>
+                            @Html.TextBoxFor(m => m.GroupName, new {
+                            id = "GroupName",
+                                                @class = "form-control autocomplete-input",
+                                                placeholder = "Search and select group",
+                                                required = "true",
+                                                tabindex = "1",
+                                                autocomplete = "off"
+                                                })
+                        @Html.HiddenFor(m => m.GroupCode, new { id = "GroupCode" })
+                        <input type="hidden" id="CenterName" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="GroupCodeDisplay">Group Code</label>
+                        <input type="text" id="GroupCodeDisplay" class="form-control" readonly placeholder="Auto-filled" />
+                    </div>
+                </div>
+
+                <!-- Leader Name and Get Button -->
+                <div class="form-row-inline">
+                    <div class="form-group">
+                        <label class="form-label" for="LeaderName">Leader Name</label>
+                        @Html.TextBoxFor(m => m.LeaderName, new {
+                                                id = "LeaderName",
+                                                @class = "form-control",
+                                                @readonly = "readonly",
+                                                placeholder = "Auto-filled"
+                                                })
+                        <div id="errGroupName" class="error-message"></div>
+                    </div>
+                    <div class="form-group">
+                        <button class="btn btn-secondary" type="button" onclick="checkGroup()" tabindex="2" id="btnGetGroup">
+                            🔍 Get Group Details
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Receipt Form Data (Hidden Initially) -->
+            <div id="pfReceiptFormData" class="hidden-section">
+                <hr style="margin: 2rem 0; border: none; border-top: 2px solid #e9ecef;">
+
+                <!-- Fee Details -->
+                <div class="form-section">
+                    <h3 style="margin-bottom: 1rem; color: #212529; font-size: 1.25rem;">Group Fee Summary</h3>
+
+                    <div class="form-row-split">
+                        <div class="form-group">
+                            <label class="form-label" for="ProcessingFee">Total Processing Fee (₹)</label>
+                            @Html.TextBoxFor(m => m.ProcessingFee, new {
+                                                        id = "ProcessingFee",
+                                                        @class = "form-control",
+                                                        @readonly = "readonly",
+                                                        required = "true"
+                                                        })
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="Insurance">Total Insurance (₹)</label>
+                            @Html.TextBoxFor(m => m.Insurance, new {
+                                                        id = "Insurance",
+                                                        @class = "form-control",
+                                                        @readonly = "readonly",
+                                                        required = "true"
+                                                        })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="TotalFee">Total Fee Amount (₹)</label>
+                        @Html.TextBoxFor(m => m.TotalFee, new {
+                                                id = "TotalFee",
+                                                @class = "form-control",
+                                                @readonly = "readonly",
+                                                required = "true",
+                                                style = "font-weight: 700; font-size: 1.1rem; color: #667eea;"
+                                                })
+                    </div>
+                </div>
+
+                <!-- Receipt Date -->
+                <div class="form-section">
+                    <div class="form-group">
+                        <label class="form-label" for="ActualReceiptDate">
+                            Actual Receipt Date <span style="color: #dc3545;">*</span>
+                        </label>
+                        @Html.TextBoxFor(m => m.ActualReceiptDate, new {
+                                                @class = "form-control date-picker",
+                                                @required = "true",
+                                                @Value = DateTime.Now.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture),
+                                                @autocomplete = "off",
+                                                @tabindex = "3",
+                                                @placeholder = "DD/MM/YYYY"
+                                                })
+                        <div id="errActualReceiptDate" class="error-message"></div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="form-group">
+                    <button class="btn btn-primary" type="submit" tabindex="4" style="width: 100%;">
+                        💾 Generate Group Receipts
+                    </button>
+                </div>
+            </div>
+                        }
+        </div>
+    </div>
+</div>
+
+<script src="~/js/autocomplete.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+    let groupAutoComplete;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize date picker
+        flatpickr(".date-picker", {
+            dateFormat: "d/m/Y",
+            defaultDate: new Date(),
+            maxDate: "today",
+            allowInput: true
+        });
+
+        // Initialize group autocomplete
+        initializeGroupAutoComplete();
+    });
+
+    function initializeGroupAutoComplete() {
+        groupAutoComplete = new MultiFieldAutoComplete({
+            inputId: 'GroupName',
+            hiddenIds: ['GroupCode', 'CenterName', 'LeaderName'],
+            fieldNames: ['groupCode', 'centerName', 'leaderName', 'groupName'],
+            serviceUrl: '/Group/GetGroupListByPattern',
+            minChars: 1,
+            debounceTime: 300,
+            onSelect: function (group) {
+                console.log('Selected group:', group);
+                document.getElementById('GroupCodeDisplay').value = group.groupCode || '';
+                // Clear form when new group is selected
+                document.getElementById('pfReceiptFormData').classList.add('hidden-section');
+                document.getElementById('errGroupName').classList.remove('show');
+            }
+        });
+
+        groupAutoComplete.formatItem = function (item) {
+            const groupCode = item.groupCode || '';
+            const groupName = item.groupName || '';
+            const centerName = item.centerName || '';
+
+            return `
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <strong>${groupName}</strong>
+                        <span class="autocomplete-code">${groupCode}</span>
+                    </div>
+                    <div style="font-size: 0.85em; color: #666;">
+                        Center: ${centerName}
+                    </div>
+                </div>
+            `;
+        };
+    }
+
+    async function checkGroup() {
+        const groupCode = document.getElementById('GroupCode').value.trim();
+        const errorDiv = document.getElementById('errGroupName');
+        const formData = document.getElementById('pfReceiptFormData');
+        const btnGetGroup = document.getElementById('btnGetGroup');
+
+        // Validate group selection
+        if (!groupCode) {
+            errorDiv.textContent = 'Please select a valid group';
+            errorDiv.classList.add('show');
+            formData.classList.add('hidden-section');
+            return;
+        }
+
+        // Show loading state
+        const originalBtnText = btnGetGroup.innerHTML;
+        btnGetGroup.disabled = true;
+        btnGetGroup.innerHTML = 'Loading<span class="loading-spinner"></span>';
+        errorDiv.classList.remove('show');
+        formData.classList.add('hidden-section');
+
+        try {
+            const response = await fetch(`/Receipt/GetGroupPFReceipt/${encodeURIComponent(groupCode)}`);
+            const data = await response.json();
+
+            if (data.success && data.statusCode === 1) {
+                // Populate form fields
+                document.getElementById("ProcessingFee").value = data.processingFee || '0';
+                document.getElementById("Insurance").value = data.insurance || '0';
+                document.getElementById("TotalFee").value = data.totalFee || '0';
+
+                // Show form
+                formData.classList.remove('hidden-section');
+                errorDiv.classList.remove('show');
+
+            } else {
+                // Handle errors
+                let errorMessage = '';
+
+                if (data.statusCode === 0) {
+                    errorMessage = '⚠️ No pending loans found for this group or receipts already generated';
+                } else {
+                    errorMessage = '❌ ' + (data.message || 'Unable to fetch group receipt details');
+                }
+
+                errorDiv.textContent = errorMessage;
+                errorDiv.classList.add('show');
+                formData.classList.add('hidden-section');
+            }
+
+        } catch (error) {
+            console.error('Error fetching group details:', error);
+            errorDiv.textContent = '❌ Error fetching group details. Please try again.';
+            errorDiv.classList.add('show');
+            formData.classList.add('hidden-section');
+        } finally {
+            // Restore button
+            btnGetGroup.disabled = false;
+            btnGetGroup.innerHTML = originalBtnText;
+        }
+    }
+</script>

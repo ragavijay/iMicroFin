@@ -1,0 +1,168 @@
+body {
+	background:#42f4df;
+}
+
+a {
+	text-decoration: none;
+}
+
+.clearfix:after {
+	display:block;
+	clear:both;
+}
+
+/*----- Menu Outline -----*/
+.menu-wrap {
+	width: 100%;
+	display: table;
+	background-color: #EEE;
+}
+
+.menu {
+	width:1000px;
+	margin:0px auto;
+}
+
+.menu li {
+	margin:0px;
+	list-style:none;
+}
+
+.menu a {
+	transition:all linear 0.15s;
+	color:#919191;
+}
+
+.menu li:hover > a, .menu .current-item > a {
+	text-decoration:none;
+	color:#be5b70;
+}
+
+.menu .arrow {
+	font-size:11px;
+	line-height:0%;
+}
+
+/*----- Top Level -----*/
+.menu > ul > li {
+	float:left;
+	display:inline-block;
+	position:relative;
+	font-size:19px;
+}
+
+.menu > ul > li > a {
+	padding:10px 40px;
+	display:inline-block;
+	text-shadow:0px 1px 0px rgba(0,0,0,0.4);
+}
+
+.menu > ul > li:hover > a, .menu > ul > .current-item > a {
+	background:#2e2728;
+}
+
+/*----- Bottom Level -----*/
+.menu li:hover .sub-menu {
+	z-index:1;
+	opacity:1;
+}
+
+.sub-menu {
+	width:160%;
+	padding:5px 0px;
+	position:absolute;
+	top:100%;
+	left:0px;
+	z-index:-1;
+	opacity:0;
+	transition:opacity linear 0.15s;
+	box-shadow:0px 2px 3px rgba(0,0,0,0.2);
+	background:#2e2728;
+}
+
+.sub-menu li {
+	display:block;
+	font-size:16px;
+}
+
+.sub-menu li a {
+	padding:10px 30px;
+	display:block;
+}
+
+.sub-menu li a:hover, .sub-menu .current-item a {
+	background:#3e3436;
+}
+
+
+.autocomplete {
+  position: relative;
+  display: inline-block;
+}
+
+.autocomplete-items {
+  position: absolute;
+  border: 1px solid #d4d4d4;
+  border-bottom: none;
+  border-top: none;
+  z-index: 99;
+  /*position the autocomplete items to be the same width as the container:*/
+  top: 100%;
+  left: 0;
+  right: 0;
+}
+
+.autocomplete-items div {
+  padding: 10px;
+  cursor: pointer;
+  background-color: #fff; 
+  border-bottom: 1px solid #d4d4d4; 
+}
+
+/*when hovering an item:*/
+.autocomplete-items div:hover {
+  background-color: #e9e9e9; 
+}
+
+/*when navigating through the items using the arrow keys:*/
+.autocomplete-active {
+  background-color: DodgerBlue !important; 
+  color: #ffffff; 
+}
+
+.myform {
+	border: solid 1px #000000;
+}
+
+.tg {
+            border-collapse: collapse;
+            border-spacing: 0;
+ }
+
+.tg td {
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    padding: 10px 5px;
+    border-style: solid;
+    border-width: 1px;
+    overflow: hidden;
+    word-break: normal;
+    border-color: black;
+}
+
+.tg th {
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    font-weight: normal;
+    padding: 10px 5px;
+    border-style: solid;
+    border-width: 1px;
+    overflow: hidden;
+    word-break: normal;
+    border-color: black;
+}
+
+.tg .tg-0lax {
+    text-align: left;
+    vertical-align: top;
+}

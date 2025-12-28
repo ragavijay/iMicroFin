@@ -1,5 +1,5 @@
-create database amftnin_db;
-use amftnin_db;
+create database amf_db;
+use amf_db;
 -- Version 2.0 (No Change)
 CREATE TABLE AppUser (
     UserId VARCHAR(20),
@@ -18,6 +18,8 @@ CREATE TABLE AppUser (
 INSERT INTO AppUser VALUES('admin','admin','admin','A','admin@amftn.in','123456789','T');
 INSERT INTO AppUser VALUES('director','director','director','D','admin@amftn.in','123456789','T');
 INSERT INTO AppUser VALUES('manager','manager','manager','M','admin@amftn.in','123456789','T');
+INSERT INTO AppUser VALUES('cashier','cashier','cashier','C','admin@amftn.in','123456789','T');
+
 
 -- Version 2.0 (No Change)
 CREATE TABLE Branch (
@@ -37,6 +39,8 @@ CREATE TABLE BranchUser (
     BranchId INT,
     UserId VARCHAR(20)
 );
+
+
 
 -- Version 2.0 (Modified: CenterCode added as pKey)
 CREATE TABLE Center (
@@ -120,6 +124,8 @@ CREATE TABLE Loan (
     LoanDisposalDate DATE,
     ApprovedBy VARCHAR(20),
 	StatusRemarks VARCHAR(50),
+    PreClosureDiscount INT,
+    BadLoanDiscount INT,
     CONSTRAINT pKey_L_LoanCode PRIMARY KEY (LoanCode),
     CONSTRAINT fKey_L_MemberCode FOREIGN KEY (MemberCode)
         REFERENCES Member (MemberCode),
@@ -128,7 +134,7 @@ CREATE TABLE Loan (
     CONSTRAINT fKey_L_ApprovedBy FOREIGN KEY (ApprovedBy)
         REFERENCES AppUser (UserId)
 );
--- LoanStatus: P=Pending, A-Approved O-Ongoing, C-Closed
+-- LoanStatus: P=Pending, A-Approved O-Ongoing, C-Closed, S- Pre-Closed, b- Bad loan initiated, B- Bad loan closed
 
 CREATE TABLE CashReceipt (
     ReceiptId INT AUTO_INCREMENT,
@@ -136,7 +142,7 @@ CREATE TABLE CashReceipt (
     ReceiptType CHAR(1),
     ReceiptAmount INT,
     ReceiptDate DATE,
-    Description VARCHAR(50),
+    Description VARCHAR(100),
     UserId VARCHAR(20),
 	ActualReceiptDate DATE,
     CONSTRAINT pKey_CR_ReceiptId PRIMARY KEY (ReceiptId),
@@ -145,7 +151,7 @@ CREATE TABLE CashReceipt (
     CONSTRAINT fKey_CR_UserId FOREIGN KEY (UserId)
         REFERENCES AppUser (UserId)
 ); 
--- ProcessingFee: ReceiptType='P'; EWI: ReceiptType='I'  
+-- ProcessingFee: ReceiptType='P'; EWI: ReceiptType='I'; Settlement: ReceiptType='S'  
 
 -- Patch 26 Apr 2020
 -- alter table cashreceipt drop FOREIGN KEY fKey_CR_LoanCode
@@ -699,9 +705,10 @@ AddLoan:BEGIN
 	SET vLoanCycle := vLoanCycle + 1;
 	
 	INSERT INTO Loan (LoanCode, MemberCode, LoanCycle, BranchId, LoanPurpose, LoanAmount, ProcessingFeeRate, ProcessingFee, InsuranceRate, 
-					Insurance, Tenure, InterestRate, EWI, LoanStatus, LoanDate, LoanDisposalDate, ApprovedBy, StatusRemarks) 
+					Insurance, Tenure, InterestRate, EWI, LoanStatus, LoanDate, LoanDisposalDate, ApprovedBy, StatusRemarks,PreClosureDiscount, BadLoanDiscount) 
 					VALUES (pLoanCode, pMemberCode, vLoanCycle, pBranchId, pLoanPurpose, pLoanAmount, pProcessingFeeRate, pProcessingFee, 
-					pInsuranceRate, pInsurance, pTenure, pInterestRate, pEWI, 'P', pLoanDate, pLoanDisposalDate, NULL, NULL);
+					pInsuranceRate, pInsurance, pTenure, pInterestRate, pEWI, 'P', pLoanDate, pLoanDisposalDate, NULL, NULL,0,0);
+	COMMIT;
 END;//
 DELIMITER ;
 
@@ -750,9 +757,9 @@ AddGroupLoan:BEGIN
 		SET vLoanCycle := vLoanCycle + 1;
 		
 		INSERT INTO Loan (LoanCode, MemberCode, LoanCycle, BranchId, LoanPurpose, LoanAmount, ProcessingFeeRate, ProcessingFee, InsuranceRate, 
-					Insurance, Tenure, InterestRate, EWI, LoanStatus, LoanDate, LoanDisposalDate, ApprovedBy, StatusRemarks) 
+					Insurance, Tenure, InterestRate, EWI, LoanStatus, LoanDate, LoanDisposalDate, ApprovedBy, StatusRemarks,PreClosureDiscount, BadLoanDiscount) 
 					VALUES (vLoanCode, vMemberCode, vLoanCycle, pBranchId, pLoanPurpose, pLoanAmount, pProcessingFeeRate, pProcessingFee, 
-					pInsuranceRate, pInsurance, pTenure, pInterestRate, pEWI, 'P', pLoanDate, pLoanDisposalDate, NULL, NULL);
+					pInsuranceRate, pInsurance, pTenure, pInterestRate, pEWI, 'P', pLoanDate, pLoanDisposalDate, NULL, NULL, 0, 0);
 	END LOOP;
 END;//
 DELIMITER ;
@@ -867,9 +874,9 @@ DELIMITER ;
 -- Version 2.0 (Modified: LoanCode instead of LoanId)
 DELIMITER //
 DROP PROCEDURE IF EXISTS `UpdateLoanStatus`//
-CREATE PROCEDURE UpdateLoanStatus(pLoanCode CHAR(10), pLoanStatus CHAR(1), pStatusRemarks VARCHAR(50))
+CREATE PROCEDURE UpdateLoanStatus(pLoanCode CHAR(10), pLoanStatus CHAR(1), pStatusRemarks VARCHAR(50), pApprovedBy VARCHAR(20))
 BEGIN
-	UPDATE Loan SET LoanStatus=pLoanStatus, StatusRemarks=pStatusRemarks WHERE LoanCode=pLoanCode;
+	UPDATE Loan SET LoanStatus=pLoanStatus, StatusRemarks=pStatusRemarks, ApprovedBy=pApprovedBy WHERE LoanCode=pLoanCode;
 END//
 DELIMITER ;
 
@@ -879,7 +886,7 @@ DELIMITER //
 DROP PROCEDURE IF EXISTS `GetLoanStatus`//
 CREATE PROCEDURE GetLoanStatus(pLoanCode CHAR(10), OUT pLoanStatus VARCHAR(1), OUT pMemberCode CHAR(9), OUT pMemberName VARCHAR(50)
 							, OUT pProcessingFee INT, OUT pInsurance INT, OUT pEwi INT, OUT pNoOfInstalments INT
-							, OUT pFromDate DATE, OUT pToDate DATE)
+							, OUT pFromDate DATE, OUT pToDate DATE, OUT pTotalPendingInstalments INT)
 GetLoanStatus:BEGIN
 	DECLARE vTenure INT;
 	DECLARE vLoanDisposalDate DATE;
@@ -908,6 +915,7 @@ GetLoanStatus:BEGIN
 		END IF;
 		SET vWeeksPaid := vAmountPaid/pEwi;
 		SET pNoOfInstalments := vWeeksCompleted - vWeeksPaid;
+        SET pTotalPendingInstalments := vTenure - vWeeksPaid;
 		IF pNoOfInstalments >= 1 THEN
 			SET pFromDate := DATE_ADD(vLoanDisposalDate, INTERVAL (vWeeksPaid + 1)*7 DAY);
 			SET pToDate := DATE_ADD(vLoanDisposalDate, INTERVAL (vWeeksPaid + pNoOfInstalments)*7 DAY);
@@ -1014,13 +1022,12 @@ BEGIN
 	DECLARE vWeeksPaid INT;
 	DECLARE vAmountPaid INT;
 	DECLARE vNoOfInstalments INT;
-	DECLARE vFromDate DATE;
-	DECLARE vToDate DATE;
-	DECLARE vDueDate VARCHAR(25);
+    DECLARE vPendingAmount INT;
+	DECLARE vDueDate DATE;
 	DECLARE vCompleted INT;
-	DECLARE EWIDueCursor CURSOR FOR SELECT L.LoanCode, L.BranchId, L.MemberCode, M.MemberName, M.Phone, L.LoanAmount, L.Tenure, L.EWI, L.LoanDisposalDate FROM Loan L INNER JOIN Member M ON L.MemberCode = M.MemberCode WHERE L.LoanStatus='O' AND BranchId = pBranchId;
+	DECLARE EWIDueCursor CURSOR FOR SELECT L.LoanCode, L.BranchId, L.MemberCode, M.MemberName, M.Phone, L.LoanAmount, L.Tenure, L.EWI, L.LoanDisposalDate FROM Loan L INNER JOIN Member M ON L.MemberCode = M.MemberCode WHERE (L.LoanStatus='O' OR L.LoanStatus='b') AND BranchId = pBranchId;
 	DECLARE CONTINUE HANDLER FOR NOT FOUND SET vCompleted=0;
-	CREATE TEMPORARY TABLE EwiDueRows(LoanCode CHAR(10), BranchId INT, MemberCode CHAR(8), MemberName VARCHAR(50), Phone VARCHAR(10), NoOfInstalments INT, EWI INT, DueDate VARCHAR(25));
+	CREATE TEMPORARY TABLE EwiDueRows(LoanCode CHAR(10), BranchId INT, MemberCode CHAR(9), MemberName VARCHAR(50), Phone VARCHAR(10), NoOfInstalments INT, EWI INT, PendingAmount INT, DueDate DATE);
 	OPEN EWIDueCursor;
 	SET vCompleted:=1;
 	CursorLoop:LOOP
@@ -1032,22 +1039,16 @@ BEGIN
 		IF vWeeksCompleted > vTenure THEN
 			SET vWeeksCompleted := vTenure;
 		END IF;
-		SELECT SUM(ReceiptAmount) INTO vAmountPaid FROM CashReceipt WHERE LoanCode = vLoanCode AND ReceiptType='I';
+		SELECT SUM(ReceiptAmount) INTO vAmountPaid FROM CashReceipt WHERE LoanCode = vLoanCode AND (ReceiptType='I' OR ReceiptType='S');
 		IF vAmountPaid IS NULL THEN
 			SET vAmountPaid := 0;
 		END IF;
 		SET vWeeksPaid := vAmountPaid/vEWI;
 		SET vNoOfInstalments := vWeeksCompleted - vWeeksPaid;
+        SET vPendingAmount := vEWI*vTenure - vAmountPaid;
 		IF vNoOfInstalments >= 1 THEN
-			SET vFromDate := DATE_ADD(vLoanDisposalDate, INTERVAL (vWeeksPaid + 1)*7 DAY);
-			SET vDueDate := DATE_FORMAT(vFromDate,'%d-%m-%Y');
-		END IF;
-		IF vNoOfInstalments > 1 THEN
-			SET vToDate := DATE_ADD(vLoanDisposalDate, INTERVAL (vWeeksPaid + vNoOfInstalments)*7 DAY);
-			SET vDueDate := CONCAT(DATE_FORMAT(vFromDate,'%d-%m-%Y'), ' to ', DATE_FORMAT(vToDate,'%d-%m-%Y'));
-		END IF;
-		IF vNoOfInstalments >= 1 THEN
-			INSERT INTO EwiDueRows VALUES(vLoanCode, vBranchId, vMemberCode, vMemberName, vPhone,vNoOfInstalments, vEWI, vDueDate);
+			SET vDueDate := DATE_ADD(vLoanDisposalDate, INTERVAL (vWeeksPaid + 1)*7 DAY);
+            INSERT INTO EwiDueRows VALUES(vLoanCode, vBranchId, vMemberCode, vMemberName, vPhone,vNoOfInstalments, vEWI, vPendingAmount, vDueDate);
 		END IF;
 	END LOOP;
 	SELECT * FROM EwiDueRows;
@@ -1184,7 +1185,7 @@ READS SQL DATA
 BEGIN
 	DECLARE vEWI INT;
 	SELECT 
-		EWI INTO vEWI
+		AVG(EWI) INTO vEWI
 	FROM
 		MemberGroup MG
 			INNER JOIN
@@ -1193,8 +1194,8 @@ BEGIN
 		Loan L ON M.MemberCode = L.MemberCode
 	WHERE
 		MG.GroupCode = pGroupCode
-			AND L.LoanStatus <> 'C'
-	LIMIT 1;
+			AND L.LoanStatus <> 'C';
+	-- LIMIT 1;
 	RETURN vEWI;
 END//
 DELIMITER ;
@@ -1202,29 +1203,29 @@ DELIMITER ;
 SELECT GetEWI(1);
 
 --GetTotalEWI 
---Version 2.0
+--Version 3.0
 DELIMITER //
 DROP FUNCTION IF EXISTS `GetTotalEWI`//
 CREATE FUNCTION GetTotalEWI(pGroupCode CHAR(7)) RETURNS INT
 READS SQL DATA
 BEGIN
-	DECLARE vTotalEWI INT;
-	SELECT 
-		SUM(EWI)*Tenure INTO vTotalEWI
-	FROM
-		MemberGroup MG
-			INNER JOIN
-		Member M ON MG.GroupCode = M.GroupCode
-			INNER JOIN
-		Loan L ON M.MemberCode = L.MemberCode
-	WHERE
-		MG.GroupCode = pGroupCode
-			AND L.LoanStatus <> 'C'; 
-	RETURN vTotalEWI;
+    DECLARE vTotalEWI INT;
+    SELECT 
+        SUM(L.EWI * L.Tenure) INTO vTotalEWI  -- ✅ Sum the product
+    FROM
+        MemberGroup MG
+            INNER JOIN
+        Member M ON MG.GroupCode = M.GroupCode
+            INNER JOIN
+        Loan L ON M.MemberCode = L.MemberCode
+    WHERE
+        MG.GroupCode = pGroupCode
+            AND L.LoanStatus <> 'C'; 
+    RETURN vTotalEWI;
 END//
 DELIMITER ;
 -- Test
-SELECT GetTotalEWI(1);
+SELECT GetTotalEWI('0010101');
 
 --GetTenure
 --Version 2.0 
@@ -1250,7 +1251,8 @@ BEGIN
 END//
 DELIMITER ;
 -- Test
-SELECT GetTenure(1);
+SELECT GetTenure('0010101');
+
 
 --GetTotalMembers
 --Version 2.0
@@ -1294,7 +1296,7 @@ BEGIN
 		CashReceipt CR ON CR.LoanCode = L.LoanCode
 	WHERE
 		M.GroupCode = pGroupCode
-			AND L.LoanStatus <> 'C' AND CR.ReceiptType='I';
+			AND L.LoanStatus <> 'C' AND (CR.ReceiptType='I'OR CR.ReceiptType='S');
 	IF vTotalEWIReceived IS NULL THEN
 		SET vTotalEWIReceived:=0;
 	END IF;
@@ -1302,7 +1304,7 @@ BEGIN
 END//
 DELIMITER ;
 -- Test
-SELECT GetTotalEWIReceived(1);
+SELECT GetTotalEWIReceived('0010101');
 
 --GetLeaderName
 --Version 2.0
@@ -1330,29 +1332,147 @@ DELIMITER ;
 SELECT GetLeaderName(1);
 
 
+DELIMITER //
+DROP FUNCTION IF EXISTS `GetAverageLoanAmount`//
+CREATE FUNCTION GetAverageLoanAmount(pGroupCode CHAR(7)) RETURNS INT
+READS SQL DATA
+BEGIN
+    DECLARE vAverageLoanAmount INT;
+    SELECT 
+        AVG(L.LoanAmount) INTO vAverageLoanAmount
+    FROM
+        MemberGroup MG
+            INNER JOIN
+        Member M ON MG.GroupCode = M.GroupCode
+            INNER JOIN
+        Loan L ON M.MemberCode = L.MemberCode
+    WHERE
+        MG.GroupCode = pGroupCode
+            AND L.LoanStatus <> 'C';
+    RETURN COALESCE(vAverageLoanAmount, 0);
+END//
+DELIMITER ;
+
+
+DELIMITER //
+DROP FUNCTION IF EXISTS `GetWeeksCompleted`//
+CREATE FUNCTION GetWeeksCompleted(pGroupCode CHAR(7)) RETURNS INT
+READS SQL DATA
+BEGIN
+    DECLARE vWeeksCompleted INT;
+    DECLARE vTotalMembers INT;
+    DECLARE vTotalEWIExpected INT;
+    DECLARE vTotalEWIReceived INT;
+    
+    -- Get total members with active loans
+    SELECT COUNT(*) INTO vTotalMembers
+    FROM Member M
+        INNER JOIN Loan L ON M.MemberCode = L.MemberCode
+    WHERE M.GroupCode = pGroupCode
+        AND L.LoanStatus <> 'C';
+    
+    -- If no members, return 0
+    IF vTotalMembers = 0 THEN
+        RETURN 0;
+    END IF;
+    
+    -- Get total EWI received (instalment receipts only, ReceiptType = 'I')
+    SELECT COALESCE(SUM(ReceiptAmount), 0) INTO vTotalEWIReceived
+    FROM Member M
+        INNER JOIN Loan L ON M.MemberCode = L.MemberCode
+        INNER JOIN CashReceipt CR ON CR.LoanCode = L.LoanCode
+    WHERE M.GroupCode = pGroupCode
+        AND L.LoanStatus <> 'C'
+        AND CR.ReceiptType = 'I';
+    
+    -- Get total EWI amount per member (average EWI * total members * tenure for first member)
+    -- This represents the expected total collection
+    SELECT COALESCE(AVG(L.EWI), 0) INTO vTotalEWIExpected
+    FROM Member M
+        INNER JOIN Loan L ON M.MemberCode = L.MemberCode
+    WHERE M.GroupCode = pGroupCode
+        AND L.LoanStatus <> 'C';
+    
+    -- Calculate weeks completed: Total EWI Received / (Total Members * Average EWI per week)
+    -- Formula: Weeks = Total Received / (Members * Weekly Rate)
+    IF vTotalEWIExpected > 0 AND vTotalMembers > 0 THEN
+        SET vWeeksCompleted = ROUND(vTotalEWIReceived / (vTotalMembers * vTotalEWIExpected));
+    ELSE
+        SET vWeeksCompleted = 0;
+    END IF;
+    
+    RETURN vWeeksCompleted;
+END//
+DELIMITER ;
+
+DELIMITER //
+DROP FUNCTION IF EXISTS `GetAverageEWIReceived`//
+CREATE FUNCTION GetAverageEWIReceived(pGroupCode CHAR(7)) RETURNS INT
+READS SQL DATA
+BEGIN
+    DECLARE vAverageEWIReceived INT;
+    DECLARE vTotalMembers INT;
+    DECLARE vWeeksCompleted INT;
+    DECLARE vTotalEWIReceived INT;
+    
+    -- Get total members with active loans
+    SELECT COUNT(*) INTO vTotalMembers
+    FROM Member M
+        INNER JOIN Loan L ON M.MemberCode = L.MemberCode
+    WHERE M.GroupCode = pGroupCode
+        AND L.LoanStatus <> 'C';
+    
+    -- Get weeks completed
+    SELECT GetWeeksCompleted(pGroupCode) INTO vWeeksCompleted;
+    
+    -- Get total EWI received
+    SELECT COALESCE(SUM(ReceiptAmount), 0) INTO vTotalEWIReceived
+    FROM Member M
+        INNER JOIN Loan L ON M.MemberCode = L.MemberCode
+        INNER JOIN CashReceipt CR ON CR.LoanCode = L.LoanCode
+    WHERE M.GroupCode = pGroupCode
+        AND L.LoanStatus <> 'C'
+        AND CR.ReceiptType = 'I';
+    
+    -- Calculate average EWI received per week
+    -- Formula: Total Received / Weeks Completed
+    IF vWeeksCompleted > 0 THEN
+        SET vAverageEWIReceived = ROUND(vTotalEWIReceived / vWeeksCompleted);
+    ELSE
+        SET vAverageEWIReceived = 0;
+    END IF;
+    
+    RETURN vAverageEWIReceived;
+END//
+DELIMITER ;
+
 -- GetCumulativeReport
 -- Version 2.0
 DELIMITER //
 DROP PROCEDURE IF EXISTS `GetCumulativeReport`//
 CREATE PROCEDURE GetCumulativeReport() 
 BEGIN
-	SELECT * FROM (
-		SELECT 
-			GroupCode,
-			GroupName,
-			GetLeaderName(GroupCode) AS LeaderName,
-			GetEWIDay(GroupCode) AS EWIDay,
-			GetTotalEWI(GroupCode) AS TotalEWI,
-			GetTotalMembers(GroupCode) AS TotalMembers,
-			GetEWI(GroupCode) AS EWI,
-			GetTenure(GroupCode) AS Tenure,
-			GetTotalEWIReceived(GroupCode) AS TotalEWIReceived
-		FROM MemberGroup) 
-		AS MG
-	WHERE 
-		MG.EwiDay IS NOT NULL;
-END;//
+    SELECT * FROM (
+        SELECT 
+            GroupCode,
+            GroupName,
+            GetLeaderName(GroupCode) AS LeaderName,
+            GetEWIDay(GroupCode) AS EWIDay,
+            GetAverageLoanAmount(GroupCode) AS AverageLoanAmount,
+            GetTenure(GroupCode) AS Tenure,
+            GetWeeksCompleted(GroupCode) AS WeeksCompleted,
+            GetAverageEWIReceived(GroupCode) AS AverageEWIReceived,
+            GetTotalEWI(GroupCode) AS TotalEwi,
+            GetTotalMembers(GroupCode) AS TotalMembers,
+            GetEWI(GroupCode) AS Ewi,
+            GetTotalEWIReceived(GroupCode) AS TotalEwiReceived
+        FROM MemberGroup
+    ) AS MG
+    WHERE MG.EwiDay IS NOT NULL;
+END//
 DELIMITER ;
+
+CALL GetCumulativeReport();
 
 -- GetGroupPFStatus
 -- Version 2.0 (GroupId to GroupCode)
@@ -1452,7 +1572,7 @@ DROP PROCEDURE IF EXISTS `GetGroupMembersOngoingLoan`//
 CREATE PROCEDURE GetGroupMembersOngoingLoan(pGroupCode CHAR(7))
 BEGIN
 	SELECT 
-		M.MemberCode, M.MemberName, L.LoanCode, L.LoanAmount, L.ProcessingFee, L.Insurance
+		M.MemberCode, M.MemberName, L.LoanCode, L.LoanAmount, L.ProcessingFee, L.Insurance, L.Ewi
 	FROM
 		MemberGroup MG
 			INNER JOIN
@@ -1537,6 +1657,534 @@ DELIMITER ;
 
 -- getmember
 -- getallmembers
+
+
+DELIMITER //
+DROP PROCEDURE IF EXISTS `GetPreClosureDetails`//
+CREATE PROCEDURE GetPreClosureDetails(
+    pLoanCode CHAR(10), 
+    OUT pLoanStatus VARCHAR(1), 
+    OUT pMemberCode CHAR(9), 
+    OUT pMemberName VARCHAR(50),
+    OUT pLoanAmount INT,
+    OUT pInterestRate DECIMAL(5,2),
+    OUT pTenure INT,
+    OUT pLoanDisposalDate DATE,
+    OUT pEwi INT, 
+    OUT pTotalPendingInstalments INT,
+    OUT pTotalDue INT,
+    OUT pSuggestedDiscount INT,
+    OUT pInterestSavings INT,
+    OUT pDelayPenalty INT,
+    OUT pAdvanceBenefit INT
+)
+GetPreClosureDetails:BEGIN
+    DECLARE vWeeksCompleted INT;
+    DECLARE vWeeksPaid INT;
+    DECLARE vAmountPaid INT;
+    DECLARE vBalance DECIMAL(10,2);
+    DECLARE vInterest DECIMAL(10,2);
+    DECLARE vPrincipal DECIMAL(10,2);
+    DECLARE vFactor DECIMAL(20,10);
+    DECLARE vTotalInterestRemaining DECIMAL(10,2);
+    DECLARE vCurrentWeek INT;
+    DECLARE vDaysDiff INT;
+    DECLARE vPaymentAdjustment DECIMAL(10,2);
+    DECLARE vReceiptDate DATE;
+    DECLARE vExpectedDate DATE;
+    DECLARE vReceiptAmount INT;
+    DECLARE done INT DEFAULT FALSE;
+    
+    -- Cursor for receipts
+    DECLARE receipt_cursor CURSOR FOR 
+        SELECT ActualReceiptDate, ReceiptAmount
+        FROM CashReceipt 
+        WHERE LoanCode = pLoanCode AND ReceiptType = 'I'
+        ORDER BY ReceiptDate;
+    
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+    
+    SET pLoanStatus := 'N';
+    SET pTotalPendingInstalments := 0;
+    SET pSuggestedDiscount := 0;
+    SET pInterestSavings := 0;
+    SET pDelayPenalty := 0;
+    SET pAdvanceBenefit := 0;
+    
+    -- Get loan details
+    SELECT MemberCode, LoanAmount, InterestRate, Tenure, LoanDisposalDate, EWI, LoanStatus 
+    INTO pMemberCode, pLoanAmount, pInterestRate, pTenure, pLoanDisposalDate, pEwi, pLoanStatus 
+    FROM Loan 
+    WHERE LoanCode = pLoanCode;
+    
+    IF pMemberCode IS NULL THEN
+        SET pLoanStatus := 'I';
+        LEAVE GetPreClosureDetails;
+    END IF;
+    
+    SELECT MemberName INTO pMemberName FROM Member WHERE MemberCode = pMemberCode;
+    
+    IF pLoanStatus = 'O' THEN
+        -- Calculate weeks completed and paid
+        SET vWeeksCompleted := FLOOR(DATEDIFF(SYSDATE(), pLoanDisposalDate) / 7);
+        IF vWeeksCompleted > pTenure THEN
+            SET vWeeksCompleted := pTenure;
+        END IF;
+        
+        SELECT COALESCE(SUM(ReceiptAmount), 0) INTO vAmountPaid 
+        FROM CashReceipt 
+        WHERE LoanCode = pLoanCode AND ReceiptType = 'I';
+        
+        SET vWeeksPaid := vAmountPaid / pEwi;
+        SET pTotalPendingInstalments := pTenure - vWeeksPaid;
+        SET pTotalDue := pTotalPendingInstalments * pEwi;
+        
+        -- Calculate interest savings on remaining instalments
+        SET vFactor := POW(1 + pInterestRate / 5200, pTenure);
+        SET vBalance := pLoanAmount;
+        SET vTotalInterestRemaining := 0;
+        
+        -- Loop through paid instalments to get current balance
+        SET vCurrentWeek := 1;
+        WHILE vCurrentWeek <= vWeeksPaid DO
+            SET vInterest := vBalance * pInterestRate / 100 / 52;
+            SET vPrincipal := pEwi - vInterest;
+            SET vBalance := vBalance - vPrincipal;
+            SET vCurrentWeek := vCurrentWeek + 1;
+        END WHILE;
+        
+        -- Calculate interest for remaining instalments
+        SET vCurrentWeek := vWeeksPaid + 1;
+        WHILE vCurrentWeek <= pTenure DO
+            SET vInterest := vBalance * pInterestRate / 100 / 52;
+            SET vPrincipal := pEwi - vInterest;
+            SET vTotalInterestRemaining := vTotalInterestRemaining + vInterest;
+            SET vBalance := vBalance - vPrincipal;
+            SET vCurrentWeek := vCurrentWeek + 1;
+        END WHILE;
+        
+        SET pInterestSavings := ROUND(vTotalInterestRemaining);
+        
+        -- Calculate delay penalty AND advance benefit
+        -- Process each receipt to check if paid early or late
+        SET vPaymentAdjustment := 0;
+        SET vCurrentWeek := 0;
+        SET vBalance := pLoanAmount;
+        
+        OPEN receipt_cursor;
+        
+        read_loop: LOOP
+            FETCH receipt_cursor INTO vReceiptDate, vReceiptAmount;
+            IF done THEN
+                LEAVE read_loop;
+            END IF;
+            
+            -- Calculate how many instalments this receipt covers
+            SET vCurrentWeek := vCurrentWeek + (vReceiptAmount / pEwi);
+            
+            -- Expected date for this instalment (approximate)
+            SET vExpectedDate := DATE_ADD(pLoanDisposalDate, INTERVAL vCurrentWeek * 7 DAY);
+            
+            -- Calculate days difference (negative = advance, positive = delay)
+            SET vDaysDiff := DATEDIFF(vReceiptDate, vExpectedDate);
+            
+            -- Calculate daily interest on the outstanding balance
+            -- Using the current balance for calculation
+            IF vDaysDiff != 0 THEN
+                -- Daily interest rate applied to the receipt amount
+                SET vPaymentAdjustment := vPaymentAdjustment + 
+                    (vReceiptAmount * pInterestRate / 100 / 365 * vDaysDiff);
+            END IF;
+            
+            -- Update balance (simplified)
+            SET vInterest := vBalance * pInterestRate / 100 / 52 * (vReceiptAmount / pEwi);
+            SET vPrincipal := vReceiptAmount - vInterest;
+            SET vBalance := vBalance - vPrincipal;
+            
+        END LOOP;
+        
+        CLOSE receipt_cursor;
+        
+        -- Separate into delay penalty and advance benefit
+        IF vPaymentAdjustment > 0 THEN
+            -- Positive means delays (member paid late)
+            SET pDelayPenalty := ROUND(vPaymentAdjustment);
+            SET pAdvanceBenefit := 0;
+        ELSE
+            -- Negative means advances (member paid early)
+            SET pDelayPenalty := 0;
+            SET pAdvanceBenefit := ROUND(ABS(vPaymentAdjustment));
+        END IF;
+        
+        -- Calculate suggested discount: Interest Savings - Delay Penalty + Advance Benefit
+        SET pSuggestedDiscount := pInterestSavings - pDelayPenalty + pAdvanceBenefit;
+        
+        -- Ensure discount is not negative or more than total due
+        IF pSuggestedDiscount < 0 THEN
+            SET pSuggestedDiscount := 0;
+        END IF;
+        
+        IF pSuggestedDiscount > pTotalDue THEN
+            SET pSuggestedDiscount := pTotalDue;
+        END IF;
+        
+    ELSE
+        SET pEwi := 0;
+    END IF;
+END//
+DELIMITER ;
+
+DELIMITER //
+DROP PROCEDURE IF EXISTS `GeneratePreClosureReceipt`//
+CREATE PROCEDURE GeneratePreClosureReceipt(
+    pLoanCode VARCHAR(10), 
+    pPreClosureDiscount INT, 
+    pActualReceiptDate DATE, 
+    pUserId VARCHAR(20), 
+    OUT pReceiptId INT
+)
+BEGIN
+    DECLARE vTenure INT;
+    DECLARE vLoanDisposalDate DATE;
+    DECLARE vEWI INT;
+    DECLARE vAmountPaid INT;
+    DECLARE vWeeksPaid INT;
+    DECLARE vPendingInstalments INT;
+    DECLARE vTotalDue INT;
+    DECLARE vNetAmount INT;
+    DECLARE vDescription VARCHAR(100);
+    
+    -- Get loan details
+    SELECT Tenure, LoanDisposalDate, EWI 
+    INTO vTenure, vLoanDisposalDate, vEWI 
+    FROM Loan 
+    WHERE LoanCode = pLoanCode;
+    
+    -- Calculate amount already paid
+    SELECT COALESCE(SUM(ReceiptAmount), 0) 
+    INTO vAmountPaid 
+    FROM CashReceipt 
+    WHERE LoanCode = pLoanCode AND ReceiptType = 'I';
+    
+    -- Calculate weeks paid and pending instalments
+    SET vWeeksPaid := vAmountPaid / vEWI;
+    SET vPendingInstalments := vTenure - vWeeksPaid;
+    
+    -- Calculate total due and net amount after discount
+    SET vTotalDue := vPendingInstalments * vEWI;
+    SET vNetAmount := vTotalDue - pPreClosureDiscount;
+    
+    -- Create description
+    SET vDescription := CONCAT(
+        'Pre-Closure: ', 
+        CAST(vPendingInstalments AS CHAR), 
+        ' instalments (Total: ₹', 
+        CAST(vTotalDue AS CHAR),
+        ', Discount: ₹',
+        CAST(pPreClosureDiscount AS CHAR),
+        ', Net: ₹',
+        CAST(vNetAmount AS CHAR),
+        ')'
+    );
+    
+    SAVEPOINT Trans;
+    
+    -- Insert pre-closure receipt
+    INSERT INTO CashReceipt(
+        LoanCode, 
+        ReceiptType, 
+        ReceiptAmount, 
+        ReceiptDate, 
+        Description, 
+        ActualReceiptDate, 
+        UserId
+    )
+    VALUES(
+        pLoanCode, 
+        'S', 
+        vNetAmount, 
+        SYSDATE(), 
+        vDescription, 
+        pActualReceiptDate, 
+        pUserId
+    );
+    
+    -- Update loan status to 'S' (Settled) and save discount
+    UPDATE Loan 
+    SET LoanStatus = 'S', 
+        PreClosureDiscount = pPreClosureDiscount 
+    WHERE LoanCode = pLoanCode;
+    
+    SET pReceiptId := LAST_INSERT_ID();
+    
+    COMMIT;
+END//
+DELIMITER ;
+
+DELIMITER //
+DROP PROCEDURE IF EXISTS `MarkLoanAsBad`//
+CREATE PROCEDURE MarkLoanAsBad(
+    pLoanCode CHAR(10),
+    pUserId VARCHAR(20),
+    pStatusRemarks VARCHAR(50)
+)
+BEGIN
+    DECLARE vCurrentStatus CHAR(1);
+    
+    -- Get current loan status
+    SELECT LoanStatus INTO vCurrentStatus 
+    FROM Loan 
+    WHERE LoanCode = pLoanCode;
+    
+    -- Only allow marking as bad if loan is currently Ongoing
+    IF vCurrentStatus = 'O' THEN
+        UPDATE Loan 
+        SET LoanStatus = 'b',
+            StatusRemarks = pStatusRemarks,
+            ApprovedBy = pUserId
+        WHERE LoanCode = pLoanCode;
+        
+        SELECT 1 AS StatusCode, 'Loan marked as bad loan' AS Message;
+    ELSE
+        SELECT 0 AS StatusCode, 'Only ongoing loans can be marked as bad' AS Message;
+    END IF;
+END//
+DELIMITER ;
+
+DELIMITER //
+DROP PROCEDURE IF EXISTS `GetBadLoanDetails`//
+CREATE PROCEDURE GetBadLoanDetails(
+    pLoanCode CHAR(10),
+    OUT pLoanStatus CHAR(1),
+    OUT pMemberCode CHAR(9),
+    OUT pMemberName VARCHAR(50),
+    OUT pLoanAmount INT,
+    OUT pTotalDue INT,
+    OUT pAmountPaid INT,
+    OUT pPendingAmount INT
+)
+GetBadLoanDetails:BEGIN
+    DECLARE vTenure INT;
+    DECLARE vEWI INT;
+    DECLARE vProcessingFee INT;
+    DECLARE vInsurance INT;
+    
+    SET pLoanStatus := 'N';
+    SET pTotalDue := 0;
+    SET pAmountPaid := 0;
+    SET pPendingAmount := 0;
+    
+    -- Get loan details
+    SELECT MemberCode, LoanAmount, Tenure, EWI, ProcessingFee, Insurance, LoanStatus
+    INTO pMemberCode, pLoanAmount, vTenure, vEWI, vProcessingFee, vInsurance, pLoanStatus
+    FROM Loan 
+    WHERE LoanCode = pLoanCode;
+    
+    IF pMemberCode IS NULL THEN
+        SET pLoanStatus := 'I';
+        LEAVE GetBadLoanDetails;
+    END IF;
+    
+    -- Get member name
+    SELECT MemberName INTO pMemberName FROM Member WHERE MemberCode = pMemberCode;
+    
+    IF pLoanStatus = 'b' THEN
+        -- Calculate total due (all instalments + processing fee + insurance)
+        SET pTotalDue := vTenure * vEWI;
+        
+        -- Calculate amount already paid (all receipts for this loan)
+        SELECT COALESCE(SUM(ReceiptAmount), 0) INTO pAmountPaid
+        FROM CashReceipt 
+        WHERE LoanCode = pLoanCode AND (ReceiptType='I' OR ReceiptType='S');
+        
+        -- Calculate pending amount
+        SET pPendingAmount := pTotalDue - pAmountPaid;
+        
+        -- Ensure pending amount is not negative
+        IF pPendingAmount < 0 THEN
+            SET pPendingAmount := 0;
+        END IF;
+    ELSE
+        SET pLoanAmount := 0;
+    END IF;
+END//
+DELIMITER ;
+
+-- Generate Bad Loan Receipt
+DELIMITER //
+DROP PROCEDURE IF EXISTS `GenerateBadLoanReceipt`//
+CREATE PROCEDURE GenerateBadLoanReceipt(
+    pLoanCode VARCHAR(10),
+    pPaymentAmount INT,
+    pSettlementDiscount INT,
+    pActualReceiptDate DATE,
+    pUserId VARCHAR(20),
+    OUT pReceiptId INT,
+    OUT pRemainingBalance INT,
+    OUT pIsFullSettlement TINYINT
+)
+BEGIN
+    DECLARE vTenure INT;
+    DECLARE vEWI INT;
+    DECLARE vProcessingFee INT;
+    DECLARE vInsurance INT;
+    DECLARE vTotalDue INT;
+    DECLARE vAmountPaid INT;
+    DECLARE vPendingAmount INT;
+    DECLARE vDescription VARCHAR(100);
+    DECLARE vTotalPayment INT;
+    
+    -- Get loan details
+    SELECT Tenure, EWI, ProcessingFee, Insurance
+    INTO vTenure, vEWI, vProcessingFee, vInsurance
+    FROM Loan 
+    WHERE LoanCode = pLoanCode;
+    
+    -- Calculate total due
+    SET vTotalDue := (vTenure * vEWI);
+    
+    -- Calculate amount already paid
+    SELECT COALESCE(SUM(ReceiptAmount), 0) INTO vAmountPaid
+    FROM CashReceipt 
+    WHERE LoanCode = pLoanCode AND (ReceiptType='I' OR ReceiptType='S');
+    
+    -- Calculate pending amount before this payment
+    SET vPendingAmount := vTotalDue - vAmountPaid;
+    
+    -- Total effective payment (payment + discount)
+    SET vTotalPayment := pPaymentAmount + pSettlementDiscount;
+    
+    -- Calculate remaining balance after this payment
+    SET pRemainingBalance := vPendingAmount - vTotalPayment;
+    
+    -- Check if this is full settlement
+    IF pRemainingBalance <= 0 THEN
+        SET pIsFullSettlement := 1;
+        SET pRemainingBalance := 0;
+    ELSE
+        SET pIsFullSettlement := 0;
+    END IF;
+    
+    -- Create description
+    IF pIsFullSettlement = 1 THEN
+        IF pSettlementDiscount > 0 THEN
+            SET vDescription := CONCAT('Bad Loan Settlement (Payment: ₹', 
+                                      CAST(pPaymentAmount AS CHAR),
+                                      ', Discount: ₹',
+                                      CAST(pSettlementDiscount AS CHAR),
+                                      ')');
+        ELSE
+            SET vDescription := CONCAT('Bad Loan Full Settlement (₹', 
+                                      CAST(pPaymentAmount AS CHAR),
+                                      ')');
+        END IF;
+    ELSE
+        SET vDescription := CONCAT('Bad Loan Part Payment (₹', 
+                                  CAST(pPaymentAmount AS CHAR),
+                                  ', Pending: ₹',
+                                  CAST(pRemainingBalance AS CHAR),
+                                  ')');
+    END IF;
+    
+    SAVEPOINT Trans;
+    
+    -- Insert receipt for the payment
+    INSERT INTO CashReceipt(
+        LoanCode, 
+        ReceiptType, 
+        ReceiptAmount, 
+        ReceiptDate, 
+        Description, 
+        ActualReceiptDate, 
+        UserId
+    )
+    VALUES(
+        pLoanCode, 
+        'S', 
+        pPaymentAmount, 
+        SYSDATE(), 
+        vDescription, 
+        pActualReceiptDate, 
+        pUserId
+    );
+    
+    SET pReceiptId := LAST_INSERT_ID();
+    
+    -- If full settlement, update loan status and save discount
+    IF pIsFullSettlement = 1 THEN
+        UPDATE Loan 
+        SET LoanStatus = 'B',
+            BadLoanDiscount = pSettlementDiscount
+        WHERE LoanCode = pLoanCode;
+    END IF;
+    
+    COMMIT;
+END//
+DELIMITER ;
+
+DELIMITER //
+DROP PROCEDURE IF EXISTS `GetFinancialYears`//
+CREATE PROCEDURE GetFinancialYears()
+BEGIN
+    DECLARE vMinYear INT;
+    DECLARE vMaxYear INT;
+    DECLARE vCurrentYear INT;
+    DECLARE vStartDate DATE;
+    DECLARE vEndDate DATE;
+    
+    -- Get min and max years from loan data
+    SELECT 
+        YEAR(MIN(LoanDate)),
+        YEAR(MAX(LoanDate))
+    INTO vMinYear, vMaxYear
+    FROM Loan;
+    
+    -- Adjust for financial year (Apr-Mar)
+    -- If min loan is before April, FY starts from previous year
+    SELECT MIN(LoanDate) INTO vStartDate FROM Loan;
+    IF MONTH(vStartDate) < 4 THEN
+        SET vMinYear := vMinYear - 1;
+    END IF;
+    
+    -- If max loan is after March, include next FY
+    SELECT MAX(LoanDate) INTO vEndDate FROM Loan;
+    IF MONTH(vEndDate) >= 4 THEN
+        SET vMaxYear := vMaxYear + 1;
+    END IF;
+    
+    -- Create temp table for results
+    CREATE TEMPORARY TABLE IF NOT EXISTS TempFY (
+        FYCode VARCHAR(10),
+        FYDisplay VARCHAR(20),
+        StartDate DATE,
+        EndDate DATE,
+        SortOrder INT
+    );
+    
+    -- Add "Overall" option
+    INSERT INTO TempFY VALUES ('OVERALL', 'Overall', '1900-01-01', '2099-12-31', 0);
+    
+    -- Generate FY list
+    SET vCurrentYear := vMinYear;
+    WHILE vCurrentYear <= vMaxYear DO
+        INSERT INTO TempFY VALUES (
+            CONCAT(vCurrentYear, '-', LPAD(vCurrentYear + 1 - 2000, 2, '0')),
+            CONCAT('FY ', vCurrentYear, '-', vCurrentYear + 1 - 2000),
+            CONCAT(vCurrentYear, '-04-01'),
+            CONCAT(vCurrentYear + 1, '-03-31'),
+            vCurrentYear
+        );
+        SET vCurrentYear := vCurrentYear + 1;
+    END WHILE;
+    
+    -- Return results ordered by year
+    SELECT FYCode, FYDisplay, StartDate, EndDate 
+    FROM TempFY 
+    ORDER BY SortOrder DESC;
+    
+    DROP TEMPORARY TABLE IF EXISTS TempFY;
+END//
+DELIMITER ;
 
 DELIMITER //
 DROP PROCEDURE IF EXISTS `debug_msg`//

@@ -1,0 +1,487 @@
+﻿@model iMicroFin.Models.GroupInstalmentReceipt
+@using System.Globalization;
+@{
+    ViewBag.Title = "Group Instalment Receipt";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="~/css/autocomplete.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="~/css/receipt/group-instalment-receipt-form.css" />
+
+<div class="receipt-form-container">
+    <div class="receipt-card">
+        <div class="card-header">
+            <h2>Group Instalment Receipt</h2>
+        </div>
+
+        <div class="card-body">
+            @using (Html.BeginForm("GroupInstalmentReceipt", "Receipt", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+
+                <!-- Info Box -->
+                <div class="form-section">
+                    <div class="info-box">
+                        <p>💡 Select a group to view all members and configure individual instalment payments</p>
+                    </div>
+
+                    <!-- Group Selection -->
+                    <div class="form-row-split">
+                        <div class="form-group">
+                            <label class="form-label" for="GroupName">
+                                Group Name <span style="color: #dc3545;">*</span>
+                            </label>
+                            @Html.TextBoxFor(m => m.GroupName, new {
+                            id = "GroupName",
+                                                @class = "form-control autocomplete-input",
+                                                placeholder = "Search and select group",
+                                                required = "true",
+                                                tabindex = "1",
+                                                autocomplete = "off"
+                                                })
+                        @Html.HiddenFor(m => m.GroupCode, new { id = "GroupCode" })
+                        <input type="hidden" id="CenterName" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="GroupCodeDisplay">Group Code</label>
+                        <input type="text" id="GroupCodeDisplay" class="form-control" readonly placeholder="Auto-filled" />
+                    </div>
+                </div>
+
+                <!-- Leader Name and Get Button -->
+                <div class="form-row-inline">
+                    <div class="form-group">
+                        <label class="form-label" for="LeaderName">Leader Name</label>
+                        @Html.TextBoxFor(m => m.LeaderName, new {
+                                                id = "LeaderName",
+                                                @class = "form-control",
+                                                @readonly = "readonly",
+                                                placeholder = "Auto-filled"
+                                                })
+                        <div id="errGroupName" class="error-message"></div>
+                    </div>
+                    <div class="form-group">
+                        <button class="btn btn-secondary" type="button" onclick="checkGroup()" tabindex="2" id="btnGetGroup">
+                            🔍 Get Group Members
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Members Data Section (Hidden Initially) -->
+            <div id="membersDataSection" class="hidden-section">
+                <hr style="margin: 2rem 0; border: none; border-top: 2px solid #e9ecef;">
+
+                <!-- Receipt Date -->
+                <div class="form-section">
+                    <h3 style="margin-bottom: 1rem; color: #212529; font-size: 1.25rem;">Receipt Details</h3>
+
+                    <div class="form-row-split">
+                        <div class="form-group">
+                            <label class="form-label" for="ActualReceiptDate">
+                                Actual Receipt Date <span style="color: #dc3545;">*</span>
+                            </label>
+                            @Html.TextBoxFor(m => m.ActualReceiptDate, new {
+                                                        @class = "form-control date-picker",
+                                                        @required = "true",
+                                                        @Value = DateTime.Now.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture),
+                                                        @autocomplete = "off",
+                                                        @tabindex = "3",
+                                                        @placeholder = "DD/MM/YYYY"
+                                                        })
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Collected By: <span id="collectedByDisplay">-</span></label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Members Summary -->
+                <div class="form-section">
+                    <h3 style="margin-bottom: 1rem; color: #212529; font-size: 1.25rem;">Member Payment Configuration</h3>
+                    <div class="members-count" id="membersCountDiv"></div>
+
+                    <!-- Summary Cards -->
+                    <div class="summary-container" id="summaryContainer">
+                        <div class="summary-card">
+                            <div class="summary-label">Total Members</div>
+                            <div class="summary-value" id="totalMembersCount">0</div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="summary-label">Total Instalments</div>
+                            <div class="summary-value" id="totalInstalmentsValue">0</div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="summary-label">Total EWI Amount</div>
+                            <div class="summary-value">₹ <span id="totalEwiValue">0.00</span></div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="summary-label">Grand Total</div>
+                            <div class="summary-value">₹ <span id="grandTotalValue">0.00</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Members Table -->
+                <div class="form-section">
+                    <div class="members-table-wrapper">
+                        <table class="members-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 12%;">Member Code</th>
+                                    <th style="width: 20%;">Member Name</th>
+                                    <th style="width: 12%;">Loan Code</th>
+                                    <th style="width: 10%; text-align: center;">EWI (₹)</th>
+                                    <th style="width: 10%; text-align: center;">Current Due</th>
+                                    <th style="width: 10%; text-align: center;">Total Pending</th>
+                                    <th style="width: 13%; text-align: center;">Pay Instalments</th>
+                                    <th style="width: 13%; text-align: right;">Total Due (₹)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="membersTableBody">
+                                <!-- Members will be populated here -->
+                            </tbody>
+                        </table>
+                        <div id="noMembersMsg" class="no-members-msg" style="display: none;">
+                            No members found for this group
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="form-group" style="margin-top: 2rem;">
+                    <button class="btn btn-primary" type="submit" tabindex="4" style="width: 100%;">
+                        💾 Generate Group Receipts
+                    </button>
+                </div>
+            </div>
+                        }
+        </div>
+    </div>
+</div>
+
+<script src="~/js/autocomplete.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+    let groupAutoComplete;
+    let membersList = [];
+    let ewiAmountMap = {};
+    let currentDueMap = {};
+    let totalPendingMap = {};
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize date picker
+        flatpickr(".date-picker", {
+            dateFormat: "d/m/Y",
+            defaultDate: new Date(),
+            maxDate: "today",
+            allowInput: true
+        });
+
+        // Initialize group autocomplete
+        initializeGroupAutoComplete();
+    });
+
+    function initializeGroupAutoComplete() {
+        groupAutoComplete = new MultiFieldAutoComplete({
+            inputId: 'GroupName',
+            hiddenIds: ['GroupCode', 'CenterName', 'LeaderName'],
+            fieldNames: ['groupCode', 'centerName', 'leaderName', 'groupName'],
+            serviceUrl: '/Group/GetGroupListByPattern',
+            minChars: 1,
+            debounceTime: 300,
+            onSelect: function (group) {
+                console.log('Selected group:', group);
+                document.getElementById('GroupCodeDisplay').value = group.groupCode || '';
+                // Clear members section when new group is selected
+                document.getElementById('membersDataSection').classList.add('hidden-section');
+                document.getElementById('errGroupName').classList.remove('show');
+                membersList = [];
+            }
+        });
+
+        groupAutoComplete.formatItem = function (item) {
+            const groupCode = item.groupCode || '';
+            const groupName = item.groupName || '';
+            const centerName = item.centerName || '';
+
+            return `
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <strong>${groupName}</strong>
+                        <span class="autocomplete-code">${groupCode}</span>
+                    </div>
+                    <div style="font-size: 0.85em; color: #666;">
+                        Center: ${centerName}
+                    </div>
+                </div>
+            `;
+        };
+    }
+
+    async function checkGroup() {
+        const groupCode = document.getElementById('GroupCode').value.trim();
+        const errorDiv = document.getElementById('errGroupName');
+        const membersDataSection = document.getElementById('membersDataSection');
+        const btnGetGroup = document.getElementById('btnGetGroup');
+
+        // Validate group selection
+        if (!groupCode) {
+            errorDiv.textContent = 'Please select a valid group';
+            errorDiv.classList.add('show');
+            membersDataSection.classList.add('hidden-section');
+            return;
+        }
+
+        // Show loading state
+        const originalBtnText = btnGetGroup.innerHTML;
+        btnGetGroup.disabled = true;
+        btnGetGroup.innerHTML = 'Loading<span class="loading-spinner"></span>';
+        errorDiv.classList.remove('show');
+        membersDataSection.classList.add('hidden-section');
+
+        try {
+            const response = await fetch(`/Receipt/GetGroupInstalmentMembers/${encodeURIComponent(groupCode)}`);
+            const data = await response.json();
+
+            if (data.success && data.members && data.members.length > 0) {
+                membersList = data.members;
+                populateMembers(membersList);
+                membersDataSection.classList.remove('hidden-section');
+                errorDiv.classList.remove('show');
+            } else {
+                let errorMessage = data.message || 'No members found for this group';
+                errorDiv.textContent = '⚠️ ' + errorMessage;
+                errorDiv.classList.add('show');
+                membersDataSection.classList.add('hidden-section');
+            }
+
+        } catch (error) {
+            console.error('Error fetching group members:', error);
+            errorDiv.textContent = '❌ Error fetching group members. Please try again.';
+            errorDiv.classList.add('show');
+            membersDataSection.classList.add('hidden-section');
+        } finally {
+            btnGetGroup.disabled = false;
+            btnGetGroup.innerHTML = originalBtnText;
+        }
+    }
+
+    function populateMembers(members) {
+        const tbody = document.getElementById('membersTableBody');
+        const noMembersMsg = document.getElementById('noMembersMsg');
+        const membersCountDiv = document.getElementById('membersCountDiv');
+
+        tbody.innerHTML = '';
+        membersList = [];
+        ewiAmountMap = {};
+        currentDueMap = {};
+        totalPendingMap = {};
+
+        if (!members || members.length === 0) {
+            noMembersMsg.style.display = 'block';
+            tbody.style.display = 'none';
+            return;
+        }
+
+        noMembersMsg.style.display = 'none';
+        tbody.style.display = 'table-row-group';
+        membersCountDiv.innerHTML = `Showing <strong>${members.length}</strong> member(s) with active loans`;
+
+        members.forEach((member, index) => {
+            const memberCode = member.memberCode || member.MemberCode || '';
+            const memberName = member.memberName || member.MemberName || '';
+            const loanCode = member.loanCode || member.LoanCode || '';
+            const ewi = member.ewi || member.Ewi || 0;
+            const currentDue = member.noOfInstalments || member.NoOfInstalments || 0;
+            const totalPending = member.totalPendingInstalments || member.TotalPendingInstalments || 0;
+
+            // Store values for later use
+            ewiAmountMap[memberCode] = ewi;
+            currentDueMap[memberCode] = currentDue;
+            totalPendingMap[memberCode] = totalPending;
+
+            const row = document.createElement('tr');
+            const totalDueValue = currentDue * ewi;
+
+            row.innerHTML = `
+                <td class="member-code">${escapeHtml(memberCode)}</td>
+                <td class="member-name">${escapeHtml(memberName)}</td>
+                <td class="loan-code">${escapeHtml(loanCode)}</td>
+                <td style="text-align: center; color: #667eea; font-weight: 600;">₹ ${ewi.toFixed(2)}</td>
+                <td style="text-align: center;">
+                    <span class="instalment-value">${currentDue}</span>
+                </td>
+                <td style="text-align: center;">
+                    <span class="instalment-value">${totalPending}</span>
+                </td>
+                <td>
+                    <div>
+                        <input
+                            type="number"
+                            class="member-input"
+                            data-member-code="${memberCode}"
+                            data-current-due="${currentDue}"
+                            data-total-pending="${totalPending}"
+                            data-ewi="${ewi}"
+                            min="0"
+                            max="${totalPending}"
+                            value="${currentDue < 0 ? 0 : currentDue}"
+                            onchange="updateMemberTotal(this)"
+                            onkeyup="updateMemberTotal(this)"
+                        />
+                        <span class="instalment-range">0 - ${totalPending}</span>
+                        <div class="input-error-msg" id="error-${memberCode}"></div>
+                    </div>
+                </td>
+                <td class="totalDue" id="total-${memberCode}">₹ ${totalDueValue.toFixed(2)}</td>
+            `;
+
+            tbody.appendChild(row);
+        });
+
+        updateSummary();
+    }
+
+    function updateMemberTotal(inputElement) {
+        const memberCode = inputElement.dataset.memberCode;
+        const currentDue = parseInt(inputElement.dataset.currentDue);
+        const totalPending = parseInt(inputElement.dataset.totalPending);
+        const ewi = parseFloat(inputElement.dataset.ewi);
+        const value = parseInt(inputElement.value) || 0;
+        const errorMsg = document.getElementById(`error-${memberCode}`);
+
+        errorMsg.classList.remove('show');
+
+        // Allow 0 value (member hasn't paid)
+        if (value < 0) {
+            inputElement.classList.add('error');
+            errorMsg.textContent = 'Cannot be negative';
+            errorMsg.classList.add('show');
+            return;
+        }
+
+        if (value > totalPending) {
+            inputElement.classList.add('error');
+            errorMsg.textContent = `Maximum ${totalPending} instalments allowed`;
+            errorMsg.classList.add('show');
+            return;
+        }
+
+        inputElement.classList.remove('error');
+
+        // Mark as advance if payment is more than current due (and current due > 0)
+        if (value > 0 && currentDue > 0 && value > currentDue) {
+            inputElement.classList.add('advance');
+        } else if (value > 0 && currentDue < 0) {
+            // Always advance if current due is negative (already paid advance)
+            inputElement.classList.add('advance');
+        } else {
+            inputElement.classList.remove('advance');
+        }
+
+        const totalDue = value * ewi;
+        document.getElementById(`total-${memberCode}`).textContent = `₹ ${totalDue.toFixed(2)}`;
+
+        updateSummary();
+    }
+
+    function updateSummary() {
+        let totalMembers = 0;
+        let totalInstalments = 0;
+        let totalEwi = 0;
+        let grandTotal = 0;
+
+        const inputs = document.querySelectorAll('[data-member-code]');
+
+        inputs.forEach(input => {
+            const value = parseInt(input.value) || 0;
+            const ewi = parseFloat(input.dataset.ewi);
+
+            if (value > 0) {
+                totalMembers++;
+                totalInstalments += value;
+                totalEwi += ewi;
+                grandTotal += (value * ewi);
+            }
+        });
+
+        document.getElementById('totalMembersCount').textContent = totalMembers;
+        document.getElementById('totalInstalmentsValue').textContent = totalInstalments;
+        document.getElementById('totalEwiValue').textContent = totalEwi.toFixed(2);
+        document.getElementById('grandTotalValue').textContent = grandTotal.toFixed(2);
+    }
+
+    function escapeHtml(text) {
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+        return text.replace(/[&<>"']/g, m => map[m]);
+    }
+
+    // Form validation before submit
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const inputs = document.querySelectorAll('[data-member-code]');
+        let hasError = false;
+        let memberData = [];
+
+        inputs.forEach(input => {
+            const value = parseInt(input.value) || 0;
+            const totalPending = parseInt(input.dataset.totalPending);
+            const memberCode = input.dataset.memberCode;
+            const errorMsg = document.getElementById(`error-${memberCode}`);
+
+            // Validate: must be 0-totalPending (0 means skip, no receipt for this member)
+            if (value < 0 || value > totalPending) {
+                input.classList.add('error');
+                if (value < 0) {
+                    errorMsg.textContent = 'Cannot be negative';
+                } else {
+                    errorMsg.textContent = `Maximum ${totalPending} instalments allowed`;
+                }
+                errorMsg.classList.add('show');
+                hasError = true;
+            } else {
+                input.classList.remove('error');
+
+                // Only add to memberData if value > 0 (skip members with 0 payment)
+                if (value > 0) {
+                    memberData.push({
+                        memberCode: memberCode,
+                        noOfInstalments: value
+                    });
+                }
+            }
+        });
+
+        if (hasError) {
+            e.preventDefault();
+            alert('Please fix the errors in the member instalment amounts');
+            return false;
+        }
+
+        if (memberData.length === 0) {
+            e.preventDefault();
+            alert('At least one member must have a payment amount greater than 0');
+            return false;
+        }
+
+        // Store member data in a hidden field as JSON
+        let hiddenField = document.getElementById('memberInstalmentsData');
+        if (!hiddenField) {
+            hiddenField = document.createElement('input');
+            hiddenField.type = 'hidden';
+            hiddenField.id = 'memberInstalmentsData';
+            hiddenField.name = 'MemberInstalmentsData';
+            document.querySelector('form').appendChild(hiddenField);
+        }
+        hiddenField.value = JSON.stringify(memberData);
+
+        return true;
+    });
+</script>

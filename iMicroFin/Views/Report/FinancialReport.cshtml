@@ -1,0 +1,208 @@
+﻿@{
+    ViewBag.Title = "Financial Report";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="/css/report/financial-report.css">
+
+<div class="report-container">
+    <div class="report-header">
+        <h2>Financial Report</h2>
+        <p class="report-subtitle">Comprehensive financial overview and performance metrics</p>
+    </div>
+
+    <!-- FY Selection -->
+    <div class="fy-selection-panel">
+        <div class="form-group">
+            <label for="fySelector">Select Financial Year</label>
+            <select id="fySelector" class="form-select" onchange="loadFinancialReport()">
+                <option value="">Loading...</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Loading Message -->
+    <div id="loadingMessage" class="loading-message" style="display: none;">
+        <div class="spinner"></div>
+        <p>Loading financial data...</p>
+    </div>
+
+    <!-- Report Content -->
+    <div id="reportContent" class="report-content" style="display: none;">
+        <!-- Summary Cards -->
+        <div class="summary-cards">
+            <div class="summary-card primary">
+                <div class="card-icon">💰</div>
+                <div class="card-content">
+                    <div class="card-label">Total Loans Disbursed</div>
+                    <div class="card-value" id="totalLoansCount">0</div>
+                    <div class="card-amount" id="totalLoansDisbursed">₹0</div>
+                </div>
+            </div>
+
+            <div class="summary-card success">
+                <div class="card-icon">✓</div>
+                <div class="card-content">
+                    <div class="card-label">Total EWI Received</div>
+                    <div class="card-value" id="totalEWIReceived">₹0</div>
+                </div>
+            </div>
+
+            <div class="summary-card info">
+                <div class="card-icon">📈</div>
+                <div class="card-content">
+                    <div class="card-label">Future EWI Expected</div>
+                    <div class="card-value" id="futureEWIExpected">₹0</div>
+                </div>
+            </div>
+
+            <div class="summary-card warning">
+                <div class="card-icon">⚠️</div>
+                <div class="card-content">
+                    <div class="card-label">Bad Loan Pending</div>
+                    <div class="card-value" id="badLoanPending">₹0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Report Tables -->
+        <div class="report-sections">
+            <!-- Loan Disbursement Section -->
+            <div class="report-section">
+                <h3 class="section-title">
+                    <span class="section-icon">🏦</span>
+                    Loan Disbursement
+                </h3>
+                <table class="report-table">
+                    <tbody>
+                        <tr>
+                            <td class="metric-label">Total Loans Disbursed (Count)</td>
+                            <td class="metric-value" id="loansCountDetail">0</td>
+                        </tr>
+                        <tr>
+                            <td class="metric-label">Total Loan Amount Disbursed</td>
+                            <td class="metric-value" id="loanAmountDetail">₹0</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Collections Section -->
+            <div class="report-section">
+                <h3 class="section-title">
+                    <span class="section-icon">💵</span>
+                    Collections & Recoveries
+                </h3>
+                <table class="report-table">
+                    <tbody>
+                        <tr>
+                            <td class="metric-label">Total EWI Received (Instalments)</td>
+                            <td class="metric-value success" id="ewiReceivedDetail">₹0</td>
+                        </tr>
+                        <tr>
+                            <td class="metric-label">Future EWI Expected</td>
+                            <td class="metric-value info" id="futureEWIDetail">₹0</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Losses & Discounts Section -->
+            <div class="report-section">
+                <h3 class="section-title">
+                    <span class="section-icon">📉</span>
+                    Losses & Discounts
+                </h3>
+                <table class="report-table">
+                    <tbody>
+                        <tr class="loss-row">
+                            <td class="metric-label">Bad Loan Pending Amount (Potential Loss)</td>
+                            <td class="metric-value danger" id="badLoanPendingDetail">₹0</td>
+                        </tr>
+                        <tr class="loss-row">
+                            <td class="metric-label">Bad Loan Settlement Discount (Actual Loss)</td>
+                            <td class="metric-value danger" id="badLoanDiscountDetail">₹0</td>
+                        </tr>
+                        <tr class="info-row">
+                            <td class="metric-label">Pre-Closure Discount (Interest Waiver)</td>
+                            <td class="metric-value warning" id="preClosureDiscountDetail">₹0</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Interest Income Section -->
+            <div class="report-section highlight">
+                <h3 class="section-title">
+                    <span class="section-icon">💹</span>
+                    Interest Income Analysis
+                </h3>
+                <table class="report-table">
+                    <tbody>
+                        <tr>
+                            <td class="metric-label">Actual Interest Income Earned</td>
+                            <td class="metric-value success large" id="actualInterest">₹0</td>
+                        </tr>
+                        <tr>
+                            <td class="metric-label-sub">
+                                <small>(Total EWI Received - Total Loans Disbursed)</small>
+                            </td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td class="metric-label">Anticipated Interest Income</td>
+                            <td class="metric-value info large" id="anticipatedInterest">₹0</td>
+                        </tr>
+                        <tr>
+                            <td class="metric-label-sub">
+                                <small>(Future EWI Expected)</small>
+                            </td>
+                            <td></td>
+                        </tr>
+                        <tr class="total-row">
+                            <td class="metric-label"><strong>Total Interest Income</strong></td>
+                            <td class="metric-value primary large" id="totalInterest"><strong>₹0</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Net Profit Section -->
+            <div class="report-section highlight-profit">
+                <h3 class="section-title">
+                    <span class="section-icon">🎯</span>
+                    Net Profit Summary
+                </h3>
+                <table class="report-table">
+                    <tbody>
+                        <tr>
+                            <td class="metric-label">Actual Interest Income</td>
+                            <td class="metric-value" id="netActualInterest">₹0</td>
+                        </tr>
+                        <tr>
+                            <td class="metric-label">Less: Bad Loan Pending (Potential Loss)</td>
+                            <td class="metric-value danger" id="netBadLoanPending">(₹0)</td>
+                        </tr>
+                        <tr>
+                            <td class="metric-label">Less: Bad Loan Discount (Actual Loss)</td>
+                            <td class="metric-value danger" id="netBadLoanDiscount">(₹0)</td>
+                        </tr>
+                        <tr class="total-row profit">
+                            <td class="metric-label"><strong>Net Profit (After Losses)</strong></td>
+                            <td class="metric-value" id="netProfit"><strong>₹0</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- No Data Message -->
+    <div id="noDataMessage" class="no-data-message" style="display: none;">
+        <div class="no-data-icon">📊</div>
+        <h3>No Data Available</h3>
+        <p>No financial data found for the selected period.</p>
+    </div>
+</div>
+
+<script src="/js/report/financial-report.js"></script>

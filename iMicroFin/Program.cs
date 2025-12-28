@@ -31,6 +31,7 @@ namespace iMicroFin
                 {
                     options.LoginPath = "/App/Login"; // Redirect here if not authenticated
                     options.LogoutPath = "/App/Logout";
+                    options.AccessDeniedPath = "/App/AccessDenied";
                     options.ExpireTimeSpan = TimeSpan.FromHours(8); // Cookie expiration
                     options.SlidingExpiration = true;
                     options.Cookie.HttpOnly = true;
@@ -40,6 +41,9 @@ namespace iMicroFin
             builder.Services.AddAuthorization(options =>
             {
                 options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+                options.AddPolicy("DirectorManager", policy => policy.RequireRole("Director","Manager"));
+                options.AddPolicy("DirectorManagerCashier", policy => policy.RequireRole("Director", "Manager","Cashier"));
+
             });
 
             builder.Services.AddHttpContextAccessor();

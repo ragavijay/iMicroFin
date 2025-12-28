@@ -1,0 +1,350 @@
+﻿.report-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.report-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 3px solid #667eea;
+}
+
+    .report-header h2 {
+        margin: 0 0 0.5rem 0;
+        color: #212529;
+        font-size: 2rem;
+        font-weight: 700;
+    }
+
+.report-subtitle {
+    margin: 0;
+    color: #6c757d;
+    font-size: 1.1rem;
+}
+
+.fy-selection-panel {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+.form-group {
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #495057;
+        font-size: 1rem;
+    }
+
+.form-select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+    .form-select:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+.loading-message {
+    text-align: center;
+    padding: 3rem;
+    color: #6c757d;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.summary-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+    .summary-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    }
+
+.card-icon {
+    font-size: 3rem;
+    flex-shrink: 0;
+}
+
+.card-content {
+    flex-grow: 1;
+}
+
+.card-label {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.card-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.card-amount {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #495057;
+}
+
+.summary-card.primary {
+    border-left: 5px solid #667eea;
+}
+
+    .summary-card.primary .card-value {
+        color: #667eea;
+    }
+
+.summary-card.success {
+    border-left: 5px solid #28a745;
+}
+
+    .summary-card.success .card-value {
+        color: #28a745;
+    }
+
+.summary-card.info {
+    border-left: 5px solid #17a2b8;
+}
+
+    .summary-card.info .card-value {
+        color: #17a2b8;
+    }
+
+.summary-card.warning {
+    border-left: 5px solid #ffc107;
+}
+
+    .summary-card.warning .card-value {
+        color: #ffc107;
+    }
+
+.report-sections {
+    display: grid;
+    gap: 2rem;
+}
+
+.report-section {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+    .report-section.highlight {
+        border: 2px solid #667eea;
+    }
+
+    .report-section.highlight-profit {
+        border: 2px solid #28a745;
+        background: linear-gradient(to bottom, #ffffff 0%, #f0fff4 100%);
+    }
+
+.section-title {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1rem 1.5rem;
+    margin: 0;
+    font-size: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.section-icon {
+    font-size: 1.5rem;
+}
+
+.report-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+    .report-table tbody tr {
+        border-bottom: 1px solid #e9ecef;
+    }
+
+        .report-table tbody tr:last-child {
+            border-bottom: none;
+        }
+
+    .report-table td {
+        padding: 1rem 1.5rem;
+    }
+
+.metric-label {
+    font-weight: 500;
+    color: #495057;
+    font-size: 1rem;
+}
+
+.metric-label-sub {
+    padding-left: 2rem;
+    color: #6c757d;
+    font-size: 0.875rem;
+}
+
+.metric-value {
+    text-align: right;
+    font-size: 1.25rem;
+    font-weight: 600;
+    font-family: 'Courier New', monospace;
+}
+
+    .metric-value.large {
+        font-size: 1.5rem;
+    }
+
+    .metric-value.success {
+        color: #28a745;
+    }
+
+    .metric-value.info {
+        color: #17a2b8;
+    }
+
+    .metric-value.warning {
+        color: #ffc107;
+    }
+
+    .metric-value.danger {
+        color: #dc3545;
+    }
+
+    .metric-value.primary {
+        color: #667eea;
+    }
+
+.loss-row {
+    background: #ffebee;
+}
+
+.info-row {
+    background: #fff3cd;
+}
+
+.total-row {
+    background: #f8f9fa;
+    font-weight: 700;
+}
+
+    .total-row.profit {
+        background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+    }
+
+    .total-row td {
+        padding: 1.25rem 1.5rem;
+        font-size: 1.1rem;
+    }
+
+.no-data-message {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.no-data-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+.no-data-message h3 {
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.no-data-message p {
+    color: #6c757d;
+    margin: 0;
+}
+
+@media print {
+    .fy-selection-panel {
+        display: none;
+    }
+
+    .report-container {
+        max-width: 100%;
+    }
+
+    .summary-card {
+        break-inside: avoid;
+    }
+
+    .report-section {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+}
+
+@media (max-width: 768px) {
+    .summary-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .report-table td {
+        padding: 0.75rem 1rem;
+    }
+
+    .metric-value {
+        font-size: 1rem;
+    }
+
+        .metric-value.large {
+            font-size: 1.25rem;
+        }
+}

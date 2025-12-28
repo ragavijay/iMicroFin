@@ -1,0 +1,201 @@
+﻿@model IEnumerable<iMicroFin.Models.EWIDue>
+@{
+    ViewBag.Title = "EWI Due List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var totalInstalments = Model.Sum(x => x.NoOfInstalments);
+    var totalEwi = Model.Sum(x => x.Ewi);
+    var totalPendingAmount = Model.Sum(x => x.PendingAmount);
+}
+
+<link rel="stylesheet" href="~/css/receipt/view-ewi-due-list.css" />
+
+<div class="due-list-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>📋 EWI Due List</h1>
+        <p>Complete list of all pending instalments and upcoming due dates</p>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="stats-container">
+        <div class="stat-card">
+            <div class="stat-label">Total Members</div>
+            <div class="stat-value">@Model.Count()</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Total Pending Instalments</div>
+            <div class="stat-value">@totalInstalments</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Total Pending Amount</div>
+            <div class="stat-value">₹ @totalPendingAmount.ToString("N2")</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Average EWI</div>
+            <div class="stat-value">₹ @(Model.Any() ? (totalEwi / Model.Count()).ToString("N2") : "0.00")</div>
+        </div>
+    </div>
+
+    <!-- Table Card -->
+    <div class="table-card">
+        <div class="table-header">
+            <h2>Due Details</h2>
+            <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text"
+                           id="searchInput"
+                           class="search-input"
+                           placeholder="Search by name, code, or phone..."
+                           onkeyup="filterTable()">
+                </div>
+                <div class="action-buttons no-print">
+                    <button class="btn btn-primary" onclick="window.print()">
+                        🖨️ Print
+                    </button>
+                    <button class="btn btn-export" onclick="exportToCSV()">
+                        📥 Export
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        @if (Model != null && Model.Any())
+        {
+            <table class="due-table" id="dueTable">
+                <thead>
+                    <tr>
+                        <th style="text-align: center;">S.No.</th>
+                        <th>Loan Code</th>
+                        <th>Member Code</th>
+                        <th>Member Name</th>
+                        <th>Phone</th>
+                        <th style="text-align: center;">Pending<br />Instalments</th>
+                        <th style="text-align: right;">EWI Amount</th>
+                        <th style="text-align: right;">Total Pending<br />Amount</th>
+                        <th style="text-align: center;">Due Date</th>
+                        <th style="text-align: center;">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        var serialNo = 1;
+                    }
+                    @foreach (var item in Model)
+                    {
+                        var today = DateTime.Today;
+                        var daysUntilDue = (item.DueDate.Date - today).Days;
+                        var statusClass = daysUntilDue < 0 ? "due-overdue" : (daysUntilDue == 0 ? "due-today" : "due-upcoming");
+                        var statusText = daysUntilDue < 0 ? "Overdue" : (daysUntilDue == 0 ? "Today" : "Upcoming");
+                        //var totalPending = item.NoOfInstalments * item.Ewi;
+
+                        <tr>
+                            <td style="text-align: center;">@serialNo</td>
+                            <td class="loan-code">@item.LoanCode</td>
+                            <td>@item.MemberCode</td>
+                            <td><strong>@item.MemberName</strong></td>
+                            <td class="phone-number">@item.Phone</td>
+                            <td style="text-align: center;"><strong>@item.NoOfInstalments</strong></td>
+                            <td style="text-align: right;">₹ @item.Ewi.ToString("N2")</td>
+                            <td style="text-align: right;"><strong>₹ @item.PendingAmount.ToString("N2")</strong></td>
+                            <td style="text-align: center;">@item.DueDate.ToString("dd-MMM-yyyy")</td>
+                            <td style="text-align: center;">
+                                <span class="due-badge @statusClass">@statusText</span>
+                            </td>
+                        </tr>
+                        serialNo++;
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="no-data">
+                <div class="no-data-icon">📭</div>
+                <h3>No Due Records Found</h3>
+                <p>There are no pending instalments at this time</p>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    function filterTable() {
+        const input = document.getElementById('searchInput');
+        const filter = input.value.toUpperCase();
+        const table = document.getElementById('dueTable');
+        const tr = table.getElementsByTagName('tr');
+
+        let visibleCount = 0;
+        for (let i = 1; i < tr.length; i++) {
+            const row = tr[i];
+            const cells = row.getElementsByTagName('td');
+            let found = false;
+
+            // Search in loan code (index 1), member code (index 2), member name (index 3), and phone (index 4)
+            const loanCode = cells[1]?.textContent || '';
+            const memberCode = cells[2]?.textContent || '';
+            const memberName = cells[3]?.textContent || '';
+            const phone = cells[4]?.textContent || '';
+
+            const searchText = (loanCode + memberCode + memberName + phone).toUpperCase();
+
+            if (searchText.indexOf(filter) > -1) {
+                found = true;
+                visibleCount++;
+                // Update serial number for visible rows
+                cells[0].textContent = visibleCount;
+            }
+
+            row.style.display = found ? '' : 'none';
+        }
+    }
+
+    function exportToCSV() {
+        const table = document.getElementById('dueTable');
+        let csv = [];
+
+        // Get headers
+        const headers = [];
+        const headerCells = table.querySelectorAll('thead th');
+        headerCells.forEach(cell => {
+            headers.push('"' + cell.textContent.replace(/\n/g, ' ').trim() + '"');
+        });
+        csv.push(headers.join(','));
+
+        // Get data rows (only visible ones)
+        const rows = table.querySelectorAll('tbody tr');
+        let serialNo = 1;
+        rows.forEach(row => {
+            if (row.style.display !== 'none') {
+                const rowData = [];
+                const cells = row.querySelectorAll('td');
+                cells.forEach((cell, index) => {
+                    // Update serial number for export
+                    if (index === 0) {
+                        rowData.push('"' + serialNo + '"');
+                    } else {
+                        // Remove currency symbols and commas for numeric values
+                        let value = cell.textContent.trim().replace(/₹|,/g, '');
+                        rowData.push('"' + value + '"');
+                    }
+                });
+                csv.push(rowData.join(','));
+                serialNo++;
+            }
+        });
+
+        // Create and download file
+        const csvContent = csv.join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+
+        link.setAttribute('href', url);
+        link.setAttribute('download', 'EWI_Due_List_' + new Date().toISOString().split('T')[0] + '.csv');
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+</script>

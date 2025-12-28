@@ -11,6 +11,7 @@ namespace iMicroFin.Models
         public string MemberCode{ get; set; }
         public string MemberName{ get; set; }
         public int NoOfInstalments{ get; set; }
+        public int TotalPendingInstalments { get; set; }
         public int Ewi{ get; set; }
         public int TotalDue { get; set; }
         public string UserId { get; set; }

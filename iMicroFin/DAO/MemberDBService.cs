@@ -136,69 +136,106 @@ namespace iMicroFin.DAO
 
         public static List<Member> GetAllMembers(string groupCode)
         {
-            Member? member=null;
-            List<Member>? members = new List<Member>();
-            using (MySqlConnection con = new MySqlConnection(ConfigHelper.GetConnectionString()))
+            List<Member> members = new List<Member>();
+
+            try
             {
-                con.Open();
-                using (MySqlCommand cmd = new MySqlCommand("GetAllMembers", con))
+                using (MySqlConnection con = new MySqlConnection(ConfigHelper.GetConnectionString()))
                 {
-                    cmd.CommandType = System.Data.CommandType.StoredProcedure;
-                    cmd.Parameters.Add("@pGroupCode", MySqlDbType.VarChar, 6);
-                    cmd.Parameters["@pGroupCode"].Value = groupCode;
-                    using (MySqlDataReader rdr = cmd.ExecuteReader())
+                    con.Open();
+                    using (MySqlCommand cmd = new MySqlCommand("GetAllMembers", con))
                     {
-                        while (rdr.Read())
+                        cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                        cmd.Parameters.Add("@pGroupCode", MySqlDbType.VarChar, 6);
+                        cmd.Parameters["@pGroupCode"].Value = groupCode ?? string.Empty;
+
+                        using (MySqlDataReader rdr = cmd.ExecuteReader())
                         {
-                            member = new Member();
-                            member.MemberCode = rdr["MemberCode"]?.ToString() ?? "";
-                            member.MemberId = Convert.ToInt32(rdr["MemberId"].ToString());
-                            member.GroupCode = rdr["GroupCode"]?.ToString() ?? "";
-                            member.CenterCode = rdr["CenterCode"]?.ToString() ?? "";
-                            member.BranchId = Convert.ToInt32(rdr["BranchId"].ToString());
-                            member.GroupName = rdr["GroupName"]?.ToString() ?? "";
-                            member.CenterName = rdr["CenterName"]?.ToString() ?? "";
-                            member.LeaderName = rdr["LeaderName"]?.ToString() ?? "";
-                            member.MemberType = (EMemberType)Convert.ToInt32(rdr["MemberType"].ToString());
-                            member.MemberName = rdr["MemberName"]?.ToString() ?? "";
-                            member.Gender = (EGender)Convert.ToInt32(rdr["Gender"].ToString());
-                            member.DOB = DateTime.Parse(rdr["DOB"]?.ToString() ?? "");
-                            member.MaritalStatus = (EMaritalStatus)Convert.ToInt32(rdr["MaritalStatus"].ToString());
-                            member.Religion = (EReligion)Convert.ToInt32(rdr["Religion"].ToString());
-                            member.FName = rdr["FName"]?.ToString() ?? "";
-                            member.HName = rdr["HName"]?.ToString() ?? "";
-                            member.Occupation = (EOccupation)Convert.ToInt32(rdr["Occupation"].ToString());
-                            member.OccupationType = (EOccupationType)Convert.ToInt32(rdr["OccupationType"].ToString());
-                            member.AddressLine1 = rdr["AddressLine1"]?.ToString() ?? "";
-                            member.AddressLine2 = rdr["AddressLine2"]?.ToString() ?? "";
-                            member.AddressLine3 = rdr["AddressLine3"]?.ToString() ?? "";
-                            member.AddressLine4 = rdr["AddressLine4"]?.ToString() ?? "";
-                            member.Taluk = rdr["Taluk"]?.ToString() ?? "";
-                            member.Panchayat = rdr["Panchayat"]?.ToString() ?? "";
-                            member.City = rdr["City"]?.ToString() ?? "";
-                            member.Pincode = rdr["Pincode"]?.ToString() ?? "";
-                            member.NoOfYears = Convert.ToInt32(rdr["NoOfYears"].ToString());
-                            member.HouseType = (EHouseType)Convert.ToInt32(rdr["HouseType"].ToString());
-                            member.Phone = rdr["Phone"]?.ToString() ?? "";
-                            member.MemberAadharNumber = rdr["MemberAadharNumber"]?.ToString() ?? "";
-                            member.RMemberAadharNumber = member.MemberAadharNumber;
-                            member.PAN = rdr["PAN"]?.ToString() ?? "";
-                            member.RationCardNo = rdr["RationCardNo"]?.ToString() ?? "";
-                            member.VoterIDNo = rdr["VoterIdNo"]?.ToString() ?? "";
-                            member.AccountNumber = rdr["AccountNumber"]?.ToString() ?? "";
-                            member.RAccountNumber = member.AccountNumber;
-                            member.IFSC = rdr["IFSC"]?.ToString() ?? "";
-                            member.BankCustomerId = rdr["BankCustomerId"]?.ToString() ?? "";
-                            member.NomineeName = rdr["NomineeName"]?.ToString() ?? "";
-                            member.Relationship = (ERelationship)Convert.ToInt32(rdr["Relationship"].ToString());
-                            member.NomineeAadharNumber = rdr["NomineeAadharNumber"]?.ToString() ?? "";
-                            member.NomineeDOB = DateTime.Parse(rdr["NomineeDOB"]?.ToString() ?? "");
-                            member.CurrentLoanCode = rdr["CurrentLoanCode"]?.ToString() ?? "";
-                            members.Add(member);
+                            while (rdr.Read())
+                            {
+                                try
+                                {
+                                    Member member = new Member
+                                    {
+                                        MemberCode = rdr["MemberCode"]?.ToString() ?? "",
+                                        MemberId = rdr["MemberId"] != DBNull.Value ? Convert.ToInt32(rdr["MemberId"]) : 0,
+                                        GroupCode = rdr["GroupCode"]?.ToString() ?? "",
+                                        CenterCode = rdr["CenterCode"]?.ToString() ?? "",
+                                        BranchId = rdr["BranchId"] != DBNull.Value ? Convert.ToInt32(rdr["BranchId"]) : 0,
+                                        GroupName = rdr["GroupName"]?.ToString() ?? "",
+                                        CenterName = rdr["CenterName"]?.ToString() ?? "",
+                                        LeaderName = rdr["LeaderName"]?.ToString() ?? "",
+                                        MemberType = rdr["MemberType"] != DBNull.Value ? (EMemberType)Convert.ToInt32(rdr["MemberType"]) : (EMemberType)(-1),
+                                        MemberName = rdr["MemberName"]?.ToString() ?? "",
+                                        Gender = rdr["Gender"] != DBNull.Value ? (EGender)Convert.ToInt32(rdr["Gender"]) : (EGender)(-1),
+                                        DOB = rdr["DOB"] != DBNull.Value && DateTime.TryParse(rdr["DOB"].ToString(), out DateTime dob) ? dob : DateTime.MinValue,
+                                        MaritalStatus = rdr["MaritalStatus"] != DBNull.Value && !string.IsNullOrEmpty(rdr["MaritalStatus"].ToString())
+                                            ? (EMaritalStatus)Convert.ToInt32(rdr["MaritalStatus"])
+                                            : (EMaritalStatus)(-1),
+                                        Religion = rdr["Religion"] != DBNull.Value && !string.IsNullOrEmpty(rdr["Religion"].ToString())
+                                            ? (EReligion)Convert.ToInt32(rdr["Religion"])
+                                            : (EReligion)(-1),
+                                        FName = rdr["FName"]?.ToString() ?? "",
+                                        HName = rdr["HName"]?.ToString() ?? "",
+                                        Occupation = rdr["Occupation"] != DBNull.Value && !string.IsNullOrEmpty(rdr["Occupation"].ToString())
+                                            ? (EOccupation)Convert.ToInt32(rdr["Occupation"])
+                                            : (EOccupation)(-1),
+                                        OccupationType = rdr["OccupationType"] != DBNull.Value && !string.IsNullOrEmpty(rdr["OccupationType"].ToString())
+                                            ? (EOccupationType)Convert.ToInt32(rdr["OccupationType"])
+                                            : (EOccupationType)(-1),
+                                        AddressLine1 = rdr["AddressLine1"]?.ToString() ?? "",
+                                        AddressLine2 = rdr["AddressLine2"]?.ToString() ?? "",
+                                        AddressLine3 = rdr["AddressLine3"]?.ToString() ?? "",
+                                        AddressLine4 = rdr["AddressLine4"]?.ToString() ?? "",
+                                        Taluk = rdr["Taluk"]?.ToString() ?? "",
+                                        Panchayat = rdr["Panchayat"]?.ToString() ?? "",
+                                        City = rdr["City"]?.ToString() ?? "",
+                                        Pincode = rdr["Pincode"]?.ToString() ?? "",
+                                        NoOfYears = rdr["NoOfYears"] != DBNull.Value ? Convert.ToInt32(rdr["NoOfYears"]) : 0,
+                                        HouseType = rdr["HouseType"] != DBNull.Value ? (EHouseType)Convert.ToInt32(rdr["HouseType"]) : (EHouseType)(-1),
+                                        Phone = rdr["Phone"]?.ToString() ?? "",
+                                        MemberAadharNumber = rdr["MemberAadharNumber"]?.ToString() ?? "",
+                                        PAN = rdr["PAN"]?.ToString() ?? "",
+                                        RationCardNo = rdr["RationCardNo"]?.ToString() ?? "",
+                                        VoterIDNo = rdr["VoterIdNo"]?.ToString() ?? "",
+                                        AccountNumber = rdr["AccountNumber"]?.ToString() ?? "",
+                                        IFSC = rdr["IFSC"]?.ToString() ?? "",
+                                        BankCustomerId = rdr["BankCustomerId"]?.ToString() ?? "",
+                                        NomineeName = rdr["NomineeName"]?.ToString() ?? "",
+                                        Relationship = rdr["Relationship"] != DBNull.Value ? (ERelationship)Convert.ToInt32(rdr["Relationship"]) : (ERelationship)(-1),
+                                        NomineeAadharNumber = rdr["NomineeAadharNumber"]?.ToString() ?? "",
+                                        NomineeDOB = rdr["NomineeDOB"] != DBNull.Value && DateTime.TryParse(rdr["NomineeDOB"].ToString(), out DateTime nomineeDob)
+                                            ? nomineeDob
+                                            : DateTime.MinValue,
+                                        CurrentLoanCode = rdr["CurrentLoanCode"]?.ToString() ?? ""
+                                    };
+
+                                    // Set the "R" properties after main properties are set
+                                    member.RMemberAadharNumber = member.MemberAadharNumber;
+                                    member.RAccountNumber = member.AccountNumber;
+
+                                    members.Add(member);
+                                }
+                                catch (Exception ex)
+                                {
+                                    // Log the error for this specific member record
+                                    // Consider logging: ex.Message or using a logging framework
+                                    // You can choose to continue processing other records or handle differently
+                                    Console.WriteLine($"Error processing member record: {ex.Message}");
+                                    continue; // Skip this record and continue with next
+                                }
+                            }
                         }
                     }
                 }
             }
+            catch (Exception ex)
+            {
+                // Log the database connection or query error
+                Console.WriteLine($"Database error in GetAllMembers: {ex.Message}");
+                throw; // Re-throw to let caller handle the exception
+            }
+
             return members;
         }
 
@@ -217,50 +254,64 @@ namespace iMicroFin.DAO
                     {
                         if (rdr.Read())
                         {
-                            member = new Member();
-                            member.MemberCode = rdr["MemberCode"]?.ToString()??"";
-                            member.MemberId = Convert.ToInt32(rdr["MemberId"].ToString());
-                            member.GroupCode = rdr["GroupCode"]?.ToString()??"";
-                            member.CenterCode = rdr["CenterCode"]?.ToString() ?? "";
-                            member.BranchId = Convert.ToInt32(rdr["BranchId"].ToString());
-                            member.GroupName = rdr["GroupName"]?.ToString() ?? "";
-                            member.CenterName = rdr["CenterName"]?.ToString() ?? "";
-                            member.LeaderName = rdr["LeaderName"]?.ToString() ?? "";
-                            member.MemberType = (EMemberType)Convert.ToInt32(rdr["MemberType"].ToString());
-                            member.MemberName = rdr["MemberName"]?.ToString() ?? "";
-                            member.Gender = (EGender)Convert.ToInt32(rdr["Gender"].ToString());
-                            member.DOB = DateTime.Parse(rdr["DOB"]?.ToString() ?? "");
-                            member.MaritalStatus = (EMaritalStatus)Convert.ToInt32(rdr["MaritalStatus"].ToString());
-                            member.Religion = (EReligion)Convert.ToInt32(rdr["Religion"].ToString());
-                            member.FName = rdr["FName"]?.ToString() ?? "";
-                            member.HName = rdr["HName"]?.ToString() ?? "";
-                            member.Occupation = (EOccupation)Convert.ToInt32(rdr["Occupation"].ToString());
-                            member.OccupationType = (EOccupationType)Convert.ToInt32(rdr["OccupationType"].ToString());
-                            member.AddressLine1 = rdr["AddressLine1"]?.ToString() ?? "";
-                            member.AddressLine2 = rdr["AddressLine2"]?.ToString() ?? "";
-                            member.AddressLine3 = rdr["AddressLine3"]?.ToString() ?? "";
-                            member.AddressLine4 = rdr["AddressLine4"]?.ToString() ?? "";
-                            member.Taluk = rdr["Taluk"]?.ToString() ?? "";
-                            member.Panchayat = rdr["Panchayat"]?.ToString() ?? "";
-                            member.City = rdr["City"]?.ToString() ?? "";
-                            member.Pincode = rdr["Pincode"]?.ToString() ?? "";
-                            member.NoOfYears = Convert.ToInt32(rdr["NoOfYears"].ToString());
-                            member.HouseType = (EHouseType)Convert.ToInt32(rdr["HouseType"].ToString());
-                            member.Phone = rdr["Phone"]?.ToString() ?? "";
-                            member.MemberAadharNumber = rdr["MemberAadharNumber"]?.ToString() ?? "";
+                            member = new Member
+                            {
+                                MemberCode = rdr["MemberCode"]?.ToString() ?? "",
+                                MemberId = rdr["MemberId"] != DBNull.Value ? Convert.ToInt32(rdr["MemberId"]) : 0,
+                                GroupCode = rdr["GroupCode"]?.ToString() ?? "",
+                                CenterCode = rdr["CenterCode"]?.ToString() ?? "",
+                                BranchId = rdr["BranchId"] != DBNull.Value ? Convert.ToInt32(rdr["BranchId"]) : 0,
+                                GroupName = rdr["GroupName"]?.ToString() ?? "",
+                                CenterName = rdr["CenterName"]?.ToString() ?? "",
+                                LeaderName = rdr["LeaderName"]?.ToString() ?? "",
+                                MemberType = rdr["MemberType"] != DBNull.Value ? (EMemberType)Convert.ToInt32(rdr["MemberType"]) : (EMemberType)(-1),
+                                MemberName = rdr["MemberName"]?.ToString() ?? "",
+                                Gender = rdr["Gender"] != DBNull.Value ? (EGender)Convert.ToInt32(rdr["Gender"]) : (EGender)(-1),
+                                DOB = rdr["DOB"] != DBNull.Value && DateTime.TryParse(rdr["DOB"].ToString(), out DateTime dob) ? dob : DateTime.MinValue,
+                                MaritalStatus = rdr["MaritalStatus"] != DBNull.Value && !string.IsNullOrEmpty(rdr["MaritalStatus"].ToString())
+                                             ? (EMaritalStatus)Convert.ToInt32(rdr["MaritalStatus"])
+                                             : (EMaritalStatus)(-1),
+                                Religion = rdr["Religion"] != DBNull.Value && !string.IsNullOrEmpty(rdr["Religion"].ToString())
+                                             ? (EReligion)Convert.ToInt32(rdr["Religion"])
+                                             : (EReligion)(-1),
+                                FName = rdr["FName"]?.ToString() ?? "",
+                                HName = rdr["HName"]?.ToString() ?? "",
+                                Occupation = rdr["Occupation"] != DBNull.Value && !string.IsNullOrEmpty(rdr["Occupation"].ToString())
+                                             ? (EOccupation)Convert.ToInt32(rdr["Occupation"])
+                                             : (EOccupation)(-1),
+                                OccupationType = rdr["OccupationType"] != DBNull.Value && !string.IsNullOrEmpty(rdr["OccupationType"].ToString())
+                                             ? (EOccupationType)Convert.ToInt32(rdr["OccupationType"])
+                                             : (EOccupationType)(-1),
+                                AddressLine1 = rdr["AddressLine1"]?.ToString() ?? "",
+                                AddressLine2 = rdr["AddressLine2"]?.ToString() ?? "",
+                                AddressLine3 = rdr["AddressLine3"]?.ToString() ?? "",
+                                AddressLine4 = rdr["AddressLine4"]?.ToString() ?? "",
+                                Taluk = rdr["Taluk"]?.ToString() ?? "",
+                                Panchayat = rdr["Panchayat"]?.ToString() ?? "",
+                                City = rdr["City"]?.ToString() ?? "",
+                                Pincode = rdr["Pincode"]?.ToString() ?? "",
+                                NoOfYears = rdr["NoOfYears"] != DBNull.Value ? Convert.ToInt32(rdr["NoOfYears"]) : 0,
+                                HouseType = rdr["HouseType"] != DBNull.Value ? (EHouseType)Convert.ToInt32(rdr["HouseType"]) : (EHouseType)(-1),
+                                Phone = rdr["Phone"]?.ToString() ?? "",
+                                MemberAadharNumber = rdr["MemberAadharNumber"]?.ToString() ?? "",
+                                PAN = rdr["PAN"]?.ToString() ?? "",
+                                RationCardNo = rdr["RationCardNo"]?.ToString() ?? "",
+                                VoterIDNo = rdr["VoterIdNo"]?.ToString() ?? "",
+                                AccountNumber = rdr["AccountNumber"]?.ToString() ?? "",
+                                IFSC = rdr["IFSC"]?.ToString() ?? "",
+                                BankCustomerId = rdr["BankCustomerId"]?.ToString() ?? "",
+                                NomineeName = rdr["NomineeName"]?.ToString() ?? "",
+                                Relationship = rdr["Relationship"] != DBNull.Value ? (ERelationship)Convert.ToInt32(rdr["Relationship"]) : (ERelationship)(-1),
+                                NomineeAadharNumber = rdr["NomineeAadharNumber"]?.ToString() ?? "",
+                                NomineeDOB = rdr["NomineeDOB"] != DBNull.Value && DateTime.TryParse(rdr["NomineeDOB"].ToString(), out DateTime nomineeDob)
+                                             ? nomineeDob
+                                             : DateTime.MinValue,
+                                CurrentLoanCode = rdr["CurrentLoanCode"]?.ToString() ?? ""
+                            };
+
+                            // Set the "R" properties after main properties are set
                             member.RMemberAadharNumber = member.MemberAadharNumber;
-                            member.PAN = rdr["PAN"]?.ToString() ?? "";
-                            member.RationCardNo = rdr["RationCardNo"]?.ToString() ?? "";
-                            member.VoterIDNo = rdr["VoterIdNo"]?.ToString() ?? "";
-                            member.AccountNumber = rdr["AccountNumber"]?.ToString() ?? "";
                             member.RAccountNumber = member.AccountNumber;
-                            member.IFSC = rdr["IFSC"]?.ToString() ?? "";
-                            member.BankCustomerId = rdr["BankCustomerId"]?.ToString() ?? "";
-                            member.NomineeName = rdr["NomineeName"]?.ToString() ?? "";
-                            member.Relationship = (ERelationship)Convert.ToInt32(rdr["Relationship"].ToString());
-                            member.NomineeAadharNumber = rdr["NomineeAadharNumber"]?.ToString() ?? "";
-                            member.NomineeDOB = DateTime.Parse(rdr["NomineeDOB"]?.ToString() ?? "");
-                            member.CurrentLoanCode = rdr["CurrentLoanCode"]?.ToString() ?? "";
                         }
                     }
                 }

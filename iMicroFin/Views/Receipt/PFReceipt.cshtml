@@ -1,0 +1,99 @@
+﻿@model iMicroFin.Models.PFReceipt
+@{
+    ViewBag.Title = "Processing Fee Receipt";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="/css/receipt/pf-receipt.css">
+
+<div class="receipt-container">
+    <!-- Success Banner -->
+    <div class="success-banner no-print">
+        <div class="success-icon">✓</div>
+        <h2>Receipt Generated Successfully!</h2>
+        <p style="margin: 0; font-size: 1.1rem;">Processing fee receipt has been created and saved</p>
+    </div>
+
+    <!-- Receipt Card -->
+    <div class="receipt-card" id="printableReceipt">
+        <div class="receipt-header">
+            <h3>Processing Fee Receipt</h3>
+            <div class="receipt-id">Receipt ID: @Model.ReceiptId</div>
+        </div>
+
+        <div class="receipt-body">
+            <div class="receipt-info-grid">
+                <!-- Loan Details -->
+                <div class="receipt-item">
+                    <div class="receipt-label">Loan Code</div>
+                    <div class="receipt-value">@Model.LoanCode</div>
+                </div>
+
+                <!-- Member Details -->
+                <div class="receipt-item">
+                    <div class="receipt-label">Member Code</div>
+                    <div class="receipt-value">@Model.MemberCode</div>
+                </div>
+
+                <div class="receipt-item">
+                    <div class="receipt-label">Member Name</div>
+                    <div class="receipt-value">@Model.MemberName</div>
+                </div>
+
+                <!-- Fee Details -->
+                <div class="receipt-item">
+                    <div class="receipt-label">Processing Fee</div>
+                    <div class="receipt-value">₹ @Model.ProcessingFee.ToString("N2")</div>
+                </div>
+
+                <div class="receipt-item">
+                    <div class="receipt-label">Insurance</div>
+                    <div class="receipt-value">₹ @Model.Insurance.ToString("N2")</div>
+                </div>
+
+                <!-- Receipt Info -->
+                <div class="receipt-item">
+                    <div class="receipt-label">Receipt Date</div>
+                    <div class="receipt-value">@Model.ActualReceiptDate.ToString("dd-MMM-yyyy")</div>
+                </div>
+
+                <div class="receipt-item">
+                    <div class="receipt-label">Collected By</div>
+                    <div class="receipt-value">@Model.UserId</div>
+                </div>
+            </div>
+
+            <!-- Total Fee -->
+            <div class="receipt-total">
+                <div class="receipt-label">Total Fee Amount</div>
+                <div class="receipt-value">₹ @Model.TotalFee.ToString("N2")</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons no-print">
+        <button class="btn btn-print" onclick="printReceipt()">
+            🖨️ Print Receipt
+        </button>
+        <a href="@Url.Action("PFReceiptForm", "Receipt")" class="btn btn-new">
+            ➕ New Receipt
+        </a>
+        <a href="@Url.Action("Index", "Home")" class="btn btn-home">
+            🏠 Home
+        </a>
+    </div>
+</div>
+
+<script>
+    function printReceipt() {
+        window.print();
+    }
+
+    // Optional: Auto-print on page load (uncomment if needed)
+    // window.addEventListener('load', function() {
+    //     setTimeout(function() {
+    //         window.print();
+    //     }, 500);
+    // });
+</script>

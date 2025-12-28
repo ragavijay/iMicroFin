@@ -1,0 +1,37 @@
+﻿@model IEnumerable<iMicroFin.Models.UserCashReceiptStatement>
+
+@{
+    ViewBag.Title = "CashReceiptStatement";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>CashReceiptStatement</h2>
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.UserId)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.UserName)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Amount)
+        </th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.UserId)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.UserName)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Amount)
+        </td>
+    </tr>
+}
+
+</table>

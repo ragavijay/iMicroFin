@@ -1,0 +1,195 @@
+﻿@using System.Globalization;
+@{
+    ViewBag.Title = "Cash Receipt Statement";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<link rel="stylesheet" href="~/css/receipt//cash-receipt-statement-form.css">
+
+<div class="report-form-container">
+    <div class="report-card">
+        <div class="card-header">
+            <h2>📊 Cash Receipt Statement</h2>
+        </div>
+
+        <div class="card-body">
+            <div class="info-box">
+                <p>💡 Select a date range to view all cash receipts collected during that period</p>
+            </div>
+
+            @using (Html.BeginForm("CashReceiptStatement", "Receipt", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+
+                <div class="form-section">
+                    <h3 style="margin-bottom: 1rem; color: #212529; font-size: 1.25rem;">Quick Date Ranges</h3>
+                    <div class="quick-dates">
+                        <button type="button" class="quick-date-btn" onclick="setToday()">Today</button>
+                        <button type="button" class="quick-date-btn" onclick="setYesterday()">Yesterday</button>
+                        <button type="button" class="quick-date-btn" onclick="setThisWeek()">This Week</button>
+                        <button type="button" class="quick-date-btn" onclick="setThisMonth()">This Month</button>
+                        <button type="button" class="quick-date-btn" onclick="setLastMonth()">Last Month</button>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3 style="margin-bottom: 1rem; color: #212529; font-size: 1.25rem;">Select Date Range</h3>
+
+                    <div class="form-row-split">
+                        <div class="form-group">
+                            <label class="form-label" for="FromDate">
+                                From Date <span style="color: #dc3545;">*</span>
+                            </label>
+                            @Html.TextBox("FromDate", DateTime.Now.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture), new {
+                            @class = "form-control date-picker",
+                                                id = "FromDate",
+                                                required = "true",
+                                                placeholder = "DD/MM/YYYY",
+                                                autocomplete = "off"
+                                                })
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="ToDate">
+                            To Date <span style="color: #dc3545;">*</span>
+                        </label>
+                        @Html.TextBox("ToDate", DateTime.Now.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture), new {
+                                                @class = "form-control date-picker",
+                                                id = "ToDate",
+                                                required = "true",
+                                                placeholder = "DD/MM/YYYY",
+                                                autocomplete = "off"
+                                                })
+                    </div>
+                </div>
+                <div id="dateError" class="error-message"></div>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn-submit">
+                    📄 Generate Report
+                </button>
+            </div>
+                        }
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+    let fromDatePicker, toDatePicker;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize date pickers with explicit options
+        fromDatePicker = flatpickr("#FromDate", {
+            dateFormat: "d/m/Y",
+            defaultDate: new Date(),
+            maxDate: "today",
+            allowInput: true,
+            onChange: function(selectedDates, dateStr, instance) {
+                if (selectedDates.length > 0) {
+                    toDatePicker.set('minDate', selectedDates[0]);
+                }
+                validateDates();
+            }
+        });
+
+        toDatePicker = flatpickr("#ToDate", {
+            dateFormat: "d/m/Y",
+            defaultDate: new Date(),
+            maxDate: "today",
+            allowInput: true,
+            onChange: function(selectedDates, dateStr, instance) {
+                validateDates();
+            }
+        });
+
+        // Form validation
+        document.querySelector('form').addEventListener('submit', function(e) {
+            if (!validateDates()) {
+                e.preventDefault();
+                return false;
+            }
+        });
+    });
+
+    function validateDates() {
+        const fromDate = fromDatePicker.selectedDates[0];
+        const toDate = toDatePicker.selectedDates[0];
+        const errorDiv = document.getElementById('dateError');
+
+        if (fromDate && toDate && fromDate > toDate) {
+            errorDiv.textContent = '❌ From Date cannot be later than To Date';
+            errorDiv.classList.add('show');
+            return false;
+        } else {
+            errorDiv.classList.remove('show');
+            return true;
+        }
+    }
+
+    function setDateRange(fromDate, toDate) {
+        // Clear existing dates first
+        fromDatePicker.clear();
+        toDatePicker.clear();
+
+        // Small delay to ensure clearing is complete
+        setTimeout(function() {
+            fromDatePicker.setDate(fromDate, false);
+            toDatePicker.setDate(toDate, false);
+
+            // Force input value update
+            document.getElementById('FromDate').value = formatDate(fromDate);
+            document.getElementById('ToDate').value = formatDate(toDate);
+
+            // Trigger validation
+            validateDates();
+        }, 10);
+    }
+
+    function formatDate(date) {
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
+    }
+
+    function setToday() {
+        const today = new Date();
+        setDateRange(today, today);
+    }
+
+    function setYesterday() {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        setDateRange(yesterday, yesterday);
+    }
+
+    function setThisWeek() {
+        const today = new Date();
+        const firstDay = new Date(today);
+
+        // Get Monday of current week
+        const day = today.getDay();
+        const diff = today.getDate() - day + (day === 0 ? -6 : 1);
+        firstDay.setDate(diff);
+
+        setDateRange(firstDay, today);
+    }
+
+    function setThisMonth() {
+        const today = new Date();
+        const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+
+        setDateRange(firstDay, today);
+    }
+
+    function setLastMonth() {
+        const today = new Date();
+        const firstDay = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+        const lastDay = new Date(today.getFullYear(), today.getMonth(), 0);
+
+        setDateRange(firstDay, lastDay);
+    }
+</script>

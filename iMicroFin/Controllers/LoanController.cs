@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace iMicroFin.Controllers
 {
     [Route("[controller]")]
-    [Authorize]
+    [Authorize(Policy = "DirectorManager")]
     public class LoanController : Controller
     {
         [HttpGet]
@@ -190,10 +190,11 @@ namespace iMicroFin.Controllers
 
         [HttpPost]
         [Route("SaveLoanStatus")]
-        public ActionResult SaveLoanStatus(string LoanCode, string MemberCode, string LoanStatus, string StatusRemarks)
+        public ActionResult SaveLoanStatus(string loanCode, string memberCode, string loanStatus, string statusRemarks)
         {
-            LoanDBService.UpdateLoanStatus(LoanCode, LoanStatus, StatusRemarks);
-            return ViewLoans(MemberDBService.GetGroupCode(MemberCode));
+            string userId = HttpContext.Session?.GetString("userId") ?? "";
+            LoanDBService.UpdateLoanStatus(loanCode, loanStatus, statusRemarks, userId);
+            return ViewLoans(MemberDBService.GetGroupCode(memberCode));
         }
 
         [Route("LoanRepaymentStatus/{id?}")]
@@ -205,6 +206,7 @@ namespace iMicroFin.Controllers
         }
 
         [HttpGet]
+        [Route("CumulativeReport")]
         public ActionResult CumulativeReport()
         {
             List<CumulativeReport> cumulativeReport=LoanDBService.GetCumulativeReport();
@@ -235,6 +237,50 @@ namespace iMicroFin.Controllers
         {
             string result = LoanDBService.CheckGroup(groupCode);
             return Content(result, "text/plain");
+        }
+        [HttpPost]
+        [Route("MarkAsBadLoan")]
+        public IActionResult MarkAsBadLoan([FromBody] BadLoanRequest request)
+        {
+            try
+            {
+                string userId = HttpContext.Session?.GetString("userId") ?? "";
+                int statusCode = LoanDBService.MarkLoanAsBad(request.LoanCode, userId, request.StatusRemarks);
+
+                if (statusCode == 1)
+                {
+                    return Json(new
+                    {
+                        success = true,
+                        message = "Loan marked as bad loan successfully"
+                    });
+                }
+                else
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Failed to mark loan as bad. Only ongoing loans can be marked as bad."
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Error: " + ex.Message
+                });
+            }
+        }
+
+        
+
+        // Add this class at the end of the file or in a separate Models file
+        public class BadLoanRequest
+        {
+            public string LoanCode { get; set; }
+            public string StatusRemarks { get; set; }
         }
     }
 }

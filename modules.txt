@@ -1,0 +1,9 @@
+1. Bad loan and part payment
+2. Repayment view
+3. Balance sheet
+4. Mobile app
+
+
+Perfect.
+
+If discount is mentioned, the pending amount should be zero, so that it would be the last transaction.

@@ -1,0 +1,573 @@
+﻿/* receipt/group-instalment-receipt-form.css - ENHANCED */
+
+.receipt-form-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.receipt-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    transition: box-shadow 0.3s ease;
+}
+
+    .receipt-card:hover {
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    }
+
+.card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+}
+
+    .card-header h2 {
+        margin: 0;
+        font-size: 1.75rem;
+        font-weight: 600;
+        letter-spacing: -0.5px;
+    }
+
+.card-body {
+    padding: 2.5rem;
+}
+
+.form-section {
+    margin-bottom: 2.5rem;
+}
+
+    .form-section h3 {
+        color: #212529;
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    font-size: 1rem;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    background: white;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+    .form-control:hover {
+        border-color: #bbb;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
+    }
+
+    .form-control:read-only {
+        background-color: #f8f9fa;
+        cursor: not-allowed;
+        color: #666;
+    }
+
+.form-row-inline {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 1.5rem;
+    align-items: end;
+}
+
+.form-row-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+.error-message {
+    color: #dc3545;
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+    display: none;
+    font-weight: 500;
+}
+
+    .error-message.show {
+        display: block;
+        animation: slideDown 0.3s ease-out;
+    }
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.btn {
+    padding: 0.875rem 1.75rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+    .btn:active {
+        transform: scale(0.98);
+    }
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    width: 100%;
+    justify-content: center;
+}
+
+    .btn-primary:hover:not(:disabled) {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.35);
+    }
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+    padding: 0.875rem 2rem;
+}
+
+    .btn-secondary:hover {
+        background: #5a6268;
+        transform: translateY(-3px);
+        box-shadow: 0 6px 16px rgba(108, 117, 125, 0.35);
+    }
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.hidden-section {
+    display: none;
+}
+
+.info-box {
+    background: linear-gradient(135deg, #e7f3ff 0%, #f0f8ff 100%);
+    border-left: 4px solid #2196f3;
+    padding: 1.25rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    border-right: 1px solid #d0e8ff;
+}
+
+    .info-box p {
+        margin: 0;
+        color: #1565c0;
+        font-size: 0.95rem;
+        line-height: 1.5;
+    }
+
+.warning-box {
+    background: linear-gradient(135deg, #fff3cd 0%, #fffbf0 100%);
+    border-left: 4px solid #ffc107;
+    padding: 1.25rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    border-right: 1px solid #ffe8a1;
+}
+
+    .warning-box p {
+        margin: 0;
+        color: #856404;
+        font-size: 0.95rem;
+        line-height: 1.5;
+    }
+
+.loading-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #667eea;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-left: 0.5rem;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* ============ MEMBERS TABLE STYLING ============ */
+
+.members-table-wrapper {
+    margin-top: 2rem;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    background: white;
+    border: 1px solid #f0f0f0;
+}
+
+.members-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+}
+
+    .members-table thead {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+    }
+
+    .members-table th {
+        padding: 18px 16px;
+        text-align: left;
+        font-weight: 700;
+        vertical-align: middle;
+        position: relative;
+        white-space: nowrap;
+    }
+
+        .members-table th:after {
+            content: '';
+        }
+
+    .members-table td {
+        padding: 18px 16px;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 0.95rem;
+        vertical-align: middle;
+    }
+
+    .members-table tbody tr {
+        transition: all 0.2s ease;
+        background: white;
+    }
+
+        .members-table tbody tr:hover {
+            background-color: #f9f9ff;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.08);
+        }
+
+        .members-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+.member-code {
+    font-weight: 700;
+    color: #667eea;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.5px;
+}
+
+.member-name {
+    color: #212529;
+    font-weight: 500;
+    max-width: 200px;
+    word-wrap: break-word;
+}
+
+.loan-code {
+    font-family: 'Courier New', monospace;
+    color: #666;
+    background: #f8f9fa;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    letter-spacing: 0.3px;
+}
+
+.member-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 2px solid #dee2e6;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    background: white;
+    color: #333;
+    text-align: center;
+}
+
+    .member-input:hover {
+        border-color: #bbb;
+    }
+
+    .member-input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+    }
+
+    .member-input.error {
+        border-color: #dc3545;
+        background-color: #fff8f9;
+    }
+
+        .member-input.error:focus {
+            box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.15);
+        }
+
+    .member-input.advance {
+        background-color: #d4edda;
+        border-color: #28a745;
+        color: #155724;
+        font-weight: 700;
+    }
+
+        .member-input.advance:focus {
+            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.15);
+        }
+
+.input-error-msg {
+    color: #dc3545;
+    font-size: 0.8rem;
+    margin-top: 6px;
+    display: none;
+    font-weight: 600;
+    animation: slideDown 0.2s ease-out;
+}
+
+    .input-error-msg.show {
+        display: block;
+    }
+
+.instalment-value {
+    display: inline-block;
+    text-align: center;
+    font-weight: 700;
+    color: #333;
+    min-width: 40px;
+    padding: 6px 12px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    font-size: 0.95rem;
+}
+
+    .instalment-value:has-parent([style*="color: #28a745"]) {
+        color: #28a745;
+        background: #d4edda;
+    }
+
+.instalment-range {
+    font-size: 0.8rem;
+    color: #999;
+    display: block;
+    margin-top: 6px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+}
+
+.ewiAmount {
+    text-align: right;
+    color: #667eea;
+    font-weight: 700;
+}
+
+.totalDue {
+    text-align: right;
+    font-weight: 700;
+    color: #667eea;
+    font-size: 1.1rem;
+    padding: 18px 16px;
+}
+
+.summary-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+    padding: 24px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border-radius: 10px;
+    border: 1px solid #f0f0f0;
+}
+
+.summary-card {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 4px solid #667eea;
+    text-align: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+    .summary-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 6px 16px rgba(102, 126, 234, 0.15);
+    }
+
+.summary-label {
+    font-size: 0.8rem;
+    color: #999;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 12px;
+    letter-spacing: 0.8px;
+}
+
+.summary-value {
+    font-size: 1.9rem;
+    font-weight: 800;
+    color: #667eea;
+    line-height: 1.2;
+}
+
+.no-members-msg {
+    text-align: center;
+    padding: 60px 40px;
+    color: #95a5a6;
+    font-size: 1.1rem;
+}
+
+    .no-members-msg::before {
+        content: '📋';
+        display: block;
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+.members-count {
+    background: linear-gradient(135deg, #e7f3ff 0%, #f0f8ff 100%);
+    border-left: 4px solid #2196F3;
+    padding: 14px 18px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    color: #0c5aa0;
+    font-weight: 600;
+    border-right: 1px solid #d0e8ff;
+}
+
+.advance-payment-indicator {
+    display: inline-block;
+    background: #d4edda;
+    color: #155724;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    margin-left: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+/* ============ RESPONSIVE DESIGN ============ */
+
+@media (max-width: 1024px) {
+    .form-row-split {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .members-table th,
+    .members-table td {
+        padding: 12px;
+        font-size: 0.9rem;
+    }
+
+    .members-table th {
+        font-size: 0.8rem;
+    }
+
+    .summary-value {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .receipt-form-container {
+        padding: 0 0.75rem;
+    }
+
+    .card-header {
+        padding: 1.5rem;
+    }
+
+        .card-header h2 {
+            font-size: 1.5rem;
+        }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    .form-row-inline,
+    .form-row-split {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .summary-container {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        padding: 16px;
+    }
+
+    .summary-card {
+        padding: 16px;
+    }
+
+    .summary-value {
+        font-size: 1.3rem;
+    }
+
+    .members-table-wrapper {
+        overflow-x: auto;
+    }
+
+    .members-table th,
+    .members-table td {
+        padding: 10px;
+        font-size: 0.85rem;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        font-size: 0.9rem;
+    }
+
+    .btn-secondary {
+        padding: 0.75rem 1.5rem;
+    }
+}

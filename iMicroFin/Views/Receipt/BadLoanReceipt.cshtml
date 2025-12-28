@@ -1,0 +1,161 @@
+﻿@model iMicroFin.Models.BadLoanReceipt
+@{
+    ViewBag.Title = "Bad Loan Receipt";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="/css/receipt/badloan-receipt.css">
+
+<div class="receipt-container">
+    <!-- Success Banner -->
+    <div class="success-banner no-print">
+        <div class="success-icon">✓</div>
+        @if (Model.IsFullSettlement)
+        {
+            <h2>Bad Loan Fully Settled!</h2>
+            <p style="margin: 0; font-size: 1.1rem;">Loan has been closed successfully</p>
+        }
+        else
+        {
+            <h2>Bad Loan Payment Recorded!</h2>
+            <p style="margin: 0; font-size: 1.1rem;">Partial payment has been recorded successfully</p>
+        }
+    </div>
+
+    <!-- Receipt Card -->
+    <div class="receipt-card" id="printableReceipt">
+        <div class="receipt-header">
+            <h3>Bad Loan Settlement Receipt</h3>
+            <div class="receipt-id">Receipt ID: @Model.ReceiptId</div>
+            <div class="receipt-type">Settlement Payment (Type: S)</div>
+        </div>
+
+        <div class="receipt-body">
+            <div class="receipt-info-grid">
+                <!-- Loan Details -->
+                <div class="receipt-item">
+                    <div class="receipt-label">Loan Code</div>
+                    <div class="receipt-value">@Model.LoanCode</div>
+                </div>
+
+                <!-- Member Details -->
+                <div class="receipt-item">
+                    <div class="receipt-label">Member Code</div>
+                    <div class="receipt-value">@Model.MemberCode</div>
+                </div>
+
+                <div class="receipt-item">
+                    <div class="receipt-label">Member Name</div>
+                    <div class="receipt-value">@Model.MemberName</div>
+                </div>
+
+                <!-- Loan Amount Details -->
+                <div class="receipt-item">
+                    <div class="receipt-label">Original Loan Amount</div>
+                    <div class="receipt-value">₹ @Model.LoanAmount.ToString("N2")</div>
+                </div>
+
+                <div class="receipt-item">
+                    <div class="receipt-label">Total Due Amount</div>
+                    <div class="receipt-value">₹ @Model.TotalDue.ToString("N2")</div>
+                </div>
+
+                <div class="receipt-item highlight-paid">
+                    <div class="receipt-label">Previously Paid</div>
+                    <div class="receipt-value paid">₹ @Model.AmountPaid.ToString("N2")</div>
+                </div>
+
+                <div class="receipt-item highlight-pending">
+                    <div class="receipt-label">Pending Before Payment</div>
+                    <div class="receipt-value pending">₹ @Model.PendingAmount.ToString("N2")</div>
+                </div>
+
+                <!-- Payment Details -->
+                <div class="receipt-item highlight">
+                    <div class="receipt-label">Payment Amount</div>
+                    <div class="receipt-value payment">₹ @Model.PaymentAmount.ToString("N2")</div>
+                </div>
+
+                @if (Model.SettlementDiscount > 0)
+                {
+                    <div class="receipt-item highlight-discount">
+                        <div class="receipt-label">Settlement Discount</div>
+                        <div class="receipt-value discount">₹ @Model.SettlementDiscount.ToString("N2")</div>
+                    </div>
+                }
+
+                <!-- Receipt Info -->
+                <div class="receipt-item">
+                    <div class="receipt-label">Receipt Date</div>
+                    <div class="receipt-value">@Model.ActualReceiptDate.ToString("dd-MMM-yyyy")</div>
+                </div>
+
+                <div class="receipt-item">
+                    <div class="receipt-label">Collected By</div>
+                    <div class="receipt-value">@Model.UserId</div>
+                </div>
+            </div>
+
+            <!-- Remaining Balance -->
+            @if (Model.IsFullSettlement)
+            {
+                <div class="receipt-highlight settlement">
+                    <div class="receipt-label">Loan Status</div>
+                    <div class="receipt-value">✓ FULLY SETTLED</div>
+                </div>
+            }
+            else
+            {
+                <div class="receipt-highlight">
+                    <div class="receipt-label">Remaining Balance</div>
+                    <div class="receipt-value">₹ @Model.RemainingBalance.ToString("N2")</div>
+                </div>
+            }
+
+            <!-- Settlement Notice -->
+            @if (Model.IsFullSettlement)
+            {
+                <div class="settlement-notice">
+                    <div class="notice-icon">🎉</div>
+                    <div class="notice-content">
+                        <strong>Bad Loan Fully Settled</strong>
+                        <p>This bad loan has been completely settled. The loan status has been updated to "Bad Loan - Settled" (Status: B).</p>
+                        @if (Model.SettlementDiscount > 0)
+                        {
+                            <p style="margin-top: 10px;">A settlement discount of <strong>₹@Model.SettlementDiscount.ToString("N2")</strong> was applied.</p>
+                        }
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="partial-notice">
+                    <div class="notice-icon">ℹ️</div>
+                    <div class="notice-content">
+                        <strong>Partial Payment Recorded</strong>
+                        <p>This is a partial payment. The remaining balance of <strong>₹@Model.RemainingBalance.ToString("N2")</strong> can be paid in future installments.</p>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons no-print">
+        <button class="btn btn-print" onclick="printReceipt()">
+            🖨️ Print Receipt
+        </button>
+        <a href="@Url.Action("BadLoanReceiptForm", "Receipt")" class="btn btn-new">
+            ➕ New Payment
+        </a>
+        <a href="@Url.Action("Index", "Home")" class="btn btn-home">
+            🏠 Home
+        </a>
+    </div>
+</div>
+
+<script>
+    function printReceipt() {
+        window.print();
+    }
+</script>

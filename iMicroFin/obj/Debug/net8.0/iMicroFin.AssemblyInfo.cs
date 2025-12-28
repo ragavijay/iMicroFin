@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("iMicroFin")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+27034905ec25a45f00971ef2227f65d0f32e7873")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+18696d4afe23723cf5b521c5a3d601295f3063d6")]
 [assembly: System.Reflection.AssemblyProductAttribute("iMicroFin")]
 [assembly: System.Reflection.AssemblyTitleAttribute("iMicroFin")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace MicroFin.Models
+namespace iMicroFin.Models
 {
     public class CashReceiptStatement
     {

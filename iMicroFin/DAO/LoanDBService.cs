@@ -417,7 +417,7 @@ namespace iMicroFin.DAO
             }
         }
 
-        public static void UpdateLoanStatus(string loanCode, string loanStatus, string statusRemarks)
+        public static void UpdateLoanStatus(string loanCode, string loanStatus, string statusRemarks, string approvedBy)
         {
             using (MySqlConnection con = new MySqlConnection(ConfigHelper.GetConnectionString()))
             {
@@ -431,6 +431,8 @@ namespace iMicroFin.DAO
                     cmd.Parameters["@pLoanStatus"].Value = loanStatus;
                     cmd.Parameters.Add("@pStatusRemarks", MySqlDbType.VarChar, 50);
                     cmd.Parameters["@pStatusRemarks"].Value = statusRemarks;
+                    cmd.Parameters.Add("@pApprovedBy", MySqlDbType.VarChar, 20);
+                    cmd.Parameters["@pApprovedBy"].Value = approvedBy;
                     cmd.ExecuteNonQuery();
                 }
             }
@@ -583,12 +585,14 @@ namespace iMicroFin.DAO
         {
             List<CumulativeReport> cumulativeReportList = new List<CumulativeReport>();
             CumulativeReport cumulativeReport;
+
             using (MySqlConnection con = new MySqlConnection(ConfigHelper.GetConnectionString()))
             {
                 con.Open();
                 using (MySqlCommand cmd = new MySqlCommand("GetCumulativeReport", con))
                 {
                     cmd.CommandType = System.Data.CommandType.StoredProcedure;
+
                     using (MySqlDataReader rdr = cmd.ExecuteReader())
                     {
                         while (rdr.Read())
@@ -598,17 +602,22 @@ namespace iMicroFin.DAO
                             cumulativeReport.GroupName = rdr["GroupName"].ToString();
                             cumulativeReport.LeaderName = rdr["LeaderName"].ToString();
                             cumulativeReport.EwiDay = rdr["EwiDay"].ToString();
-                            cumulativeReport.TotalEwi = Convert.ToInt32(rdr["TotalEwi"].ToString());
                             cumulativeReport.TotalMembers = Convert.ToInt32(rdr["TotalMembers"].ToString());
-                            cumulativeReport.Ewi = Convert.ToInt32(rdr["Ewi"].ToString());
+                            cumulativeReport.AverageLoanAmount = Convert.ToInt32(rdr["AverageLoanAmount"].ToString());
                             cumulativeReport.Tenure = Convert.ToInt32(rdr["Tenure"].ToString());
+                            cumulativeReport.WeeksCompleted = Convert.ToInt32(rdr["WeeksCompleted"].ToString());
+                            cumulativeReport.AverageEWIReceived = Convert.ToInt32(rdr["AverageEWIReceived"].ToString());
+                            cumulativeReport.Ewi = Convert.ToInt32(rdr["Ewi"].ToString());
+                            cumulativeReport.TotalEwi = Convert.ToInt32(rdr["TotalEwi"].ToString());
                             cumulativeReport.TotalEwiReceived = Convert.ToInt32(rdr["TotalEwiReceived"].ToString());
+
                             cumulativeReport.Setup();
                             cumulativeReportList.Add(cumulativeReport);
                         }
                     }
                 }
             }
+
             return cumulativeReportList;
         }
 
@@ -664,5 +673,37 @@ namespace iMicroFin.DAO
             }
             return memberLoans;
         }
+
+        public static int MarkLoanAsBad(string loanCode, string userId, string statusRemarks)
+        {
+            int statusCode = 0;
+            using (MySqlConnection con = new MySqlConnection(ConfigHelper.GetConnectionString()))
+            {
+                con.Open();
+                using (MySqlCommand cmd = new MySqlCommand("MarkLoanAsBad", con))
+                {
+                    cmd.CommandType = System.Data.CommandType.StoredProcedure;
+
+                    cmd.Parameters.Add("@pLoanCode", MySqlDbType.VarChar, 10);
+                    cmd.Parameters["@pLoanCode"].Value = loanCode;
+
+                    cmd.Parameters.Add("@pUserId", MySqlDbType.VarChar, 20);
+                    cmd.Parameters["@pUserId"].Value = userId;
+
+                    cmd.Parameters.Add("@pStatusRemarks", MySqlDbType.VarChar, 50);
+                    cmd.Parameters["@pStatusRemarks"].Value = statusRemarks;
+
+                    using (MySqlDataReader rdr = cmd.ExecuteReader())
+                    {
+                        if (rdr.Read())
+                        {
+                            statusCode = Convert.ToInt32(rdr["StatusCode"]);
+                        }
+                    }
+                }
+            }
+            return statusCode;
+        }
+        
     }
 }

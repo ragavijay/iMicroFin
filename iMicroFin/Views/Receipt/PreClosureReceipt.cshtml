@@ -1,0 +1,122 @@
+﻿@model iMicroFin.Models.PreClosureReceipt
+@{
+    ViewBag.Title = "Pre-Closure Receipt";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="/css/receipt/pre-closure-receipt.css">
+
+<div class="receipt-container">
+    <!-- Success Banner -->
+    <div class="success-banner no-print">
+        <div class="success-icon">✓</div>
+        <h2>Pre-Closure Receipt Generated Successfully!</h2>
+        <p style="margin: 0; font-size: 1.1rem;">Loan has been pre-closed successfully</p>
+    </div>
+
+    <!-- Receipt Card -->
+    <div class="receipt-card" id="printableReceipt">
+        <div class="receipt-header">
+            <h3>Pre-Closure Receipt</h3>
+            <div class="receipt-id">Receipt ID: @Model.ReceiptId</div>
+            <div class="receipt-type">Settlement Payment (Type: S)</div>
+        </div>
+
+        <div class="receipt-body">
+            <div class="receipt-info-grid">
+                <!-- Loan Details -->
+                <div class="receipt-item">
+                    <div class="receipt-label">Loan Code</div>
+                    <div class="receipt-value">@Model.LoanCode</div>
+                </div>
+
+                <!-- Member Details -->
+                <div class="receipt-item">
+                    <div class="receipt-label">Member Code</div>
+                    <div class="receipt-value">@Model.MemberCode</div>
+                </div>
+
+                <div class="receipt-item">
+                    <div class="receipt-label">Member Name</div>
+                    <div class="receipt-value">@Model.MemberName</div>
+                </div>
+
+                <!-- Payment Details -->
+                <div class="receipt-item">
+                    <div class="receipt-label">Pending Instalments</div>
+                    <div class="receipt-value">@Model.TotalPendingInstalments</div>
+                </div>
+
+                <div class="receipt-item">
+                    <div class="receipt-label">Weekly Due (EWI)</div>
+                    <div class="receipt-value">₹ @Model.Ewi.ToString("N2")</div>
+                </div>
+
+                <div class="receipt-item">
+                    <div class="receipt-label">Total Due Amount</div>
+                    <div class="receipt-value">₹ @Model.TotalDue.ToString("N2")</div>
+                </div>
+
+                <div class="receipt-item highlight">
+                    <div class="receipt-label">Pre-Closure Discount</div>
+                    <div class="receipt-value discount">- ₹ @Model.PreClosureDiscount.ToString("N2")</div>
+                </div>
+
+                <!-- Receipt Info -->
+                <div class="receipt-item">
+                    <div class="receipt-label">Receipt Date</div>
+                    <div class="receipt-value">@Model.ActualReceiptDate.ToString("dd-MMM-yyyy")</div>
+                </div>
+
+                <div class="receipt-item">
+                    <div class="receipt-label">Collected By</div>
+                    <div class="receipt-value">@Model.UserId</div>
+                </div>
+            </div>
+
+            <!-- Net Amount Paid -->
+            <div class="receipt-highlight">
+                <div class="receipt-label">Net Amount Paid</div>
+                <div class="receipt-value">₹ @Model.NetAmount.ToString("N2")</div>
+            </div>
+
+            <div class="receipt-item">
+                <div class="receipt-label">Interest Savings</div>
+                <div class="receipt-value savings">+ ₹ @Model.InterestSavings.ToString("N2")</div>
+            </div>
+
+            <div class="receipt-item">
+                <div class="receipt-label">Delay Penalty</div>
+                <div class="receipt-value penalty">- ₹ @Model.DelayPenalty.ToString("N2")</div>
+            </div>
+
+            <!-- Pre-Closure Notice -->
+            <div class="preclosure-notice">
+                <div class="notice-icon">🎉</div>
+                <div class="notice-content">
+                    <strong>Loan Pre-Closed Successfully</strong>
+                    <p>This loan has been closed before the scheduled tenure completion. The member has saved interest on the remaining instalments.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons no-print">
+        <button class="btn btn-print" onclick="printReceipt()">
+            🖨️ Print Receipt
+        </button>
+        <a href="@Url.Action("PreClosureForm", "Receipt")" class="btn btn-new">
+            ➕ New Pre-Closure
+        </a>
+        <a href="@Url.Action("Index", "Home")" class="btn btn-home">
+            🏠 Home
+        </a>
+    </div>
+</div>
+
+<script>
+    function printReceipt() {
+        window.print();
+    }
+</script>

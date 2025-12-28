@@ -1,0 +1,241 @@
+﻿@model IEnumerable<iMicroFin.Models.CumulativeReport>
+@{
+    ViewBag.Title = "Cumulative Report";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var totalGroups = Model.Count();
+    var totalMembers = Model.Sum(x => x.TotalMembers);
+    var avgLoanAmount = Model.Count() > 0 ? (int)Model.Average(x => x.AverageLoanAmount) : 0;
+    var totalEwi = Model.Sum(x => x.TotalEwi);
+    var totalEwiReceived = Model.Sum(x => x.TotalEwiReceived);
+    var totalEwiPending = Model.Sum(x => x.TotalEwiPending);
+    var collectionRate = totalEwi > 0 ? (totalEwiReceived / (decimal)totalEwi * 100) : 0;
+}
+
+<link rel="stylesheet" href="~/css/loan/cumulative-report.css" />
+
+<div class="report-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>📊 Cumulative Loan Report</h1>
+        <p>Comprehensive overview of all group loans, collection status, and outstanding dues</p>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">Total Groups</div>
+            <div class="stat-value">@totalGroups</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Total Members</div>
+            <div class="stat-value">@totalMembers</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Avg Loan Amount</div>
+            <div class="stat-value">₹ @avgLoanAmount.ToString("N0")</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Total EWI Receivable</div>
+            <div class="stat-value">₹ @totalEwi.ToString("N0")</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">EWI Received</div>
+            <div class="stat-value">₹ @totalEwiReceived.ToString("N0")</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">EWI Pending</div>
+            <div class="stat-value alert">₹ @totalEwiPending.ToString("N0")</div>
+        </div>
+        <div class="stat-card highlight">
+            <div class="stat-label">Collection Rate</div>
+            <div class="stat-value">@collectionRate.ToString("N1")%</div>
+        </div>
+    </div>
+
+    <!-- Table Card -->
+    <div class="table-card">
+        <div class="table-header">
+            <h2>Group-wise Detailed Report</h2>
+            <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text"
+                           id="searchInput"
+                           class="search-input"
+                           placeholder="Search by group or leader name..."
+                           onkeyup="filterTable()">
+                </div>
+                <div class="action-buttons no-print">
+                    <button class="btn btn-primary" onclick="window.print()">
+                        🖨️ Print
+                    </button>
+                    <button class="btn btn-export" onclick="exportToCSV()">
+                        📥 Export CSV
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        @if (Model != null && Model.Any())
+        {
+            <div class="report-table-wrapper">
+                <table class="report-table" id="reportTable">
+                    <thead>
+                        <tr>
+                            <th>Group Code</th>
+                            <th>Group Name</th>
+                            <th>Leader Name</th>
+                            <th>Due Day</th>
+                            <th style="text-align: center;">Members</th>
+                            <th style="text-align: right;">Avg Loan</th>
+                            <th style="text-align: center;">Tenure</th>
+                            <th style="text-align: center;">Weeks Done</th>
+                            <th style="text-align: center;">Weeks Left</th>
+                            <th style="text-align: right;">Avg EWI/Member</th>
+                            <th style="text-align: right;">Avg Received</th>
+                            <th style="text-align: right;">Total EWI</th>
+                            <th style="text-align: right;">Received</th>
+                            <th style="text-align: right;">Pending</th>
+                            <th style="text-align: center;">Collection %</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            var statusClass = item.CollectionPercentage >= 90 ? "badge-success" : (item.CollectionPercentage >= 70 ? "badge-warning" : "badge-danger");
+                            var statusText = item.CollectionPercentage >= 90 ? "Good" : (item.CollectionPercentage >= 70 ? "Fair" : "Poor");
+
+                            <tr>
+                                <td class="group-code">@item.GroupCode</td>
+                                <td><strong>@item.GroupName</strong></td>
+                                <td>@item.LeaderName</td>
+                                <td>@item.EwiDay</td>
+                                <td style="text-align: center;">@item.TotalMembers</td>
+                                <td style="text-align: right;">₹ @item.AverageLoanAmount.ToString("N0")</td>
+                                <td style="text-align: center;"><span class="tenure-badge">@item.Tenure</span></td>
+                                <td style="text-align: center;"><span class="completed-badge">@item.WeeksCompleted</span></td>
+                                <td style="text-align: center;"><span class="pending-badge">@item.WeeksOutstanding</span></td>
+                                <td style="text-align: right;">₹ @item.Ewi.ToString("N0")</td>
+                                <td style="text-align: right;">₹ @item.AverageEWIReceived.ToString("N0")</td>
+                                <td style="text-align: right;">₹ @item.TotalEwi.ToString("N0")</td>
+                                <td style="text-align: right; color: #28a745; font-weight: 700;">₹ @item.TotalEwiReceived.ToString("N0")</td>
+                                <td style="text-align: right; color: #dc3545; font-weight: 700;">₹ @item.TotalEwiPending.ToString("N0")</td>
+                                <td style="text-align: center;">
+                                    <span class="badge @statusClass">@statusText</span>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: @item.CollectionPercentage.ToString("F0")%"></div>
+                                    </div>
+                                    <div style="font-size: 0.75rem; color: #666; margin-top: 4px;">@item.CollectionPercentage.ToString("N1")%</div>
+                                </td>
+                            </tr>
+                        }
+                        <!-- Total Row -->
+                        <tr class="total-row">
+                            <td colspan="3" style="text-align: right;">TOTAL</td>
+                            <td></td>
+                            <td style="text-align: center;">@totalMembers</td>
+                            <td style="text-align: right;">₹ @avgLoanAmount.ToString("N0")</td>
+                            <td colspan="2"></td>
+                            <td></td>
+                            <td colspan="1"></td>
+                            <td colspan="1"></td>
+                            <td style="text-align: right;">₹ @totalEwi.ToString("N0")</td>
+                            <td style="text-align: right;">₹ @totalEwiReceived.ToString("N0")</td>
+                            <td style="text-align: right;">₹ @totalEwiPending.ToString("N0")</td>
+                            <td style="text-align: center; font-weight: 700;">@collectionRate.ToString("N1")%</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="no-data">
+                <div class="no-data-icon">📭</div>
+                <h3>No Data Available</h3>
+                <p>No cumulative report data found</p>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    function filterTable() {
+        const input = document.getElementById('searchInput');
+        const filter = input.value.toUpperCase();
+        const table = document.getElementById('reportTable');
+        const tr = table.getElementsByTagName('tr');
+
+        for (let i = 1; i < tr.length - 1; i++) {
+            const row = tr[i];
+            const cells = row.getElementsByTagName('td');
+            let found = false;
+
+            const groupCode = cells[0]?.textContent || '';
+            const groupName = cells[1]?.textContent || '';
+            const leaderName = cells[2]?.textContent || '';
+
+            const searchText = (groupCode + groupName + leaderName).toUpperCase();
+
+            if (searchText.indexOf(filter) > -1) {
+                found = true;
+            }
+
+            row.style.display = found ? '' : 'none';
+        }
+    }
+
+    function exportToCSV() {
+        const table = document.getElementById('reportTable');
+        let csv = [];
+
+        const headers = [];
+        const headerCells = table.querySelectorAll('thead th');
+        headerCells.forEach(cell => {
+            headers.push('"' + cell.textContent.trim() + '"');
+        });
+        csv.push(headers.join(','));
+
+        const rows = table.querySelectorAll('tbody tr');
+        rows.forEach((row, index) => {
+            if (row.style.display !== 'none' && !row.classList.contains('total-row')) {
+                const rowData = [];
+                const cells = row.querySelectorAll('td');
+                cells.forEach((cell, idx) => {
+                    if (idx < cells.length - 1) {
+                        let value = cell.textContent.trim().replace(/₹|,|%/g, '');
+                        rowData.push('"' + value + '"');
+                    } else {
+                        const badge = cell.querySelector('.badge');
+                        const statusText = badge ? badge.textContent.trim() : '';
+                        rowData.push('"' + statusText + '"');
+                    }
+                });
+                csv.push(rowData.join(','));
+            }
+        });
+
+        const totalRow = table.querySelector('.total-row');
+        if (totalRow) {
+            const totalData = [];
+            const totalCells = totalRow.querySelectorAll('td');
+            totalCells.forEach(cell => {
+                let value = cell.textContent.trim().replace(/₹|,|%/g, '');
+                totalData.push('"' + value + '"');
+            });
+            csv.push(totalData.join(','));
+        }
+
+        const csvContent = csv.join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+
+        link.setAttribute('href', url);
+        link.setAttribute('download', 'Cumulative_Report_' + new Date().toISOString().split('T')[0] + '.csv');
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+</script>

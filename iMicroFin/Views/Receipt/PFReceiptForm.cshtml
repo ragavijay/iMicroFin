@@ -1,0 +1,250 @@
+﻿@model iMicroFin.Models.PFReceipt
+@using System.Globalization;
+@{
+    ViewBag.Title = "Processing Fee Receipt";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="/css/receipt/pf-receipt-form.css">
+
+<div class="receipt-form-container">
+    <div class="receipt-card">
+        <div class="card-header">
+            <h2>Processing Fee Receipt</h2>
+        </div>
+
+        <div class="card-body">
+            @using (Html.BeginForm("PFReceipt", "Receipt", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+
+                <!-- Loan Code Section -->
+                <div class="form-section">
+                    <div class="info-box">
+                        <p>💡 Enter the loan code to fetch loan details and generate processing fee receipt</p>
+                    </div>
+
+                    <div class="form-row-inline">
+                        <div class="form-group">
+                            <label class="form-label" for="LoanCode">
+                                Loan Code <span style="color: #dc3545;">*</span>
+                            </label>
+                            @Html.TextBoxFor(m => m.LoanCode, new {
+                            id = "LoanCode",
+                                                @class = "form-control",
+                                                placeholder = "Enter loan code",
+                                                required = "true",
+                                                tabindex = "1",
+                                                autocomplete = "off"
+                                                })
+                        <div id="errLoanId" class="error-message"></div>
+                    </div>
+                    <div class="form-group">
+                        <button class="btn btn-secondary" type="button" onclick="getLoanDetails()" tabindex="2" id="btnGetLoan">
+                            🔍 Get Loan Details
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Receipt Form Data (Hidden Initially) -->
+            <div id="pfReceiptFormData" class="hidden-section">
+                <hr style="margin: 2rem 0; border: none; border-top: 2px solid #e9ecef;">
+
+                <!-- Member Details -->
+                <div class="form-section">
+                    <h3 style="margin-bottom: 1rem; color: #212529; font-size: 1.25rem;">Member Details</h3>
+
+                    <div class="form-row-split">
+                        <div class="form-group">
+                            <label class="form-label" for="MemberCode">Member Code</label>
+                            @Html.TextBoxFor(m => m.MemberCode, new {
+                                                        id = "MemberCode",
+                                                        @class = "form-control",
+                                                        @readonly = "readonly",
+                                                        required = "true"
+                                                        })
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="MemberName">Member Name</label>
+                            @Html.TextBoxFor(m => m.MemberName, new {
+                                                        id = "MemberName",
+                                                        @class = "form-control",
+                                                        @readonly = "readonly",
+                                                        required = "true"
+                                                        })
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fee Details -->
+                <div class="form-section">
+                    <h3 style="margin-bottom: 1rem; color: #212529; font-size: 1.25rem;">Fee Details</h3>
+
+                    <div class="form-row-split">
+                        <div class="form-group">
+                            <label class="form-label" for="ProcessingFee">Processing Fee (₹)</label>
+                            @Html.TextBoxFor(m => m.ProcessingFee, new {
+                                                        id = "ProcessingFee",
+                                                        @class = "form-control",
+                                                        @readonly = "readonly",
+                                                        required = "true"
+                                                        })
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="Insurance">Insurance (₹)</label>
+                            @Html.TextBoxFor(m => m.Insurance, new {
+                                                        id = "Insurance",
+                                                        @class = "form-control",
+                                                        @readonly = "readonly",
+                                                        required = "true"
+                                                        })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="TotalFee">Total Fee (₹)</label>
+                        @Html.TextBoxFor(m => m.TotalFee, new {
+                                                id = "TotalFee",
+                                                @class = "form-control",
+                                                @readonly = "readonly",
+                                                required = "true",
+                                                style = "font-weight: 700; font-size: 1.1rem; color: #667eea;"
+                                                })
+                    </div>
+                </div>
+
+                <!-- Receipt Date -->
+                <div class="form-section">
+                    <div class="form-group">
+                        <label class="form-label" for="ActualReceiptDate">
+                            Actual Receipt Date <span style="color: #dc3545;">*</span>
+                        </label>
+                        @Html.TextBoxFor(m => m.ActualReceiptDate, new {
+                                                @class = "form-control date-picker",
+                                                @required = "true",
+                                                @Value = DateTime.Now.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture),
+                                                @autocomplete = "off",
+                                                @tabindex = "3",
+                                                @placeholder = "DD/MM/YYYY"
+                                                })
+                        <div id="errActualReceiptDate" class="error-message"></div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="form-group">
+                    <button class="btn btn-primary" type="submit" tabindex="4" style="width: 100%;">
+                        💾 Generate Receipt
+                    </button>
+                </div>
+            </div>
+                        }
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize date picker
+        flatpickr(".date-picker", {
+            dateFormat: "d/m/Y",
+            defaultDate: new Date(),
+            maxDate: "today",
+            allowInput: true
+        });
+
+        // Clear form when loan code changes
+        document.getElementById("LoanCode").addEventListener("input", function() {
+            document.getElementById("pfReceiptFormData").classList.add('hidden-section');
+            document.getElementById("errLoanId").classList.remove('show');
+            document.getElementById("errLoanId").textContent = '';
+        });
+
+        // Allow Enter key to trigger loan lookup
+        document.getElementById("LoanCode").addEventListener("keypress", function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                getLoanDetails();
+            }
+        });
+    });
+
+    async function getLoanDetails() {
+        const loanCodeInput = document.getElementById('LoanCode');
+        const loanCode = loanCodeInput.value.trim();
+        const errorDiv = document.getElementById('errLoanId');
+        const formData = document.getElementById('pfReceiptFormData');
+        const btnGetLoan = document.getElementById('btnGetLoan');
+
+        // Validate loan code
+        if (!loanCode) {
+            errorDiv.textContent = 'Please enter a loan code';
+            errorDiv.classList.add('show');
+            return;
+        }
+
+        // Show loading state
+        const originalBtnText = btnGetLoan.innerHTML;
+        btnGetLoan.disabled = true;
+        btnGetLoan.innerHTML = 'Loading<span class="loading-spinner"></span>';
+        errorDiv.classList.remove('show');
+        formData.classList.add('hidden-section');
+
+        try {
+            const response = await fetch(`/Receipt/GetPFReceipt/${encodeURIComponent(loanCode)}`);
+            const data = await response.json();
+
+            if (data.success && data.loanStatus === 'A') {
+                // Populate form fields
+                document.getElementById("MemberCode").value = data.memberCode || '';
+                document.getElementById("MemberName").value = data.memberName || '';
+                document.getElementById("ProcessingFee").value = data.processingFee || '0';
+                document.getElementById("Insurance").value = data.insurance || '0';
+                document.getElementById("TotalFee").value = data.totalFee || '0';
+
+                // Show form
+                formData.classList.remove('hidden-section');
+                errorDiv.classList.remove('show');
+
+            } else {
+                // Handle different loan statuses
+                let errorMessage = '';
+
+                switch(data.loanStatus) {
+                    case 'P':
+                        errorMessage = '⚠️ Loan not approved yet';
+                        break;
+                    case 'O':
+                        errorMessage = '✓ Processing fee already paid for this loan';
+                        break;
+                    case 'C':
+                        errorMessage = '🔒 Loan is closed';
+                        break;
+                    case 'Invalid':
+                    case 'Error':
+                        errorMessage = '❌ ' + (data.message || 'Invalid loan code');
+                        break;
+                    default:
+                        errorMessage = '❌ Invalid loan code or loan status';
+                }
+
+                errorDiv.textContent = errorMessage;
+                errorDiv.classList.add('show');
+                formData.classList.add('hidden-section');
+            }
+
+        } catch (error) {
+            console.error('Error fetching loan details:', error);
+            errorDiv.textContent = '❌ Error fetching loan details. Please try again.';
+            errorDiv.classList.add('show');
+            formData.classList.add('hidden-section');
+        } finally {
+            // Restore button
+            btnGetLoan.disabled = false;
+            btnGetLoan.innerHTML = originalBtnText;
+        }
+    }
+</script>

@@ -34,7 +34,9 @@ namespace iMicroFin.Controllers
             if (!string.IsNullOrEmpty(userType) &&
                 (userType.Equals("A") ||
                  userType.Equals("D") ||
-                 userType.Equals("M")))
+                 userType.Equals("M") ||
+                 userType.Equals("C")))
+
             {
                 return View();
             }
@@ -52,40 +54,31 @@ namespace iMicroFin.Controllers
         {
             string userType;
             userType = DBService.GetUserType(login);
-            if (userType.Equals("A") || userType.Equals("D") || userType.Equals("M"))
+            string roleName = userType switch
+            {
+                "A" => "Admin",
+                "D" => "Director",
+                "M" => "Manager",
+                "C" => "Cashier",
+                _ => ""
+            };
+            if (userType.Equals("A") || userType.Equals("D") || userType.Equals("M") || userType.Equals("C"))
             {
                 HttpContext.Session.SetString("userType", userType);
                 HttpContext.Session.SetString("userId", login.UserId);
                 HttpContext.Session.SetInt32("branchId", 1);
                 HttpContext.Session.SetString("branch", DBService.GetBranchName(1));
 
-                if (userType.Equals("A"))
-                {
-                    var claims = new List<Claim>
-                    {
-                        new Claim(ClaimTypes.Name, login.UserId ?? ""),
-                        new Claim(ClaimTypes.Role,  "Admin"),
-
-                    };
-                    var identity = new ClaimsIdentity(claims, "MyAuthCookie");
-                    var principal = new ClaimsPrincipal(identity);
-                    await HttpContext.SignInAsync("MyAuthCookie", principal);
-                    return View();
-                }
-                else 
-                {
-                    var claims = new List<Claim>
-                        {
-                            new Claim(ClaimTypes.Name, login.UserId),
-                            new Claim(ClaimTypes.Role, "User")
-                        };
-
-                    var identity = new ClaimsIdentity(claims, "MyAuthCookie");
-                    var principal = new ClaimsPrincipal(identity);
-
-                    await HttpContext.SignInAsync("MyAuthCookie", principal);
-                    return View();
-                }
+                // Create claims (same for all user types)
+                var claims = new List<Claim>
+                            {
+                                new Claim(ClaimTypes.Name, login.UserId ?? ""),
+                                new Claim(ClaimTypes.Role, roleName),
+                            };
+                var identity = new ClaimsIdentity(claims, "MyAuthCookie");
+                var principal = new ClaimsPrincipal(identity);
+                await HttpContext.SignInAsync("MyAuthCookie", principal);
+                return View();
             }
             else
             {
@@ -104,5 +97,8 @@ namespace iMicroFin.Controllers
             return RedirectToAction("Login");
         }
 
+        [Authorize]
+        [HttpGet]
+        public ActionResult AccessDenied() { return View(); }
     }
 }

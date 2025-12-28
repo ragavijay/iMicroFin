@@ -1,0 +1,401 @@
+﻿@model iMicroFin.Models.InstalmentReceipt
+@using System.Globalization;
+@{
+    ViewBag.Title = "Instalment Receipt";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="/css/receipt/instalment-receipt-form.css">
+
+
+<div class="receipt-form-container">
+    <div class="receipt-card">
+        <div class="card-header">
+            <h2>Instalment Receipt</h2>
+        </div>
+
+        <div class="card-body">
+            @using (Html.BeginForm("InstalmentReceipt", "Receipt", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+
+                <!-- Loan Code Section -->
+                <div class="form-section">
+                    <div class="info-box">
+                        <p>💡 Enter the loan code to fetch loan details. You can pay current due or advance instalments up to the total pending amount.</p>
+                    </div>
+
+                    <div class="form-row-inline">
+                        <div class="form-group">
+                            <label class="form-label" for="LoanCode">
+                                Loan Code <span style="color: #dc3545;">*</span>
+                            </label>
+                            @Html.TextBoxFor(m => m.LoanCode, new {
+                            id = "LoanCode",
+                                                @class = "form-control",
+                                                placeholder = "Enter loan code",
+                                                required = "true",
+                                                tabindex = "1",
+                                                autocomplete = "off"
+                                                })
+                        <div id="errLoanId" class="error-message"></div>
+                    </div>
+                    <div class="form-group">
+                        <button class="btn btn-secondary" type="button" onclick="getLoanDetails()" tabindex="2" id="btnGetLoan">
+                            🔍 Get Loan Details
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Receipt Form Data (Hidden Initially) -->
+            <div id="instalmentReceiptFormData" class="hidden-section">
+                <hr style="margin: 2rem 0; border: none; border-top: 2px solid #e9ecef;">
+
+                <!-- Member Details -->
+                <div class="form-section">
+                    <h3 style="margin-bottom: 1rem; color: #212529; font-size: 1.25rem;">Member Details</h3>
+
+                    <div class="form-row-split">
+                        <div class="form-group">
+                            <label class="form-label" for="MemberCode">Member Code</label>
+                            @Html.TextBoxFor(m => m.MemberCode, new {
+                                                        id = "MemberCode",
+                                                        @class = "form-control",
+                                                        @readonly = "readonly",
+                                                        required = "true"
+                                                        })
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="MemberName">Member Name</label>
+                            @Html.TextBoxFor(m => m.MemberName, new {
+                                                        id = "MemberName",
+                                                        @class = "form-control",
+                                                        @readonly = "readonly",
+                                                        required = "true"
+                                                        })
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Instalment Details -->
+                <div class="form-section">
+                    <h3 style="margin-bottom: 1rem; color: #212529; font-size: 1.25rem;">Instalment Payment Details</h3>
+
+                    <!-- Pending Instalments Info -->
+                    <div class="pending-info">
+                        <div class="info-card">
+                            <div class="info-card-label">Current Due</div>
+                            <div class="info-card-value" id="currentDueDisplay">0</div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-card-label">Total Pending</div>
+                            <div class="info-card-value" id="totalPendingDisplay">0</div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-card-label">Weekly Amount (₹)</div>
+                            <div class="info-card-value" id="ewiDisplay">0</div>
+                        </div>
+                    </div>
+
+                    <!-- Instalments to Pay -->
+                    <div class="form-row-split">
+                        <div class="form-group">
+                            <label class="form-label-with-info">
+                                Instalments to Pay <span style="color: #dc3545;">*</span>
+                                <span class="info-icon" data-tooltip="Pay 1 to total pending instalments">?</span>
+                            </label>
+                            @Html.TextBoxFor(m => m.NoOfInstalments, new {
+                                                        id = "NoOfInstalments",
+                                                        @class = "form-control",
+                                                        required = "true",
+                                                        type = "number",
+                                                        min = "1",
+                                                        tabindex = "3"
+                                                        })
+                            <div class="instalment-range-info" id="instalmentRangeInfo"></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Total Instalments Pending</label>
+                            @Html.TextBoxFor(m => m.TotalPendingInstalments, new {
+                                                        id = "TotalPendingInstalments",
+                                                        @class = "form-control",
+                                                        @readonly = "readonly"
+                                                        })
+                        </div>
+                    </div>
+
+                    <div class="form-row-split">
+                        <div class="form-group">
+                            <label class="form-label" for="Ewi">Weekly Due (₹)</label>
+                            @Html.TextBoxFor(m => m.Ewi, new {
+                                                        id = "Ewi",
+                                                        @class = "form-control",
+                                                        @readonly = "readonly",
+                                                        required = "true"
+                                                        })
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="TotalDue">Total Amount Due (₹)</label>
+                            @Html.TextBoxFor(m => m.TotalDue, new {
+                                                        id = "TotalDue",
+                                                        @class = "form-control",
+                                                        @readonly = "readonly",
+                                                        required = "true",
+                                                        style = "font-weight: 700; font-size: 1.1rem; color: #667eea;"
+                                                        })
+                        </div>
+                    </div>
+
+                    <!-- Warning/Info Messages -->
+                    <div id="warningBox" class="warning-box" style="display: none;">
+                        <p id="warningMessage"></p>
+                    </div>
+                    <div id="successBox" class="success-box" style="display: none;">
+                        <p id="successMessage"></p>
+                    </div>
+                </div>
+
+                <!-- Receipt Date -->
+                <div class="form-section">
+                    <div class="form-group">
+                        <label class="form-label" for="ActualReceiptDate">
+                            Actual Receipt Date <span style="color: #dc3545;">*</span>
+                        </label>
+                        @Html.TextBoxFor(m => m.ActualReceiptDate, new {
+                                                @class = "form-control date-picker",
+                                                @required = "true",
+                                                @Value = DateTime.Now.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture),
+                                                @autocomplete = "off",
+                                                @tabindex = "4",
+                                                @placeholder = "DD/MM/YYYY"
+                                                })
+                        <div id="errActualReceiptDate" class="error-message"></div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="form-group">
+                    <button class="btn btn-primary" type="submit" tabindex="5" style="width: 100%;">
+                        💾 Generate Receipt
+                    </button>
+                </div>
+            </div>
+                        }
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+    let maxInstalments = 0;
+    let currentDueInstalments = 0;
+    let ewiAmount = 0;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize date picker
+        flatpickr(".date-picker", {
+            dateFormat: "d/m/Y",
+            defaultDate: new Date(),
+            maxDate: "today",
+            allowInput: true
+        });
+
+        // Clear form when loan code changes
+        document.getElementById("LoanCode").addEventListener("input", function() {
+            document.getElementById("instalmentReceiptFormData").classList.add('hidden-section');
+            document.getElementById("errLoanId").classList.remove('show');
+            document.getElementById("errLoanId").textContent = '';
+        });
+
+        // Allow Enter key to trigger loan lookup
+        document.getElementById("LoanCode").addEventListener("keypress", function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                getLoanDetails();
+            }
+        });
+
+        // Calculate total due when instalments change
+        document.getElementById("NoOfInstalments").addEventListener("input", function() {
+            calculateTotalDue();
+        });
+    });
+
+    async function getLoanDetails() {
+        const loanCodeInput = document.getElementById('LoanCode');
+        const loanCode = loanCodeInput.value.trim();
+        const errorDiv = document.getElementById('errLoanId');
+        const formData = document.getElementById('instalmentReceiptFormData');
+        const btnGetLoan = document.getElementById('btnGetLoan');
+
+        // Validate loan code
+        if (!loanCode) {
+            errorDiv.textContent = 'Please enter a loan code';
+            errorDiv.classList.add('show');
+            return;
+        }
+
+        // Show loading state
+        const originalBtnText = btnGetLoan.innerHTML;
+        btnGetLoan.disabled = true;
+        btnGetLoan.innerHTML = 'Loading<span class="loading-spinner"></span>';
+        errorDiv.classList.remove('show');
+        formData.classList.add('hidden-section');
+
+        try {
+            const response = await fetch(`/Receipt/GetInstalmentReceipt/${encodeURIComponent(loanCode)}`);
+            const data = await response.json();
+
+            if (data.success && data.loanStatus === 'O') {
+                // Store values - now we have both current and total pending
+                currentDueInstalments = data.noOfInstalments; // Current due
+                maxInstalments = data.totalPendingInstalments; // Total pending
+                ewiAmount = data.ewi;
+
+                // Populate form fields
+                document.getElementById("MemberCode").value = data.memberCode || '';
+                document.getElementById("MemberName").value = data.memberName || '';
+                document.getElementById("NoOfInstalments").value = currentDueInstalments || '0';
+                document.getElementById("TotalPendingInstalments").value = maxInstalments || '0';
+                document.getElementById("Ewi").value = ewiAmount || '0';
+
+                // Display info cards
+                document.getElementById("currentDueDisplay").textContent = currentDueInstalments;
+                document.getElementById("totalPendingDisplay").textContent = maxInstalments;
+                document.getElementById("ewiDisplay").textContent = ewiAmount;
+
+                // Update range info
+                updateInstalmentRangeInfo();
+
+                // Calculate initial total due
+                calculateTotalDue();
+
+                // Show form
+                formData.classList.remove('hidden-section');
+                errorDiv.classList.remove('show');
+
+            } else {
+                // Handle different loan statuses
+                let errorMessage = '';
+
+                switch(data.loanStatus) {
+                    case 'P':
+                        errorMessage = '⚠️ Loan not approved yet';
+                        break;
+                    case 'A':
+                        errorMessage = '⚠️ Processing fee not paid yet';
+                        break;
+                    case 'C':
+                        errorMessage = '🔒 Loan is closed';
+                        break;
+                    case 'Invalid':
+                    case 'Error':
+                        errorMessage = '❌ ' + (data.message || 'Invalid loan code');
+                        break;
+                    default:
+                        errorMessage = '❌ Invalid loan code or loan status';
+                }
+
+                errorDiv.textContent = errorMessage;
+                errorDiv.classList.add('show');
+                formData.classList.add('hidden-section');
+            }
+
+        } catch (error) {
+            console.error('Error fetching loan details:', error);
+            errorDiv.textContent = '❌ Error fetching loan details. Please try again.';
+            errorDiv.classList.add('show');
+            formData.classList.add('hidden-section');
+        } finally {
+            // Restore button
+            btnGetLoan.disabled = false;
+            btnGetLoan.innerHTML = originalBtnText;
+        }
+    }
+
+    function updateInstalmentRangeInfo() {
+        const rangeInfoDiv = document.getElementById("instalmentRangeInfo");
+        const instalmentInput = document.getElementById("NoOfInstalments");
+
+        instalmentInput.min = 1;
+        instalmentInput.max = maxInstalments;
+
+        let message = `You can pay between <strong>1</strong> and <strong>${maxInstalments}</strong> instalments. `;
+        if (currentDueInstalments < maxInstalments) {
+            message += `(<strong>${currentDueInstalments}</strong> are currently due, remaining <strong>${maxInstalments - currentDueInstalments}</strong> are in advance)`;
+        }
+
+        rangeInfoDiv.innerHTML = message;
+    }
+
+    function calculateTotalDue() {
+        const instalments = parseInt(document.getElementById("NoOfInstalments").value) || 0;
+        const totalDueField = document.getElementById("TotalDue");
+        const warningBox = document.getElementById("warningBox");
+        const warningMessage = document.getElementById("warningMessage");
+        const successBox = document.getElementById("successBox");
+        const successMessage = document.getElementById("successMessage");
+        const errorDiv = document.getElementById('errLoanId');
+
+        errorDiv.classList.remove('show');
+        warningBox.style.display = 'none';
+        successBox.style.display = 'none';
+
+        if (instalments <= 0) {
+            totalDueField.value = '0';
+            return;
+        }
+
+        // Validate range: minimum 1, maximum total pending
+        if (instalments > maxInstalments) {
+            totalDueField.value = '0';
+            warningBox.style.display = 'block';
+            warningMessage.innerHTML = `⚠️ Maximum instalments allowed: <strong>${maxInstalments}</strong>. Please enter a valid number.`;
+            document.getElementById("NoOfInstalments").focus();
+            return;
+        }
+
+        // Calculate total due
+        const total = instalments * ewiAmount;
+        totalDueField.value = total.toFixed(2);
+
+        // Show advance payment info if applicable
+        if (instalments > currentDueInstalments) {
+            const advanceInstalments = instalments - currentDueInstalments;
+            successBox.style.display = 'block';
+            successMessage.innerHTML = `✓ You are paying <strong>${currentDueInstalments}</strong> current dues + <strong>${advanceInstalments}</strong> advance instalments`;
+        }
+    }
+
+    // Form validation before submit
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const instalments = parseInt(document.getElementById("NoOfInstalments").value) || 0;
+        const totalDue = parseFloat(document.getElementById("TotalDue").value) || 0;
+        const errorDiv = document.getElementById('errLoanId');
+
+        if (instalments <= 0) {
+            e.preventDefault();
+            errorDiv.textContent = '❌ Please enter a valid number of instalments (minimum 1)';
+            errorDiv.classList.add('show');
+            return false;
+        }
+
+        if (instalments > maxInstalments) {
+            e.preventDefault();
+            errorDiv.textContent = `❌ Maximum instalments allowed: ${maxInstalments}`;
+            errorDiv.classList.add('show');
+            return false;
+        }
+
+        if (totalDue <= 0) {
+            e.preventDefault();
+            errorDiv.textContent = '❌ Total due amount cannot be zero';
+            errorDiv.classList.add('show');
+            return false;
+        }
+
+        return true;
+    });
+</script>

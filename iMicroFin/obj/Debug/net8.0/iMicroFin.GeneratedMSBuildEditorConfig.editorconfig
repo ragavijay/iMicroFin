@@ -20,6 +20,10 @@ build_property._RazorSourceGeneratorDebug =
 build_property.EffectiveAnalysisLevelStyle = 8.0
 build_property.EnableCodeStyleSeverity = 
 
+[C:/Project/iMicroFin/iMicroFin/Views/App/AccessDenied.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXBwXEFjY2Vzc0RlbmllZC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Project/iMicroFin/iMicroFin/Views/App/Home.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXBwXEhvbWUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
@@ -34,6 +38,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Project/iMicroFin/iMicroFin/Views/Group/ManageGroup.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcR3JvdXBcTWFuYWdlR3JvdXAuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Project/iMicroFin/iMicroFin/Views/Loan/CumulativeReport.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTG9hblxDdW11bGF0aXZlUmVwb3J0LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Project/iMicroFin/iMicroFin/Views/Loan/GroupLoanForm.cshtml]
@@ -70,6 +78,74 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Project/iMicroFin/iMicroFin/Views/Member/ViewMembers.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWVtYmVyXFZpZXdNZW1iZXJzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Project/iMicroFin/iMicroFin/Views/Receipt/BadLoanReceipt.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVjZWlwdFxCYWRMb2FuUmVjZWlwdC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Project/iMicroFin/iMicroFin/Views/Receipt/BadLoanReceiptForm.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVjZWlwdFxCYWRMb2FuUmVjZWlwdEZvcm0uY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Project/iMicroFin/iMicroFin/Views/Receipt/CashReceiptStatement.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVjZWlwdFxDYXNoUmVjZWlwdFN0YXRlbWVudC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Project/iMicroFin/iMicroFin/Views/Receipt/CashReceiptStatementForm.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVjZWlwdFxDYXNoUmVjZWlwdFN0YXRlbWVudEZvcm0uY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Project/iMicroFin/iMicroFin/Views/Receipt/GroupInstalmentReceipt.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVjZWlwdFxHcm91cEluc3RhbG1lbnRSZWNlaXB0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Project/iMicroFin/iMicroFin/Views/Receipt/GroupInstalmentReceiptForm.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVjZWlwdFxHcm91cEluc3RhbG1lbnRSZWNlaXB0Rm9ybS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Project/iMicroFin/iMicroFin/Views/Receipt/GroupPFReceipt.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVjZWlwdFxHcm91cFBGUmVjZWlwdC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Project/iMicroFin/iMicroFin/Views/Receipt/GroupPFReceiptForm.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVjZWlwdFxHcm91cFBGUmVjZWlwdEZvcm0uY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Project/iMicroFin/iMicroFin/Views/Receipt/InstalmentReceipt.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVjZWlwdFxJbnN0YWxtZW50UmVjZWlwdC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Project/iMicroFin/iMicroFin/Views/Receipt/InstalmentReceiptForm.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVjZWlwdFxJbnN0YWxtZW50UmVjZWlwdEZvcm0uY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Project/iMicroFin/iMicroFin/Views/Receipt/PFReceipt.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVjZWlwdFxQRlJlY2VpcHQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Project/iMicroFin/iMicroFin/Views/Receipt/PFReceiptForm.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVjZWlwdFxQRlJlY2VpcHRGb3JtLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Project/iMicroFin/iMicroFin/Views/Receipt/PreClosureForm.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVjZWlwdFxQcmVDbG9zdXJlRm9ybS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Project/iMicroFin/iMicroFin/Views/Receipt/PreClosureReceipt.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVjZWlwdFxQcmVDbG9zdXJlUmVjZWlwdC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Project/iMicroFin/iMicroFin/Views/Receipt/UserCashReceiptStatement.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVjZWlwdFxVc2VyQ2FzaFJlY2VpcHRTdGF0ZW1lbnQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Project/iMicroFin/iMicroFin/Views/Receipt/ViewEwiDueList.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVjZWlwdFxWaWV3RXdpRHVlTGlzdC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Project/iMicroFin/iMicroFin/Views/Report/FinancialReport.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVwb3J0XEZpbmFuY2lhbFJlcG9ydC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Project/iMicroFin/iMicroFin/Views/Shared/_Layout.cshtml]

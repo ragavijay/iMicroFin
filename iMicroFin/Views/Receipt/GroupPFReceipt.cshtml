@@ -1,0 +1,121 @@
+﻿@model IEnumerable<iMicroFin.Models.GroupPFReceiptInfo>
+@{
+    ViewBag.Title = "Group Processing Fee Receipts";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var totalProcessingFee = Model.Sum(x => x.ProcessingFee);
+    var totalInsurance = Model.Sum(x => x.Insurance);
+    var totalFee = Model.Sum(x => x.TotalFee);
+}
+<link rel="stylesheet" href="~/css/receipt/group-pf-receipt.css" />
+
+<div class="receipt-container">
+    <!-- Success Banner -->
+    <div class="success-banner no-print">
+        <div class="success-icon">✓</div>
+        <h2>Group Receipts Generated Successfully!</h2>
+        <p style="margin: 0; font-size: 1.1rem;">
+            Processing fee receipts created for @Model.Count() member(s)
+        </p>
+    </div>
+
+    <!-- Receipt Card -->
+    <div class="receipt-card" id="printableReceipt">
+        <div class="receipt-header">
+            <h3>Group Processing Fee Receipts</h3>
+
+            <!-- Summary Stats -->
+            <div class="receipt-stats">
+                <div class="stat-box">
+                    <div class="stat-label">Total Members</div>
+                    <div class="stat-value">@Model.Count()</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Total Processing Fee</div>
+                    <div class="stat-value">₹ @totalProcessingFee.ToString("N2")</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Total Insurance</div>
+                    <div class="stat-value">₹ @totalInsurance.ToString("N2")</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Grand Total</div>
+                    <div class="stat-value">₹ @totalFee.ToString("N2")</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="receipt-body">
+            @if (Model != null && Model.Any())
+            {
+                <table class="receipts-table">
+                    <thead>
+                        <tr>
+                            <th>Receipt ID</th>
+                            <th>Member Code</th>
+                            <th>Member Name</th>
+                            <th>Loan Code</th>
+                            <th style="text-align: right;">Processing Fee</th>
+                            <th style="text-align: right;">Insurance</th>
+                            <th style="text-align: right;">Total Fee</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="receipt-id">@item.ReceiptId</td>
+                                <td>@item.MemberCode</td>
+                                <td>@item.MemberName</td>
+                                <td>@item.LoanCode</td>
+                                <td style="text-align: right;">₹ @item.ProcessingFee.ToString("N2")</td>
+                                <td style="text-align: right;">₹ @item.Insurance.ToString("N2")</td>
+                                <td style="text-align: right;"><strong>₹ @item.TotalFee.ToString("N2")</strong></td>
+                            </tr>
+                        }
+                        <!-- Total Row -->
+                        <tr class="total-row">
+                            <td colspan="4" style="text-align: right;">TOTAL</td>
+                            <td style="text-align: right;">₹ @totalProcessingFee.ToString("N2")</td>
+                            <td style="text-align: right;">₹ @totalInsurance.ToString("N2")</td>
+                            <td style="text-align: right;">₹ @totalFee.ToString("N2")</td>
+                        </tr>
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="empty-state">
+                    <div class="empty-state-icon">📋</div>
+                    <h3>No receipts generated</h3>
+                    <p>No data available to display</p>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons no-print">
+        <button class="btn btn-print" onclick="printReceipt()">
+            🖨️ Print Receipts
+        </button>
+        <a href="@Url.Action("GroupPFReceiptForm", "Receipt")" class="btn btn-new">
+            ➕ New Group Receipt
+        </a>
+        <a href="@Url.Action("Index", "Home")" class="btn btn-home">
+            🏠 Home
+        </a>
+    </div>
+</div>
+
+<script>
+    function printReceipt() {
+        window.print();
+    }
+
+    // Optional: Auto-print on page load (uncomment if needed)
+    // window.addEventListener('load', function() {
+    //     setTimeout(function() {
+    //         window.print();
+    //     }, 500);
+    // });
+</script>

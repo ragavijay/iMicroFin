@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace iMicroFin.Controllers
 {
     [Route("[controller]")]
-    [Authorize]
+    [Authorize(Policy = "DirectorManager")]
     public class MemberController : Controller
     {
         private readonly IPathService _pathService;
@@ -217,6 +217,119 @@ namespace iMicroFin.Controllers
                 {
                     success = false,
                     message = "Error loading members: " + ex.Message
+                });
+            }
+        }
+        [HttpGet]
+        [Route("GetMemberByAadhar/{searchText}")]
+        public IActionResult GetMemberByAadhar(string searchText)
+        {
+            try
+            {
+                var members = MemberDBService.GetMemberByAadhar(searchText);
+
+                if (members == null || members.Count == 0)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        statusCode = 0,
+                        message = "No members found with this Aadhar",
+                        members = new List<object>()
+                    });
+                }
+
+                return Json(new
+                {
+                    success = true,
+                    statusCode = 1,
+                    members = members
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    statusCode = -1,
+                    message = "Error fetching members: " + ex.Message,
+                    members = new List<object>()
+                });
+            }
+        }
+
+        [HttpGet]
+        [Route("GetMemberByPhone/{searchText}")]
+        public IActionResult GetMemberByPhone(string searchText)
+        {
+            try
+            {
+                var members = MemberDBService.GetMemberByPhone(searchText);
+
+                if (members == null || members.Count == 0)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        statusCode = 0,
+                        message = "No members found with this phone number",
+                        members = new List<object>()
+                    });
+                }
+
+                return Json(new
+                {
+                    success = true,
+                    statusCode = 1,
+                    members = members
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    statusCode = -1,
+                    message = "Error fetching members: " + ex.Message,
+                    members = new List<object>()
+                });
+            }
+        }
+
+        [HttpGet]
+        [Route("GetMemberByName/{searchText}")]
+        public IActionResult GetMemberByName(string searchText)
+        {
+            try
+            {
+                var members = MemberDBService.GetMemberByName(searchText);
+
+                if (members == null || members.Count == 0)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        statusCode = 0,
+                        message = "No members found with this name",
+                        members = new List<object>()
+                    });
+                }
+
+                return Json(new
+                {
+                    success = true,
+                    statusCode = 1,
+                    members = members
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    statusCode = -1,
+                    message = "Error fetching members: " + ex.Message,
+                    members = new List<object>()
                 });
             }
         }

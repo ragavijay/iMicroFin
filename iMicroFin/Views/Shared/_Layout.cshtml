@@ -13,8 +13,7 @@
     <link href="~/css/font-awesome.min.css" rel="stylesheet" media="all">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i,800,800i" rel="stylesheet">
-    <link href="~/css/select2.min.css" rel="stylesheet" media="all">
-    <link href="~/css/daterangepicker.css" rel="stylesheet" media="all">
+    <link href="~/css/select2.min.css" rel="stylesheet" media="all" />
     <link href="~/css/main.css" rel="stylesheet" media="all">
     <link href="~/css/menu.css" rel="stylesheet" media="all">
     <script src="~/js/home.js"></script>
@@ -70,45 +69,47 @@
                         <span class="nav-text">Home</span>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" onclick="toggleSubmenu(this)" data-title="Group">
-                        <span class="nav-icon"><i class="fa fa-users"></i></span>
-                        <span class="nav-text">Group</span>
-                        <span class="nav-arrow">▼</span>
-                    </a>
-                    <ul class="submenu">
-                        <li><a class="submenu-link" asp-controller="Center" asp-action="ManageCenters">Manage Centers</a></li>
-                        <li><a class="submenu-link" asp-controller="Group" asp-action="ManageGroup">Manage Groups</a></li>
-                    </ul>
-                </li>
+                @if (!string.IsNullOrEmpty(userType) && (userType == "D" || userType == "M"))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link" onclick="toggleSubmenu(this)" data-title="Group">
+                            <span class="nav-icon"><i class="fa fa-users"></i></span>
+                            <span class="nav-text">Group</span>
+                            <span class="nav-arrow">▼</span>
+                        </a>
+                        <ul class="submenu">
+                            <li><a class="submenu-link" asp-controller="Center" asp-action="ManageCenters">Manage Centers</a></li>
+                            <li><a class="submenu-link" asp-controller="Group" asp-action="ManageGroup">Manage Groups</a></li>
+                        </ul>
+                    </li>
 
-                <li class="nav-item">
-                    <a class="nav-link" onclick="toggleSubmenu(this)" data-title="Member">
-                        <span class="nav-icon"><i class="fa fa-user"></i></span>
-                        <span class="nav-text">Member</span>
-                        <span class="nav-arrow">▼</span>
-                    </a>
-                    <ul class="submenu">
-                        <li><a class="submenu-link" asp-controller="Member" asp-action="MemberForm">Add Member</a></li>
-                        <li><a class="submenu-link" asp-controller="Member" asp-action="ViewMembers">View Members</a></li>
-                        <li><a class="submenu-link" asp-controller="Member" asp-action="SearchMember">Search Member</a></li>
-                    </ul>
-                </li>
+                    <li class="nav-item">
+                        <a class="nav-link" onclick="toggleSubmenu(this)" data-title="Member">
+                            <span class="nav-icon"><i class="fa fa-user"></i></span>
+                            <span class="nav-text">Member</span>
+                            <span class="nav-arrow">▼</span>
+                        </a>
+                        <ul class="submenu">
+                            <li><a class="submenu-link" asp-controller="Member" asp-action="MemberForm">Add Member</a></li>
+                            <li><a class="submenu-link" asp-controller="Member" asp-action="ViewMembers">View Members</a></li>
+                            <li><a class="submenu-link" asp-controller="Member" asp-action="SearchMember">Search Member</a></li>
+                        </ul>
+                    </li>
 
-                <li class="nav-item">
-                    <a class="nav-link" onclick="toggleSubmenu(this)" data-title="Loan">
-                        <span class="nav-icon"><i class="fa fa-money"></i></span>
-                        <span class="nav-text">Loan</span>
-                        <span class="nav-arrow">▼</span>
-                    </a>
-                    <ul class="submenu">
-                        <li><a class="submenu-link" asp-controller="Loan" asp-action="LoanForm">New Loan</a></li>
-                        <li><a class="submenu-link" asp-controller="Loan" asp-action="GroupLoanForm">Group Loan</a></li>
-                        <li><a class="submenu-link" asp-controller="Loan" asp-action="ViewLoans">View Loans</a></li>
-                        <li><a class="submenu-link" asp-controller="Loan" asp-action="CumulativeReport">Cumulative Report</a></li>
-                    </ul>
-                </li>
-
+                    <li class="nav-item">
+                        <a class="nav-link" onclick="toggleSubmenu(this)" data-title="Loan">
+                            <span class="nav-icon"><i class="fa fa-money"></i></span>
+                            <span class="nav-text">Loan</span>
+                            <span class="nav-arrow">▼</span>
+                        </a>
+                        <ul class="submenu">
+                            <li><a class="submenu-link" asp-controller="Loan" asp-action="LoanForm">New Loan</a></li>
+                            <li><a class="submenu-link" asp-controller="Loan" asp-action="GroupLoanForm">Group Loan</a></li>
+                            <li><a class="submenu-link" asp-controller="Loan" asp-action="ViewLoans">View Loans</a></li>
+                            <li><a class="submenu-link" asp-controller="Loan" asp-action="CumulativeReport">Cumulative Report</a></li>
+                        </ul>
+                    </li>
+                }
                 @if (!string.IsNullOrEmpty(userType) && (userType == "M" || userType == "D" || userType == "C"))
                 {
                     <li class="nav-item">
@@ -118,12 +119,17 @@
                             <span class="nav-arrow">▼</span>
                         </a>
                         <ul class="submenu">
+                            <!--
                             <li><a class="submenu-link" asp-controller="Receipt" asp-action="PFReceiptForm">Fee Receipt (Member)</a></li>
                             <li><a class="submenu-link" asp-controller="Receipt" asp-action="GroupPFReceiptForm">Fee Receipt (Group)</a></li>
+                            -->
                             <li><a class="submenu-link" asp-controller="Receipt" asp-action="InstalmentReceiptForm">Due Receipt (Member)</a></li>
                             <li><a class="submenu-link" asp-controller="Receipt" asp-action="GroupInstalmentReceiptForm">Due Receipt (Group)</a></li>
+                            <li><a class="submenu-link" asp-controller="Receipt" asp-action="BadLoanReceiptForm">Due Receipt (Bad Loan)</a></li>
+                            <li><a class="submenu-link" asp-controller="Receipt" asp-action="PreClosureForm">Pre-Closure</a></li>
                             <li><a class="submenu-link" asp-controller="Receipt" asp-action="ViewEwiDueList">Due Statement</a></li>
                             <li><a class="submenu-link" asp-controller="Receipt" asp-action="CashReceiptStatementForm">Cash Receipt-Statement</a></li>
+                            <li><a class="submenu-link" asp-controller="Report" asp-action="FinancialReport">Financial Report</a></li>
                         </ul>
                     </li>
                 }

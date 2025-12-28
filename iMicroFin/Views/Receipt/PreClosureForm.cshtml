@@ -1,0 +1,478 @@
+﻿@model iMicroFin.Models.PreClosureReceipt
+@using System.Globalization;
+@{
+    ViewBag.Title = "Pre-Closure Receipt";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="/css/receipt/pre-closure-form.css">
+
+<div class="receipt-form-container">
+    <div class="receipt-card">
+        <div class="card-header">
+            <h2>Loan Pre-Closure</h2>
+        </div>
+
+        <div class="card-body">
+            @using (Html.BeginForm("PreClosureReceipt", "Receipt", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+
+                <!-- Loan Code Section -->
+                <div class="form-section">
+                    <div class="info-box">
+                        <p>💡 Enter the loan code to fetch pre-closure details. The system will automatically calculate a fair discount based on interest savings, delay penalties, and advance payment benefits.</p>
+                    </div>
+
+                    <div class="form-row-inline">
+                        <div class="form-group">
+                            <label class="form-label" for="LoanCode">
+                                Loan Code <span style="color: #dc3545;">*</span>
+                            </label>
+                            @Html.TextBoxFor(m => m.LoanCode, new {
+                            id = "LoanCode",
+                                                @class = "form-control",
+                                                placeholder = "Enter loan code",
+                                                required = "true",
+                                                tabindex = "1",
+                                                autocomplete = "off"
+                                                })
+                        <div id="errLoanId" class="error-message"></div>
+                    </div>
+                    <div class="form-group">
+                        <button class="btn btn-secondary" type="button" onclick="getLoanDetails()" tabindex="2" id="btnGetLoan">
+                            🔍 Get Loan Details
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pre-Closure Form Data (Hidden Initially) -->
+            <div id="preClosureFormData" class="hidden-section">
+                <hr style="margin: 2rem 0; border: none; border-top: 2px solid #e9ecef;">
+
+                <!-- Member Details -->
+                <div class="form-section">
+                    <h3 style="margin-bottom: 1rem; color: #212529; font-size: 1.25rem;">Member Details</h3>
+
+                    <div class="form-row-split">
+                        <div class="form-group">
+                            <label class="form-label" for="MemberCode">Member Code</label>
+                            @Html.TextBoxFor(m => m.MemberCode, new {
+                                                        id = "MemberCode",
+                                                        @class = "form-control",
+                                                        @readonly = "readonly",
+                                                        required = "true"
+                                                        })
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="MemberName">Member Name</label>
+                            @Html.TextBoxFor(m => m.MemberName, new {
+                                                        id = "MemberName",
+                                                        @class = "form-control",
+                                                        @readonly = "readonly",
+                                                        required = "true"
+                                                        })
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pre-Closure Details -->
+                <div class="form-section">
+                    <h3 style="margin-bottom: 1rem; color: #212529; font-size: 1.25rem;">Pre-Closure Payment Details</h3>
+
+                    <!-- Pending Amount Info -->
+                    <div class="pending-info">
+                        <div class="info-card">
+                            <div class="info-card-label">Pending Instalments</div>
+                            <div class="info-card-value" id="pendingInstalmentsDisplay">0</div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-card-label">Weekly Amount (₹)</div>
+                            <div class="info-card-value" id="ewiDisplay">0</div>
+                        </div>
+                        <div class="info-card warning">
+                            <div class="info-card-label">Total Due (₹)</div>
+                            <div class="info-card-value" id="totalDueDisplay">0</div>
+                        </div>
+                    </div>
+
+                    <!-- Hidden fields -->
+                    @Html.HiddenFor(m => m.LoanAmount, new { id = "LoanAmount" })
+                    @Html.HiddenFor(m => m.InterestRate, new { id = "InterestRate" })
+                    @Html.HiddenFor(m => m.Tenure, new { id = "Tenure" })
+                    @Html.HiddenFor(m => m.LoanDisposalDate, new { id = "LoanDisposalDate" })
+                    @Html.HiddenFor(m => m.TotalPendingInstalments, new { id = "TotalPendingInstalments" })
+                    @Html.HiddenFor(m => m.Ewi, new { id = "Ewi" })
+                    @Html.HiddenFor(m => m.TotalDue, new { id = "TotalDue" })
+                    @Html.HiddenFor(m => m.SuggestedDiscount, new { id = "SuggestedDiscount" })
+                    @Html.HiddenFor(m => m.InterestSavings, new { id = "InterestSavings" })
+                    @Html.HiddenFor(m => m.DelayPenalty, new { id = "DelayPenalty" })
+                    @Html.HiddenFor(m => m.AdvanceBenefit, new { id = "AdvanceBenefit" })
+
+                    <!-- Discount Calculation Breakdown -->
+                    <div class="discount-breakdown">
+                        <h4>💰 Discount Calculation</h4>
+                        <div class="breakdown-item positive">
+                            <span class="breakdown-label">Interest Savings on Early Closure</span>
+                            <span class="breakdown-value" id="interestSavingsDisplay">+ ₹0</span>
+                        </div>
+                        <div class="breakdown-item positive" id="advanceBenefitRow" style="display: none;">
+                            <span class="breakdown-label">Benefit for Advance Payments</span>
+                            <span class="breakdown-value" id="advanceBenefitDisplay">+ ₹0</span>
+                        </div>
+                        <div class="breakdown-item negative" id="delayPenaltyRow" style="display: none;">
+                            <span class="breakdown-label">Penalty for Delayed Payments</span>
+                            <span class="breakdown-value" id="delayPenaltyDisplay">- ₹0</span>
+                        </div>
+                        <div class="breakdown-divider"></div>
+                        <div class="breakdown-item suggested">
+                            <span class="breakdown-label"><strong>System Suggested Discount</strong></span>
+                            <span class="breakdown-value" id="suggestedDiscountDisplay"><strong>₹0</strong></span>
+                        </div>
+                    </div>
+
+                    <!-- Discount Section -->
+                    <div class="form-row-split">
+                        <div class="form-group">
+                            <label class="form-label-with-info">
+                                Pre-Closure Discount (₹) <span style="color: #dc3545;">*</span>
+                                <span class="info-icon" data-tooltip="System calculated fair discount based on interest and payment history">?</span>
+                            </label>
+                            @Html.TextBoxFor(m => m.PreClosureDiscount, new {
+                                                        id = "PreClosureDiscount",
+                                                        @class = "form-control",
+                                                        required = "true",
+                                                        type = "number",
+                                                        min = "0",
+                                                        tabindex = "3",
+                                                        placeholder = "Enter discount amount"
+                                                        })
+                            <button type="button" class="btn-use-suggested" onclick="useSuggestedDiscount()">
+                                ✨ Use Suggested Discount
+                            </button>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Net Amount to Pay (₹)</label>
+                            @Html.TextBoxFor(m => m.NetAmount, new {
+                                                        id = "NetAmount",
+                                                        @class = "form-control",
+                                                        @readonly = "readonly",
+                                                        required = "true",
+                                                        style = "font-weight: 700; font-size: 1.1rem; color: #28a745;"
+                                                        })
+                        </div>
+                    </div>
+
+                    <!-- Warning/Success Messages -->
+                    <div id="warningBox" class="warning-box" style="display: none;">
+                        <p id="warningMessage"></p>
+                    </div>
+                    <div id="successBox" class="success-box" style="display: none;">
+                        <p id="successMessage"></p>
+                    </div>
+                </div>
+
+                <!-- Receipt Date -->
+                <div class="form-section">
+                    <div class="form-group">
+                        <label class="form-label" for="ActualReceiptDate">
+                            Actual Receipt Date <span style="color: #dc3545;">*</span>
+                        </label>
+                        @Html.TextBoxFor(m => m.ActualReceiptDate, new {
+                                                @class = "form-control date-picker",
+                                                @required = "true",
+                                                @Value = DateTime.Now.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture),
+                                                @autocomplete = "off",
+                                                @tabindex = "4",
+                                                @placeholder = "DD/MM/YYYY"
+                                                })
+                        <div id="errActualReceiptDate" class="error-message"></div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="form-group">
+                    <button class="btn btn-primary" type="submit" tabindex="5" style="width: 100%;">
+                        💾 Generate Pre-Closure Receipt
+                    </button>
+                </div>
+            </div>
+                        }
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+    let totalDue = 0;
+    let maxDiscount = 0;
+    let suggestedDiscount = 0;
+    let interestSavings = 0;
+    let delayPenalty = 0;
+    let advanceBenefit = 0;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        flatpickr(".date-picker", {
+            dateFormat: "d/m/Y",
+            defaultDate: new Date(),
+            maxDate: "today",
+            allowInput: true
+        });
+
+        document.getElementById("LoanCode").addEventListener("input", function() {
+            document.getElementById("preClosureFormData").classList.add('hidden-section');
+            document.getElementById("errLoanId").classList.remove('show');
+            document.getElementById("errLoanId").textContent = '';
+        });
+
+        document.getElementById("LoanCode").addEventListener("keypress", function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                getLoanDetails();
+            }
+        });
+
+        document.getElementById("PreClosureDiscount").addEventListener("input", function() {
+            calculateNetAmount();
+        });
+    });
+
+    async function getLoanDetails() {
+        const loanCodeInput = document.getElementById('LoanCode');
+        const loanCode = loanCodeInput.value.trim();
+        const errorDiv = document.getElementById('errLoanId');
+        const formData = document.getElementById('preClosureFormData');
+        const btnGetLoan = document.getElementById('btnGetLoan');
+
+        if (!loanCode) {
+            errorDiv.textContent = 'Please enter a loan code';
+            errorDiv.classList.add('show');
+            return;
+        }
+
+        const originalBtnText = btnGetLoan.innerHTML;
+        btnGetLoan.disabled = true;
+        btnGetLoan.innerHTML = 'Loading<span class="loading-spinner"></span>';
+        errorDiv.classList.remove('show');
+        formData.classList.add('hidden-section');
+
+        try {
+            const response = await fetch(`/Receipt/GetPreClosureDetails/${encodeURIComponent(loanCode)}`);
+            const data = await response.json();
+
+            if (data.success && data.loanStatus === 'O') {
+                totalDue = data.totalDue;
+                maxDiscount = totalDue;
+                suggestedDiscount = data.suggestedDiscount;
+                interestSavings = data.interestSavings;
+                delayPenalty = data.delayPenalty;
+                advanceBenefit = data.advanceBenefit;
+
+                document.getElementById("MemberCode").value = data.memberCode || '';
+                document.getElementById("MemberName").value = data.memberName || '';
+                document.getElementById("LoanAmount").value = data.loanAmount || '0';
+                document.getElementById("InterestRate").value = data.interestRate || '0';
+                document.getElementById("Tenure").value = data.tenure || '0';
+                document.getElementById("LoanDisposalDate").value = data.loanDisposalDate || '';
+                document.getElementById("TotalPendingInstalments").value = data.totalPendingInstalments || '0';
+                document.getElementById("Ewi").value = data.ewi || '0';
+                document.getElementById("TotalDue").value = data.totalDue || '0';
+                document.getElementById("SuggestedDiscount").value = suggestedDiscount || '0';
+                document.getElementById("InterestSavings").value = interestSavings || '0';
+                document.getElementById("DelayPenalty").value = delayPenalty || '0';
+                document.getElementById("AdvanceBenefit").value = advanceBenefit || '0';
+                document.getElementById("PreClosureDiscount").value = suggestedDiscount || '0';
+                document.getElementById("NetAmount").value = (totalDue - suggestedDiscount) || '0';
+
+                document.getElementById("pendingInstalmentsDisplay").textContent = data.totalPendingInstalments;
+                document.getElementById("ewiDisplay").textContent = data.ewi;
+                document.getElementById("totalDueDisplay").textContent = data.totalDue;
+
+                document.getElementById("interestSavingsDisplay").textContent = `+ ₹${interestSavings}`;
+
+                // Show/hide and update advance benefit row
+                if (advanceBenefit > 0) {
+                    document.getElementById("advanceBenefitRow").style.display = 'flex';
+                    document.getElementById("advanceBenefitDisplay").textContent = `+ ₹${advanceBenefit}`;
+                } else {
+                    document.getElementById("advanceBenefitRow").style.display = 'none';
+                }
+
+                // Show/hide and update delay penalty row
+                if (delayPenalty > 0) {
+                    document.getElementById("delayPenaltyRow").style.display = 'flex';
+                    document.getElementById("delayPenaltyDisplay").textContent = `- ₹${delayPenalty}`;
+                } else {
+                    document.getElementById("delayPenaltyRow").style.display = 'none';
+                }
+
+                document.getElementById("suggestedDiscountDisplay").textContent = `₹${suggestedDiscount}`;
+
+                const successBox = document.getElementById("successBox");
+                const successMessage = document.getElementById("successMessage");
+                successBox.style.display = 'block';
+                const discountPercent = ((suggestedDiscount / totalDue) * 100).toFixed(2);
+
+                let message = `✓ System suggested discount: <strong>₹${suggestedDiscount}</strong> (${discountPercent}% of total due).<br>Calculation: Interest savings ₹${interestSavings}`;
+
+                if (advanceBenefit > 0) {
+                    message += ` + Advance benefit ₹${advanceBenefit}`;
+                }
+                if (delayPenalty > 0) {
+                    message += ` - Delay penalty ₹${delayPenalty}`;
+                }
+                message += ` = <strong>₹${suggestedDiscount}</strong>`;
+
+                successMessage.innerHTML = message;
+
+                formData.classList.remove('hidden-section');
+                errorDiv.classList.remove('show');
+
+            } else {
+                let errorMessage = '';
+
+                switch(data.loanStatus) {
+                    case 'P':
+                        errorMessage = '⚠️ Loan not approved yet';
+                        break;
+                    case 'A':
+                        errorMessage = '⚠️ Processing fee not paid yet';
+                        break;
+                    case 'C':
+                        errorMessage = '🔒 Loan is already closed';
+                        break;
+                    case 'Invalid':
+                    case 'Error':
+                        errorMessage = '❌ ' + (data.message || 'Invalid loan code');
+                        break;
+                    default:
+                        errorMessage = '❌ Invalid loan code or loan status';
+                }
+
+                errorDiv.textContent = errorMessage;
+                errorDiv.classList.add('show');
+                formData.classList.add('hidden-section');
+            }
+
+        } catch (error) {
+            console.error('Error fetching loan details:', error);
+            errorDiv.textContent = '❌ Error fetching loan details. Please try again.';
+            errorDiv.classList.add('show');
+            formData.classList.add('hidden-section');
+        } finally {
+            btnGetLoan.disabled = false;
+            btnGetLoan.innerHTML = originalBtnText;
+        }
+    }
+
+    function useSuggestedDiscount() {
+        document.getElementById("PreClosureDiscount").value = suggestedDiscount;
+        calculateNetAmount();
+    }
+
+    function calculateNetAmount() {
+        const discount = parseInt(document.getElementById("PreClosureDiscount").value) || 0;
+        const netAmountField = document.getElementById("NetAmount");
+        const warningBox = document.getElementById("warningBox");
+        const warningMessage = document.getElementById("warningMessage");
+        const successBox = document.getElementById("successBox");
+        const successMessage = document.getElementById("successMessage");
+        const errorDiv = document.getElementById('errLoanId');
+
+        errorDiv.classList.remove('show');
+        warningBox.style.display = 'none';
+
+        if (discount < 0) {
+            netAmountField.value = '0';
+            warningBox.style.display = 'block';
+            warningMessage.innerHTML = '⚠️ Discount cannot be negative';
+            document.getElementById("PreClosureDiscount").focus();
+            return;
+        }
+
+        if (discount > totalDue) {
+            netAmountField.value = '0';
+            warningBox.style.display = 'block';
+            warningMessage.innerHTML = `⚠️ Discount cannot exceed total due amount of <strong>₹${totalDue}</strong>`;
+            document.getElementById("PreClosureDiscount").focus();
+            return;
+        }
+
+        const netAmount = totalDue - discount;
+        netAmountField.value = netAmount.toFixed(2);
+
+        successBox.style.display = 'block';
+        const discountPercent = ((discount / totalDue) * 100).toFixed(2);
+
+        if (discount === suggestedDiscount) {
+            successMessage.innerHTML = `✓ Using suggested discount: <strong>${discountPercent}%</strong> (₹${discount} off ₹${totalDue}). Fair for both member and bank!`;
+        } else if (discount > suggestedDiscount) {
+            const extraDiscount = discount - suggestedDiscount;
+            successMessage.innerHTML = `⚠️ Discount applied: <strong>${discountPercent}%</strong> (₹${discount} off ₹${totalDue}). This is <strong>₹${extraDiscount} more</strong> than suggested discount of ₹${suggestedDiscount}.`;
+        } else {
+            const lessDiscount = suggestedDiscount - discount;
+            successMessage.innerHTML = `✓ Discount applied: <strong>${discountPercent}%</strong> (₹${discount} off ₹${totalDue}). This is <strong>₹${lessDiscount} less</strong> than suggested discount of ₹${suggestedDiscount}.`;
+        }
+    }
+
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const discount = parseInt(document.getElementById("PreClosureDiscount").value) || 0;
+        const netAmount = parseFloat(document.getElementById("NetAmount").value) || 0;
+        const errorDiv = document.getElementById('errLoanId');
+
+        if (discount < 0) {
+            e.preventDefault();
+            errorDiv.textContent = '❌ Discount cannot be negative';
+            errorDiv.classList.add('show');
+            return false;
+        }
+
+        if (discount > totalDue) {
+            e.preventDefault();
+            errorDiv.textContent = `❌ Discount cannot exceed total due amount of ₹${totalDue}`;
+            errorDiv.classList.add('show');
+            return false;
+        }
+
+        if (netAmount < 0) {
+            e.preventDefault();
+            errorDiv.textContent = '❌ Net amount cannot be negative';
+            errorDiv.classList.add('show');
+            return false;
+        }
+
+        let confirmMessage = `Are you sure you want to pre-close this loan?\n\n` +
+            `Total Due: ₹${totalDue}\n` +
+            `Discount: ₹${discount}\n` +
+            `Net Amount: ₹${netAmount}\n\n` +
+            `Discount Breakdown:\n` +
+            `• Interest Savings: ₹${interestSavings}\n`;
+
+        if (advanceBenefit > 0) {
+            confirmMessage += `• Advance Benefit: ₹${advanceBenefit}\n`;
+        }
+        if (delayPenalty > 0) {
+            confirmMessage += `• Delay Penalty: ₹${delayPenalty}\n`;
+        }
+
+        confirmMessage += `• Suggested Discount: ₹${suggestedDiscount}\n`;
+
+        if (discount !== suggestedDiscount) {
+            const diff = discount - suggestedDiscount;
+            confirmMessage += `\n⚠️ You are using ₹${Math.abs(diff)} ${diff > 0 ? 'MORE' : 'LESS'} than suggested!\n`;
+        }
+
+        confirmMessage += `\nThis action cannot be undone.`;
+
+        const confirmed = confirm(confirmMessage);
+
+        if (!confirmed) {
+            e.preventDefault();
+            return false;
+        }
+
+        return true;
+    });
+</script>
